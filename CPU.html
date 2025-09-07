@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精确CPU使用率测试</title>
+    <link rel="icon" href="/favicon.ico">
+    <style>
+        /* 保留原有样式设置 */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        nav a {
+            font-family: 'Cascadia Code', Arial, sans-serif;
+            font-size: 15px;
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        nav a:hover {
+            background-color: #3498db;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            max-width: 65%;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 8px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+
+        .control-panel {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stats-container {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .stat-item {
+            margin: 8px 0;
+            padding: 5px;
+        }
+
+        .cpu-load {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .cpu-load-bar {
+            height: 100%;
+            background-color: #e74c3c;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+            
+            nav a {
+                display: block;
+                margin: 8px 0;
+            }
+            
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        footer {
+            font-size: 0.2em;
+            color: #A4A6C2;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 5px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html">Main</a>
+        <a href="down.html">Download</a>
+        <a href="vid.html">Video</a>
+        <a href="SCMN.html">Documents</a>
+        <a href="webs.html">Web</a>
+    </nav>
+
+    <div class="main-content">
+        <h2>精确CPU使用率测试</h2>
+        <div id="status">准备就绪</div>
+        
+        <div class="control-panel">
+            <button onclick="startConsuming()">开始消耗资源</button>
+            <button onclick="stopConsuming()">停止消耗资源</button>
+            <br>
+            <button onclick="increaseThreads()">增加线程数</button>
+            <button onclick="decreaseThreads()">减少线程数</button>
+            <br>
+            <button onclick="increaseIntensity()">增加计算强度</button>
+            <button onclick="decreaseIntensity()">降低计算强度</button>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-item">实际CPU使用率: <span id="cpuUsage">0%</span>
+                <div class="cpu-load">
+                    <div class="cpu-load-bar" id="cpuLoadBar"></div>
+                </div>
+            </div>
+            <div class="stat-item">工作线程数: <span id="threadCount">0</span></div>
+            <div class="stat-item">计算强度: <span id="intensityLevel">1</span></div>
+            <div class="stat-item">系统核心数: <span id="coreCount">0</span></div>
+            <div class="stat-item">计算耗时: <span id="calculationTime">0ms</span></div>
+        </div>
+    </div>
+
+    <script>
+        let isConsuming = false;
+        let cpuWorkers = [];
+        let statsInterval;
+        let calculationIntensity = 1;
+        let coreCount = navigator.hardwareConcurrency || 4;
+        let lastMeasureTime = 0;
+        let lastIdleTime = 0;
+
+        // 初始化显示系统核心数
+        document.getElementById('coreCount').textContent = coreCount;
+
+        // 创建高性能计算的Web Worker
+        function createCPUWorker(intensity) {
+            const workerCode = `
+                let isRunning = true;
+                let intensity = ${intensity};
+                
+                // 极其消耗CPU的计算函数
+                function heavyCalculation(iterations) {
+                    let result = 0;
+                    const randoms = new Uint32Array(1024);
+                    for (let i = 0; i < 1024; i++) {
+                        randoms[i] = Math.floor(Math.random() * 1000000);
+                    }
+                    
+                    for (let a = 0; a < iterations; a++) {
+                        for (let b = 0; b < 1000; b++) {
+                            const val = randoms[b % 1024];
+                            result += Math.sin(val) * Math.cos(val) * Math.tan(val) / (val + 1);
+                            result = Math.sqrt(Math.abs(result)) * 0.5;
+                            result += (val ^ (val >> 16)) * 0.1;
+                            if (result > 1e100) result = 0;
+                        }
+                    }
+                    return result;
+                }
+                
+                // 连续计算循环
+                function workLoop() {
+                    if (!isRunning) return;
+                    
+                    const start = performance.now();
+                    heavyCalculation(100 * intensity);
+                    const end = performance.now();
+                    
+                    // 发送计算耗时
+                    self.postMessage({
+                        type: 'calculationTime',
+                        value: end - start
+                    });
+                    
+                    if (isRunning) {
+                        requestAnimationFrame(workLoop);
+                    }
+                }
+                
+                // 接收消息
+                self.onmessage = function(e) {
+                    if (e.data === 'stop') {
+                        isRunning = false;
+                        self.close();
+                    } else if (e.data.type === 'intensity') {
+                        intensity = e.data.value;
+                    }
+                };
+                
+                // 开始工作
+                workLoop();
+            `;
+            
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            const worker = new Worker(workerUrl);
+            
+            worker.blobUrl = workerUrl;
+            
+            // 接收计算时间
+            worker.onmessage = function(e) {
+                if (e.data.type === 'calculationTime') {
+                    document.getElementById('calculationTime').textContent = 
+                        e.data.value.toFixed(2) + 'ms';
+                }
+            };
+            
+            return worker;
+        }
+
+        // 计算实际CPU使用率
+        function calculateCPUUsage() {
+            if (!performance || !performance.getEntriesByType) return 0;
+            
+            // 使用Performance API获取闲置时间
+            const now = performance.now();
+            const idleEntries = performance.getEntriesByType('idle');
+            
+            if (idleEntries.length === 0) return 0;
+            
+            // 获取最近的闲置时间记录
+            const lastIdleEntry = idleEntries[idleEntries.length - 1];
+            const idleTime = lastIdleEntry.duration;
+            
+            // 计算时间差
+            const timeDiff = now - lastMeasureTime;
+            
+            // 计算使用率 (100% - 闲置率)
+            let usage = 0;
+            if (timeDiff > 0) {
+                const idleRatio = idleTime / timeDiff;
+                usage = Math.min(100, Math.max(0, 100 - (idleRatio * 100)));
+            }
+            
+            // 更新测量点
+            lastMeasureTime = now;
+            lastIdleTime = idleTime;
+            
+            return usage;
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            // 获取实际CPU使用率
+            const cpuUsage = calculateCPUUsage();
+            
+            // 更新UI
+            document.getElementById('cpuUsage').textContent = cpuUsage.toFixed(1) + '%';
+            document.getElementById('cpuLoadBar').style.width = cpuUsage + '%';
+            document.getElementById('threadCount').textContent = cpuWorkers.length;
+            document.getElementById('intensityLevel').textContent = calculationIntensity;
+        }
+
+        // 开始消耗资源
+        function startConsuming() {
+            if (isConsuming) return;
+            
+            isConsuming = true;
+            lastMeasureTime = performance.now();
+            document.getElementById('status').textContent = '正在消耗资源...';
+            
+            // 初始创建与核心数相同的线程
+            for (let i = 0; i < coreCount; i++) {
+                const worker = createCPUWorker(calculationIntensity);
+                cpuWorkers.push(worker);
+            }
+            
+            // 启动统计更新
+            statsInterval = setInterval(updateStats, 1000);
+        }
+
+        // 停止消耗资源
+        function stopConsuming() {
+            if (!isConsuming) return;
+            
+            isConsuming = false;
+            
+            // 停止所有工作线程
+            cpuWorkers.forEach(worker => {
+                worker.postMessage('stop');
+                URL.revokeObjectURL(worker.blobUrl);
+            });
+            cpuWorkers = [];
+            
+            // 清理定时器
+            clearInterval(statsInterval);
+            
+            document.getElementById('status').textContent = '已停止消耗资源';
+            updateStats();
+        }
+
+        // 增加线程数
+        function increaseThreads() {
+            if (!isConsuming) return;
+            
+            const newWorker = createCPUWorker(calculationIntensity);
+            cpuWorkers.push(newWorker);
+            updateStats();
+        }
+
+        // 减少线程数
+        function decreaseThreads() {
+            if (!isConsuming || cpuWorkers.length <= 1) return;
+            
+            const worker = cpuWorkers.pop();
+            worker.postMessage('stop');
+            URL.revokeObjectURL(worker.blobUrl);
+            updateStats();
+        }
+
+        // 增加计算强度
+        function increaseIntensity() {
+            calculationIntensity += 1;
+            cpuWorkers.forEach(worker => {
+                worker.postMessage({
+                    type: 'intensity',
+                    value: calculationIntensity
+                });
+            });
+            updateStats();
+        }
+
+        // 降低计算强度
+        function decreaseIntensity() {
+            if (calculationIntensity <= 1) return;
+            
+            calculationIntensity -= 1;
+            cpuWorkers.forEach(worker => {
+                worker.postMessage({
+                    type: 'intensity',
+                    value: calculationIntensity
+                });
+            });
+            updateStats();
+        }
+
+        // 页面卸载时清理
+        window.addEventListener('beforeunload', stopConsuming);
+    </script>
+</body>
+<footer><u><em><strong>蚊!帐! [○･｀Д´･ ○]--RootEater.netlify.app</strong></em></u></footer>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>密码验证</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md transform transition-all duration-500 hover:shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <i class="fa fa-key text-2xl text-purple-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">密码验证</h1>
+            <p class="text-gray-500 mt-2">由于某些原因（阻止某些坏蛋），Rooteater对访客锁定，请输入密码以继续访问</p>
+        </div>
+
+        <form id="verifyForm" class="space-y-6">
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                        <i class="fa fa-lock"></i>
+                    </span>
+                    <input type="password" id="password" name="password" 
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                           placeholder="请输入密码" required>
+                </div>
+            </div>
+
+            <div id="errorMessage" class="hidden p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
+                <i class="fa fa-exclamation-circle mr-1"></i>
+                <span>密码不正确，请重试</span>
+            </div>
+
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fa fa-sign-in mr-2"></i>
+                验证并访问
+            </button>
+        </form>
+    </div>
+
+    <script>
+const storedHash = "4611ffa6b6566d574105bbd5738f1bbb49ee44659ac619ea2fd5bc8e41e4adcd";       // 密码哈希值
+const storedSalt = "f3f21289cdfd7e17c6d35653a0dbadd5";       // 盐值
+const encryptedUrl = "c02a89fe4ebb18d978e734c0171409202f15cca635ea65d218e9ef677999cf09ce73d2bd65454d536f0efb2e8724781fdb92d9";     // 加密链接
+const urlIv = "7e0570a842ec1174f310c853";            // 向量
+const urlAuthTag = "e03557c03bd8c4cd58a17aa67777d70a";      // 认证标签
+
+        // 验证密码是否正确
+        async function verifyPassword(inputPassword, storedHash, salt) {
+            const encoder = new TextEncoder();
+            const keyMaterial = await window.crypto.subtle.importKey(
+                "raw",
+                encoder.encode(inputPassword),
+                { name: "PBKDF2" },
+                false,
+                ["deriveBits"]
+            );
+            
+            const derivedBits = await window.crypto.subtle.deriveBits(
+                {
+                    name: "PBKDF2",
+                    salt: encoder.encode(salt),
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                keyMaterial,
+                256
+            );
+            
+            const inputHash = Array.from(new Uint8Array(derivedBits))
+                .map(byte => ('0' + (byte & 0xFF).toString(16)).slice(-2))
+                .join('');
+            
+            return inputHash === storedHash;
+        }
+
+        // 解密URL
+        async function decryptUrl(encryptedData, iv, tag, password, salt) {
+            const encoder = new TextEncoder();
+            const decoder = new TextDecoder();
+            
+            const ciphertext = hexStringToUint8Array(encryptedData);
+            const ivArray = hexStringToUint8Array(iv);
+            const tagArray = hexStringToUint8Array(tag);
+            
+            const combined = new Uint8Array(ciphertext.length + tagArray.length);
+            combined.set(ciphertext);
+            combined.set(tagArray, ciphertext.length);
+            
+            const keyMaterial = await window.crypto.subtle.importKey(
+                "raw",
+                encoder.encode(password),
+                { name: "PBKDF2" },
+                false,
+                ["deriveKey"]
+            );
+            
+            const key = await window.crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: encoder.encode(salt),
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["decrypt"]
+            );
+            
+            const decrypted = await window.crypto.subtle.decrypt(
+                {
+                    name: "AES-GCM",
+                    iv: ivArray
+                },
+                key,
+                combined
+            );
+            
+            return decoder.decode(decrypted);
+        }
+
+        // 十六进制字符串转Uint8Array
+        function hexStringToUint8Array(hexString) {
+            const bytes = new Uint8Array(hexString.length / 2);
+            for (let i = 0; i < bytes.length; i++) {
+                bytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
+            }
+            return bytes;
+        }
+
+        // 表单提交处理
+        document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (!storedHash || !storedSalt || !encryptedUrl || !urlIv || !urlAuthTag) {
+                alert('请先在hash.html生成加密信息，并更新本页面的配置参数');
+                return;
+            }
+            
+            try {
+                const isPasswordValid = await verifyPassword(password, storedHash, storedSalt);
+                
+                if (isPasswordValid) {
+                    const decryptedUrl = await decryptUrl(encryptedUrl, urlIv, urlAuthTag, password, storedSalt);
+                    window.location.href = decryptedUrl;
+                } else {
+                    errorMessage.classList.remove('hidden');
+                    errorMessage.classList.add('animate-shake');
+                    setTimeout(() => {
+                        errorMessage.classList.remove('animate-shake');
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('验证过程出错:', error);
+                alert('验证过程中出现错误，请重试');
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</body>
+</html>
+    

@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arch Linux Terminal</title>
+    <style>
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #282828;
+            color: #ebdbb2; /* Arch默认终端文本色（Solarized） */
+            font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            min-height: 100vh;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* 终端容器：模拟窗口效果 */
+        .terminal {
+            width: 100%;
+            max-width: 1200px;
+            background-color: #1d2021; /* Arch终端深色背景 */
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid #3c3836;
+        }
+
+        /* 终端标题栏：模拟窗口控制 */
+        .terminal-header {
+            background-color: #282828;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #3c3836;
+        }
+
+        .window-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .window-btn.close { background-color: #fb4934; }
+        .window-btn.min { background-color: #fabd2f; }
+        .window-btn.max { background-color: #b8bb26; }
+
+        .terminal-title {
+            font-size: 13px;
+            color: #a89984;
+            margin-left: 12px;
+            flex-grow: 1;
+        }
+
+        /* 终端内容区：包含历史输入和输出 */
+        .terminal-content {
+            padding: 16px;
+            height: 600px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        /* 滚动条美化 */
+        .terminal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-content::-webkit-scrollbar-track {
+            background-color: #282828;
+        }
+
+        .terminal-content::-webkit-scrollbar-thumb {
+            background-color: #504945;
+            border-radius: 4px;
+        }
+
+        /* 历史输入行：显示用户之前输入的命令 */
+        .history-input {
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 提示符样式：用户@主机:路径$ */
+        .prompt {
+            color: #8ec07c; /* 绿色提示符，贴近bash默认 */
+            font-weight: 500;
+            margin-right: 6px;
+            white-space: nowrap;
+        }
+
+        /* 历史输入的命令文本 */
+        .history-cmd {
+            color: #ebdbb2;
+        }
+
+        /* 命令输出行 */
+        .output-line {
+            margin: 4px 0;
+            color: #ebdbb2;
+            white-space: pre-wrap; /* 保留空格和换行，避免溢出 */
+        }
+
+        /* 当前输入行：包含输入框和光标 */
+        .current-input {
+            display: flex;
+            align-items: center;
+            margin: 4px 0;
+        }
+
+        /* 输入框：完全透明，模拟原生原生输入 */
+        .command-input {
+            background: transparent;
+            border: none;
+            color: #ebdbb2;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex-grow: 1;
+            padding: 0;
+            margin: 0;
+            min-width: 100px;
+        }
+
+        /* 光标：竖线样式，更贴近真实终端 */
+        .cursor {
+            width: 7px;
+            height: 16px;
+            background-color: #ebdbb2;
+            margin-left: 2px;
+            animation: blink 1.2s step-end infinite;
+        }
+
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* 文本样式：区分目录、文件、错误 */
+        .dir { color: #88aadd; font-weight: 500; } /* 目录：蓝色 */
+        .exec { color: #88cc88; } /* 可执行文件：绿色 */
+        .text-file { color: #f2c38f; } /* 文本文件：黄色 */
+        .error { color: #ff4444; } /* 错误信息：红色 */
+        .info { color: #81a2be; } /* 提示信息：浅蓝 */
+        .hint { color: #a89984; } /* 提示文本：灰色 */
+        .success { color: #b8bb26; } /* 成功信息：绿色 */
+        .ls-perm { color: #d3869b; } /* 权限字段：粉色 */
+        .ls-user { color: #88aadd; } /* 所有者：蓝色 */
+        .ls-group { color: #8ec07c; } /* 组：绿色 */
+        .ls-size { color: #fabd2f; } /* 大小：黄色 */
+        .ls-date { color: #a89984; } /* 日期：灰色 */
+        .cmd { color: #fe8019; } /* 命令名：橙色 */
+        .option { color: #d3869b; } /* 命令选项：粉色 */
+        .example { color: #b8bb26; } /* 示例：绿色 */
+
+        /* 文本编辑器样式 */
+        .editor {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            background-color: #1d2021;
+            color: #ebdbb2;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .editor-header {
+            background-color: #282828;
+            padding: 8px 16px;
+            border-bottom: 1px solid #3c3836;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-filename {
+            color: #8ec07c;
+        }
+
+        .editor-help {
+            color: #a89984;
+            font-size: 12px;
+        }
+
+        .editor-content {
+            padding: 16px;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            resize: none;
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        .editor-footer {
+            background-color: #282828;
+            padding: 8px 16px;
+            border-top: 1px solid #3c3836;
+            font-size: 12px;
+            color: #a89984;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <!-- 终端标题栏 -->
+        <div class="terminal-header">
+            <div class="window-btn close"></div>
+            <div class="window-btn min"></div>
+            <div class="window-btn max"></div>
+            <div class="terminal-title">Arch Linux - user@arch</div>
+        </div>
+
+        <!-- 终端内容区（包含历史输入和输出） -->
+        <div class="terminal-content" id="terminalContent">
+            <!-- 初始欢迎信息 -->
+            <div class="output-line info">Welcome to Arch Linux Terminal Simulator</div>
+            <div class="output-line info">Type 'help' for available commands | Type 'help [command]' for command-specific help</div>
+            <div class="output-line info">Last login: <span id="lastLoginTime">Thu Jun 13 09:15:00 2024</span> from 192.168.1.105</div>
+            
+            <!-- 当前输入行（初始状态） -->
+            <div class="current-input" id="currentInput">
+                <span class="prompt" id="prompt">user@arch:/$</span>
+                <input type="text" class="command-input" id="commandInput">
+                <span class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态管理
+        const state = {
+            systemInfo: null,
+            currentDir: '/', // 当前路径（初始为根目录）
+            fileSystem: {},  // 文件系统结构（简化版）
+            commandHistory: [], // 命令历史记录
+            historyIndex: -1,  // 命令历史索引（用于上下箭头切换）
+            inEditor: false,  // 是否处于编辑器模式
+            editorFile: null, // 当前编辑的文件
+            // DOM元素引用
+            elements: {
+                terminalContent: document.getElementById('terminalContent'),
+                currentInput: document.getElementById('currentInput'),
+                prompt: document.getElementById('prompt'),
+                commandInput: document.getElementById('commandInput'),
+                lastLoginTime: document.getElementById('lastLoginTime')
+            }
+        };
+
+        // 初始化：加载系统信息 + 绑定事件
+        function initTerminal() {
+            loadSystemInfo();
+            bindInputEvents();
+            state.elements.commandInput.focus();
+            updateDynamicSystemInfo();
+            
+            // 定期更新系统信息
+            setInterval(updateDynamicSystemInfo, 60000); // 每分钟更新一次
+        }
+
+        // 1. 加载系统信息（简化版文件系统，减少元数据）
+        function loadSystemInfo() {
+            // 初始系统信息（静态部分）
+            const baseSystemInfo = {
+                user: 'user',
+                hostname: 'arch',
+                os: 'Arch Linux x86_64',
+                kernel: '6.6.3-arch1-1',
+                packages: '1356 (pacman)',
+                shell: 'bash 5.2.21',
+                cpu: 'Intel i5-12400F (12) @ 4.400GHz',
+                gpu: 'NVIDIA GeForce GTX 1660 SUPER',
+                totalMemory: 16384, // MB
+                disks: [
+                    { name: '/dev/sda1', total: 16380, used: 9214, mount: '/' }
+                ]
+            };
+            
+            // 计算动态系统信息
+            state.systemInfo = {
+                ...baseSystemInfo,
+                uptime: calculateUptime(),
+                memory: calculateMemoryUsage(baseSystemInfo.totalMemory),
+                disks: baseSystemInfo.disks.map(disk => ({
+                    ...disk,
+                    avail: disk.total - disk.used,
+                    use: Math.round((disk.used / disk.total) * 100) + '%'
+                }))
+            };
+
+            // 更新最后登录时间
+            state.elements.lastLoginTime.textContent = getFormattedDate();
+
+            // 简化的文件系统：只保留必要元数据
+            state.fileSystem = {
+                home: {
+                    type: 'directory',
+                    perm: 'drwxr-xr-x',
+                    user: 'root',
+                    group: 'root',
+                    mtime: getPastFormattedDate(3), // 3天前
+                    contents: {
+                        user: {
+                            type: 'directory',
+                            perm: 'drwxr-xr-x',
+                            user: 'user',
+                            group: 'user',
+                            mtime: getPastFormattedDate(3),
+                            contents: {
+                                Documents: {
+                                    type: 'directory',
+                                    perm: 'drwxr-xr-x',
+                                    user: 'user',
+                                    group: 'user',
+                                    mtime: getPastFormattedDate(2),
+                                    contents: {
+                                        'report.txt': {
+                                            type: 'file',
+                                            ext: 'txt',
+                                            perm: '-rw-r--r--',
+                                            user: 'user',
+                                            group: 'user',
+                                            size: 186, // 字节
+                                            mtime: getPastFormattedDate(2),
+                                            content: 'Arch Terminal Report\n==================\n1. Fixed path parsing\n2. Added input history\n3. Improved styling\n4. Enhanced ls command with detailed list\n5. Added new commands: mkdir, rm, cp, mv, touch, grep, chmod, df, du, man'
+                                        },
+                                        'notes.md': {
+                                            type: 'file',
+                                            ext: 'md',
+                                            perm: '-rw-r--r--',
+                                            user: 'user',
+                                            group: 'user',
+                                            size: 218,
+                                            mtime: getPastFormattedDate(2),
+                                            content: '# Notes\n- Use `cd ..` to go back\n- Use `cat [file]` to view text\n- Use `neofetch` for system info\n- Use `ls -l` for detailed file information\n- Directories end with /, executables with *\n- New commands: mkdir, rm, cp, mv, touch, grep, chmod, df, du, man\n- Type `help [command]` for detailed command help'
+                                        }
+                                    }
+                                },
+                                Projects: {
+                                    type: 'directory',
+                                    perm: 'drwxr-xr-x',
+                                    user: 'user',
+                                    group: 'user',
+                                    mtime: getPastFormattedDate(2),
+                                    contents: {
+                                        'script.sh': {
+                                            type: 'file',
+                                            ext: 'sh',
+                                            perm: '-rwxr-xr-x', // 可执行
+                                            user: 'user',
+                                            group: 'user',
+                                            size: 118,
+                                            mtime: getPastFormattedDate(2),
+                                            content: '#!/bin/bash\necho "Hello from shell script"\necho "Current dir: $PWD"\necho "Script executed at: $(date)"\necho "User: $USER"'
+                                        },
+                                        'main.py': {
+                                            type: 'file',
+                                            ext: 'py',
+                                            perm: '-rw-r--r--',
+                                            user: 'user',
+                                            group: 'user',
+                                            size: 124,
+                                            mtime: getPastFormattedDate(2),
+                                            content: 'print("Hello Arch!")\nimport os\nprint(f"Current path: {os.getcwd()}")\nprint(f"File list: {os.listdir()}")\nprint(f"User: {os.getlogin()}")'
+                                        }
+                                    }
+                                },
+                                '.bashrc': {
+                                    type: 'file',
+                                    ext: 'bashrc',
+                                    perm: '-rw-r--r--',
+                                    user: 'user',
+                                    group: 'user',
+                                    size: 236,
+                                    mtime: getPastFormattedDate(4),
+                                    content: 'alias ll="ls -l"\nalias la="ls -la"\nalias update="sudo pacman -Syu"\nalias cls="clear"\nalias ..="cd .."\nalias home="cd ~"\nexport PATH=$PATH:~/bin\nexport PS1="\\u@\\h:\\w\\$ "\n# Custom aliases\nalias df="df -h"\nalias du="du -h"'
+                                }
+                            }
+                        }
+                    }
+                },
+                etc: {
+                    type: 'directory',
+                    perm: 'drwxr-xr-x',
+                    user: 'root',
+                    group: 'root',
+                    mtime: getPastFormattedDate(3),
+                    contents: {
+                        hosts: {
+                            type: 'file',
+                            ext: 'hosts',
+                            perm: '-rw-r--r--',
+                            user: 'root',
+                            group: 'root',
+                            size: 276,  // 精确匹配要求的大小
+                            mtime: getPastFormattedDate(3),
+                            content: '127.0.0.1       localhost\n127.0.1.1       arch\n::1             localhost ip6-localhost ip6-loopback\nff02::1         ip6-allnodes\nff02::2         ip6-allrouters\n# Added for local development\n192.168.1.100   dev-server\n192.168.1.101   web-server\n192.168.1.102   db-server'
+                        },
+                        passwd: {
+                            type: 'file',
+                            ext: 'passwd',
+                            perm: '-rw-r--r--',
+                            user: 'root',
+                            group: 'root',
+                            size: 256,  // 精确匹配要求的大小
+                            mtime: getPastFormattedDate(3),
+                            content: 'root:x:0:0:root:/root:/bin/bash\nbin:x:1:1:bin:/bin:/sbin/nologin\ndaemon:x:2:2:daemon:/sbin:/sbin/nologin\nadm:x:3:4:adm:/var/adm:/sbin/nologin\nlp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\nsync:x:5:0:sync:/sbin:/bin/sync\nshutdown:x:6:0:shutdown:/sbin:/sbin/shutdown\nhalt:x:7:0:halt:/sbin:/sbin/halt\nmail:x:8:12:mail:/var/spool/mail:/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash'
+                        }
+                    }
+                },
+                var: {
+                    type: 'directory',
+                    perm: 'drwxr-xr-x',
+                    user: 'root',
+                    group: 'root',
+                    mtime: getPastFormattedDate(3),
+                    contents: {
+                        log: {
+                            type: 'directory',
+                            perm: 'drwxr-xr-x',
+                            user: 'root',
+                            group: 'root',
+                            mtime: getPastFormattedDate(1),
+                            contents: {
+                                'pacman.log': {
+                                    type: 'file',
+                                    ext: 'log',
+                                    perm: '-rw-r--r--',
+                                    user: 'root',
+                                    group: 'root',
+                                    size: 528,
+                                    mtime: getPastFormattedDate(1),
+                                    content: '[2024-06-10 10:00] [ALPM] installed linux (6.6.3-arch1-1)\n[2024-06-10 10:05] [ALPM] installed nvidia (550.78-1)\n[2024-06-10 10:10] [ALPM] installed python (3.11.8-1)\n[2024-06-11 14:30] [ALPM] installed git (2.45.1-1)\n[2024-06-11 15:45] [ALPM] installed neofetch (7.1.0-6)\n[2024-06-12 10:15] [ALPM] upgraded firefox (126.0.1-1 -> 126.0.2-1)\n[2024-06-12 16:30] [ALPM] installed nodejs (20.14.0-1)\n[2024-06-12 16:35] [ALPM] installed npm (10.7.0-1)'
+                                }
+                            }
+                        }
+                    }
+                },
+                'readme.txt': {
+                    type: 'file',
+                    ext: 'txt',
+                    perm: '-rw-r--r--',
+                    user: 'root',
+                    group: 'root',
+                    size: 428,
+                    mtime: getPastFormattedDate(3),
+                    content: 'Arch Terminal Simulator v2.0\n=========================\nAdded commands in v2.0:\n- mkdir: Create new directories\n- rm: Remove files or directories\n- cp: Copy files\n- mv: Move or rename files/directories\n- touch: Create empty files\n- grep: Search text in files\n- chmod: Change file permissions\n- df: Show disk space usage\n- du: Show directory/file sizes\n- man: Show manual for commands\n- nano: Simple text editor\n\nType \'help\' for all commands or \'help [command]\' for specific help.'
+                }
+            };
+
+            // 计算所有文件总大小并更新df信息
+            updateDiskUsageFromFilesystem();
+            
+            addOutput(`<span class="info">Loaded system: ${state.systemInfo.hostname} (Kernel: ${state.systemInfo.kernel})</span>`);
+        }
+
+        // 根据文件系统内容更新磁盘使用情况
+        function updateDiskUsageFromFilesystem() {
+            // 计算所有文件的总大小
+            const calculateTotalFileSize = (dir) => {
+                let total = 0;
+                for (const name in dir) {
+                    const item = dir[name];
+                    if (item.type === 'file') {
+                        total += item.size || 0;
+                    } else if (item.type === 'directory') {
+                        total += calculateTotalFileSize(item.contents);
+                    }
+                }
+                return total;
+            };
+            
+            // 计算所有文件的总大小（转换为MB）
+            const totalFileSizeBytes = calculateTotalFileSize(state.fileSystem);
+            const totalFileSizeMB = Math.round(totalFileSizeBytes / (1024 * 1024));
+            
+            // 更新磁盘使用信息
+            if (state.systemInfo && state.systemInfo.disks.length > 0) {
+                // 只更新根分区的使用情况
+                state.systemInfo.disks.forEach(disk => {
+                    if (disk.mount === '/') {
+                        disk.used = totalFileSizeMB;
+                        disk.avail = disk.total - disk.used;
+                        disk.use = Math.round((disk.used / disk.total) * 100) + '%';
+                    }
+                });
+            }
+        }
+
+        // 更新动态系统信息
+        function updateDynamicSystemInfo() {
+            if (!state.systemInfo) return;
+            
+            // 更新运行时间
+            state.systemInfo.uptime = calculateUptime();
+            
+            // 更新内存使用情况（模拟动态变化）
+            state.systemInfo.memory = calculateMemoryUsage(state.systemInfo.totalMemory);
+            
+            // 保持磁盘空间与文件系统内容同步
+            updateDiskUsageFromFilesystem();
+        }
+
+        // 计算系统运行时间（模拟）
+        function calculateUptime() {
+            // 初始启动时间设为5小时前
+            const startupTime = Date.now() - 5 * 60 * 60 * 1000;
+            const uptimeMs = Date.now() - startupTime;
+            const hours = Math.floor(uptimeMs / (60 * 60 * 1000));
+            const minutes = Math.floor((uptimeMs % (60 * 60 * 1000)) / (60 * 1000));
+            return `${hours}h ${minutes}m`;
+        }
+
+        // 计算内存使用情况（模拟）
+        function calculateMemoryUsage(total) {
+            // 内存使用率在30%-40%之间波动
+            const usagePercent = 30 + Math.random() * 10;
+            const used = Math.round(total * (usagePercent / 100));
+            return `${used}MiB / ${total}MiB`;
+        }
+
+        // 2. 绑定输入事件
+        function bindInputEvents() {
+            const input = state.elements.commandInput;
+
+            input.addEventListener('keydown', (e) => {
+                // 如果在编辑器中，不处理终端输入
+                if (state.inEditor) return;
+
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const cmd = input.value.trim();
+                    if (cmd) {
+                        state.commandHistory.push(cmd);
+                        state.historyIndex = state.commandHistory.length;
+                        showHistoryInput(cmd);
+                        processCommand(cmd);
+                    } else {
+                        showHistoryInput('');
+                        addOutput('');
+                    }
+                    input.value = '';
+                    input.focus();
+                    return;
+                }
+
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (state.commandHistory.length === 0) return;
+                    state.historyIndex = Math.max(0, state.historyIndex - 1);
+                    input.value = state.commandHistory[state.historyIndex];
+                    input.focus();
+                    return;
+                }
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (state.commandHistory.length === 0) return;
+                    state.historyIndex = Math.min(state.commandHistory.length, state.historyIndex + 1);
+                    input.value = state.historyIndex < state.commandHistory.length 
+                        ? state.commandHistory[state.historyIndex] 
+                        : '';
+                    input.focus();
+                    return;
+                }
+            });
+
+            state.elements.terminalContent.addEventListener('click', () => {
+                if (!state.inEditor) {
+                    input.focus();
+                }
+            });
+        }
+
+        // 3. 显示历史输入
+        function showHistoryInput(cmd) {
+            state.elements.currentInput.remove();
+
+            const historyInput = document.createElement('div');
+            historyInput.className = 'history-input';
+            const promptText = getPromptText();
+            historyInput.innerHTML = `
+                <span class="prompt">${promptText}</span>
+                <span class="history-cmd">${cmd}</span>
+            `;
+
+            state.elements.terminalContent.appendChild(historyInput);
+            state.elements.terminalContent.appendChild(state.elements.currentInput);
+            state.elements.prompt.textContent = promptText;
+
+            state.elements.commandInput.focus();
+            scrollToBottom();
+        }
+
+        // 4. 获取当前提示符文本
+        function getPromptText() {
+            const user = state.systemInfo?.user || 'user';
+            const host = state.systemInfo?.hostname || 'arch';
+            const displayDir = state.currentDir === '/' 
+                ? '/' 
+                : state.currentDir.startsWith('/home/' + user) 
+                    ? '~' + state.currentDir.slice('/home/' + user.length) 
+                    : state.currentDir.split('/').pop();
+            return `${user}@${host}:${displayDir}$`;
+        }
+
+        // 5. 添加命令输出
+        function addOutput(content) {
+            state.elements.currentInput.remove();
+
+            const outputLine = document.createElement('div');
+            outputLine.className = 'output-line';
+            outputLine.innerHTML = content;
+
+            state.elements.terminalContent.appendChild(outputLine);
+            state.elements.terminalContent.appendChild(state.elements.currentInput);
+
+            state.elements.commandInput.focus();
+            scrollToBottom();
+        }
+
+        // 6. 滚动到终端底部
+        function scrollToBottom() {
+            const content = state.elements.terminalContent;
+            content.scrollTop = content.scrollHeight;
+        }
+
+        // 7. 处理命令（核心：包含多个命令）
+        function processCommand(cmd) {
+            if (!cmd) {
+                addOutput('');
+                return;
+            }
+
+            const [command, ...args] = cmd.trim().split(/\s+/);
+            switch (command.toLowerCase()) {
+                case 'help': showHelp(args); break;
+                case 'ls': listDirectory(args); break;
+                case 'cd': changeDirectory(args[0] || '~'); break;
+                case 'pwd': showPwd(); break;
+                case 'cat': showFile(args); break;
+                case 'neofetch': showNeofetch(); break;
+                case 'clear': clearTerminal(); break;
+                case 'echo': showEcho(args); break;
+                case 'whoami': showWhoami(); break;
+                // 其他命令
+                case 'mkdir': makeDirectory(args); break;
+                case 'rm': removeFileOrDir(args); break;
+                case 'cp': copyFile(args); break;
+                case 'mv': moveOrRename(args); break;
+                case 'touch': createEmptyFile(args); break;
+                case 'grep': searchText(args); break;
+                case 'chmod': changePermissions(args); break;
+                case 'df': showDiskUsage(args); break;
+                case 'du': showDirectorySize(args); break;
+                case 'man': showManual(args); break;
+                case 'nano': openEditor(args[0]); break; // 新增：文本编辑器命令
+                default: addOutput(`<span class="error">bash: ${command}: command not found</span>`);
+            }
+        }
+
+        // 8. 命令实现
+        // 8.1 help：帮助信息（更新以包含nano命令）
+        function showHelp(args) {
+            // 显示特定命令的帮助
+            if (args.length > 0) {
+                const cmd = args[0].toLowerCase();
+                const commandHelp = getCommandHelp(cmd);
+                if (commandHelp) {
+                    addOutput(`<span class="info">${commandHelp.name} - ${commandHelp.description}</span>`);
+                    addOutput(`<span class="hint">Syntax: <span class="cmd">${commandHelp.syntax}</span></span>`);
+                    
+                    if (commandHelp.options && commandHelp.options.length > 0) {
+                        addOutput('<span class="hint">Options:</span>');
+                        commandHelp.options.forEach(opt => {
+                            addOutput(`  <span class="option">${opt.flag}</span> - ${opt.description}`);
+                        });
+                    }
+                    
+                    if (commandHelp.examples && commandHelp.examples.length > 0) {
+                        addOutput('<span class="hint">Examples:</span>');
+                        commandHelp.examples.forEach(ex => {
+                            addOutput(`  <span class="example">${ex}</span>`);
+                        });
+                    }
+                } else {
+                    addOutput(`<span class="error">No help available for '${cmd}'</span>`);
+                    addOutput('<span class="hint">Type \'help\' to see all available commands</span>');
+                }
+                return;
+            }
+
+            // 显示所有命令的分类帮助
+            addOutput('<span class="info">Arch Terminal Simulator - Available Commands</span>');
+            addOutput('<span class="hint">Type \'help [command]\' for detailed help on a specific command</span>');
+            addOutput('');
+
+            // 1. 文件和目录操作
+            addOutput('<span class="info">File and Directory Operations:</span>');
+            [
+                { cmd: 'ls', desc: 'List directory contents' },
+                { cmd: 'cd', desc: 'Change current directory' },
+                { cmd: 'pwd', desc: 'Print current working directory' },
+                { cmd: 'mkdir', desc: 'Create new directories' },
+                { cmd: 'rm', desc: 'Remove files or directories' },
+                { cmd: 'cp', desc: 'Copy files' },
+                { cmd: 'mv', desc: 'Move or rename files/directories' },
+                { cmd: 'touch', desc: 'Create empty files' }
+            ].forEach(item => {
+                addOutput(`  <span class="cmd">${item.cmd.padEnd(8)}</span>${item.desc}`);
+            });
+            addOutput('');
+
+            // 2. 文本处理
+            addOutput('<span class="info">Text Processing:</span>');
+            [
+                { cmd: 'cat', desc: 'View text file content' },
+                { cmd: 'grep', desc: 'Search text in files' },
+                { cmd: 'echo', desc: 'Print text to terminal' },
+                { cmd: 'nano', desc: 'Simple text editor' } // 新增：nano命令
+            ].forEach(item => {
+                addOutput(`  <span class="cmd">${item.cmd.padEnd(8)}</span>${item.desc}`);
+            });
+            addOutput('');
+
+            // 3. 系统信息
+            addOutput('<span class="info">System Information:</span>');
+            [
+                { cmd: 'neofetch', desc: 'Show system information (Arch style)' },
+                { cmd: 'whoami', desc: 'Show current username' },
+                { cmd: 'df', desc: 'Show disk space usage' },
+                { cmd: 'du', desc: 'Show directory/file sizes' }
+            ].forEach(item => {
+                addOutput(`  <span class="cmd">${item.cmd.padEnd(8)}</span>${item.desc}`);
+            });
+            addOutput('');
+
+            // 4. 其他命令
+            addOutput('<span class="info">Other Commands:</span>');
+            [
+                { cmd: 'clear', desc: 'Clear terminal screen' },
+                { cmd: 'chmod', desc: 'Change file permissions' },
+                { cmd: 'help', desc: 'Show this help message' },
+                { cmd: 'man', desc: 'Show manual for commands' }
+            ].forEach(item => {
+                addOutput(`  <span class="cmd">${item.cmd.padEnd(8)}</span>${item.desc}`);
+            });
+            addOutput('');
+
+            addOutput('<span class="hint">Path shortcuts:</span>');
+            addOutput('  ~          Home directory (/home/user)');
+            addOutput('  ..         Parent directory');
+            addOutput('  .          Current directory');
+            addOutput('  /          Root directory');
+        }
+
+        // 辅助函数：获取特定命令的详细帮助信息（更新以包含nano命令）
+        function getCommandHelp(command) {
+            const helpDB = {
+                // ... 其他命令的帮助信息保持不变 ...
+                
+                'nano': {
+                    name: 'nano',
+                    description: 'Simple text editor',
+                    syntax: 'nano [filename]',
+                    examples: [
+                        'nano file.txt       Edit file.txt (create if doesn\'t exist)',
+                        'nano ~/notes.txt    Edit notes.txt in home directory'
+                    ],
+                    notes: [
+                        'Editor shortcuts:',
+                        '  Ctrl+O: Save file',
+                        '  Ctrl+X: Exit editor',
+                        '  Ctrl+C: Cancel operation'
+                    ]
+                },
+                
+                // ... 其他命令的帮助信息 ...
+                'ls': {
+                    name: 'ls',
+                    description: 'List directory contents',
+                    syntax: 'ls [options] [directory]',
+                    options: [
+                        { flag: '-l', description: 'Use long listing format' },
+                        { flag: '-lh', description: 'Long format with human-readable file sizes' }
+                    ],
+                    examples: [
+                        'ls                  List current directory contents',
+                        'ls /etc             List contents of /etc directory',
+                        'ls -l ~/Documents   Detailed list of Documents directory',
+                        'ls -lh              Detailed list with human-readable sizes'
+                    ]
+                },
+                'cd': {
+                    name: 'cd',
+                    description: 'Change the current working directory',
+                    syntax: 'cd [directory]',
+                    examples: [
+                        'cd ~                Go to home directory',
+                        'cd /etc             Go to /etc directory',
+                        'cd ..               Go to parent directory',
+                        'cd Documents        Go to Documents subdirectory'
+                    ]
+                },
+                'pwd': {
+                    name: 'pwd',
+                    description: 'Print the current working directory',
+                    syntax: 'pwd',
+                    examples: [
+                        'pwd                 Display current directory path'
+                    ]
+                },
+                'mkdir': {
+                    name: 'mkdir',
+                    description: 'Create new directories',
+                    syntax: 'mkdir [directory...]\nmkdir -p [directory/path...]',
+                    options: [
+                        { flag: '-p', description: 'Create parent directories as needed' }
+                    ],
+                    examples: [
+                        'mkdir newdir        Create "newdir" in current directory',
+                        'mkdir docs pics     Create both "docs" and "pics" directories',
+                        'mkdir -p a/b/c      Create nested directories a/b/c'
+                    ]
+                },
+                'rm': {
+                    name: 'rm',
+                    description: 'Remove files or directories',
+                    syntax: 'rm [options] [file...]\nrm [options] [directory...]',
+                    options: [
+                        { flag: '-r', description: 'Remove directories and their contents recursively' },
+                        { flag: '-f', description: 'Force removal without confirmation' }
+                    ],
+                    examples: [
+                        'rm file.txt         Remove "file.txt"',
+                        'rm -r olddir        Remove "olddir" and its contents',
+                        'rm -rf temp/*       Force remove all files in temp directory'
+                    ]
+                },
+                'cp': {
+                    name: 'cp',
+                    description: 'Copy files',
+                    syntax: 'cp [source] [destination]',
+                    examples: [
+                        'cp file.txt copy.txt  Make a copy of file.txt named copy.txt',
+                        'cp doc.txt ~/docs/    Copy doc.txt to docs directory in home'
+                    ]
+                },
+                'mv': {
+                    name: 'mv',
+                    description: 'Move or rename files and directories',
+                    syntax: 'mv [source] [destination]',
+                    examples: [
+                        'mv old.txt new.txt   Rename old.txt to new.txt',
+                        'mv pic.jpg ~/Pictures/  Move pic.jpg to Pictures directory',
+                        'mv docs/ ~/backup/   Move docs directory to backup directory'
+                    ]
+                },
+                'touch': {
+                    name: 'touch',
+                    description: 'Create empty files or update file timestamps',
+                    syntax: 'touch [file...]\ntouch [option] [file...]',
+                    examples: [
+                        'touch newfile.txt    Create empty newfile.txt',
+                        'touch a.txt b.txt    Create both a.txt and b.txt',
+                        'touch existing.txt   Update timestamp of existing.txt'
+                    ]
+                },
+                'cat': {
+                    name: 'cat',
+                    description: 'Concatenate and print files',
+                    syntax: 'cat [file...]\ncat [option] [file...]',
+                    examples: [
+                        'cat note.txt        Display contents of note.txt',
+                        'cat file1.txt file2.txt  Display contents of both files'
+                    ]
+                },
+                'grep': {
+                    name: 'grep',
+                    description: 'Search text in files',
+                    syntax: 'grep [pattern] [file]\ngrep [options] [pattern] [file]',
+                    options: [
+                        { flag: '-i', description: 'Ignore case distinctions' },
+                        { flag: '-n', description: 'Prefix each line of output with line number' }
+                    ],
+                    examples: [
+                        'grep "error" log.txt  Search for "error" in log.txt',
+                        'grep -i "warning" file.txt  Search case-insensitively for "warning"',
+                        'grep -n "root" /etc/passwd  Show line numbers with "root" in passwd'
+                    ]
+                },
+                'chmod': {
+                    name: 'chmod',
+                    description: 'Change file permissions',
+                    syntax: 'chmod [mode] [file...]\nchmod [options] [mode] [file...]',
+                    examples: [
+                        'chmod 644 file.txt  Set read/write for owner, read for others',
+                        'chmod +x script.sh  Add execute permission to script.sh',
+                        'chmod 755 program   Set read/write/execute for owner, read/execute for others'
+                    ]
+                },
+                'echo': {
+                    name: 'echo',
+                    description: 'Display a line of text',
+                    syntax: 'echo [string...]\necho [option] [string...]',
+                    examples: [
+                        'echo "Hello World"  Display Hello World',
+                        'echo $USER          Display current username (in real shell)',
+                        'echo -n "Input: "   Display without trailing newline'
+                    ]
+                },
+                'neofetch': {
+                    name: 'neofetch',
+                    description: 'Display system information in a visually pleasing way',
+                    syntax: 'neofetch',
+                    examples: [
+                        'neofetch           Display system information with logo'
+                    ]
+                },
+                'clear': {
+                    name: 'clear',
+                    description: 'Clear the terminal screen',
+                    syntax: 'clear',
+                    examples: [
+                        'clear              Clear all text from terminal'
+                    ]
+                },
+                'whoami': {
+                    name: 'whoami',
+                    description: 'Print the current user id',
+                    syntax: 'whoami',
+                    examples: [
+                        'whoami             Display current username'
+                    ]
+                },
+                'df': {
+                    name: 'df',
+                    description: 'Report file system disk space usage',
+                    syntax: 'df [options]',
+                    options: [
+                        { flag: '-h', description: 'Human-readable output (e.g., 1K, 234M, 2G)' }
+                    ],
+                    examples: [
+                        'df                 Show disk usage',
+                        'df -h              Show disk usage in human-readable format'
+                    ]
+                },
+                'du': {
+                    name: 'du',
+                    description: 'Estimate file space usage',
+                    syntax: 'du [options] [file/directory...]\ndu [file/directory...]',
+                    options: [
+                        { flag: '-h', description: 'Human-readable output' },
+                        { flag: '-s', description: 'Display only a total for each argument' }
+                    ],
+                    examples: [
+                        'du                 Show size of current directory and subdirectories',
+                        'du -h file.txt     Show size of file.txt in human-readable format',
+                        'du -sh ~           Show total size of home directory'
+                    ]
+                },
+                'man': {
+                    name: 'man',
+                    description: 'Display manual pages for commands',
+                    syntax: 'man [command]',
+                    examples: [
+                        'man ls             Show manual for ls command',
+                        'man grep           Show manual for grep command'
+                    ]
+                },
+                'help': {
+                    name: 'help',
+                    description: 'Display help information for commands',
+                    syntax: 'help\nhelp [command]',
+                    examples: [
+                        'help               Show list of all commands',
+                        'help ls            Show help for ls command'
+                    ]
+                }
+            };
+
+            return helpDB[command];
+        }
+
+        // 新增：文本编辑器实现
+        function openEditor(filePath) {
+            if (!filePath) {
+                addOutput(`<span class="error">nano: missing filename</span>`);
+                addOutput(`<span class="hint">Try 'help nano' for more information.</span>`);
+                return;
+            }
+
+            // 解析文件路径
+            const absPath = resolveAbsolutePath(filePath);
+            const pathParts = absPath.split('/').filter(part => part);
+            
+            if (pathParts.length === 0) {
+                addOutput(`<span class="error">nano: cannot edit directory ‘/’</span>`);
+                return;
+            }
+
+            const fileName = pathParts.pop();
+            const dirPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+            const dirContents = getDirectoryContents(dirPath);
+            
+            if (!dirContents) {
+                addOutput(`<span class="error">nano: cannot open ‘${filePath}’: No such directory</span>`);
+                return;
+            }
+
+            // 检查文件是否存在
+            let fileContent = '';
+            let fileExists = false;
+            
+            if (dirContents[fileName] && dirContents[fileName].type === 'file') {
+                fileContent = dirContents[fileName].content || '';
+                fileExists = true;
+            }
+
+            // 保存文件信息供后续使用
+            state.editorFile = {
+                name: fileName,
+                path: absPath,
+                dirPath: dirPath,
+                dirContents: dirContents,
+                exists: fileExists
+            };
+
+            // 进入编辑器模式
+            state.inEditor = true;
+
+            // 创建编辑器UI
+            const editor = document.createElement('div');
+            editor.className = 'editor';
+            editor.id = 'editor';
+            
+            // 提取文件扩展名
+            const extMatch = fileName.match(/\.([^.]+)$/);
+            const ext = extMatch ? extMatch[1] : '';
+            const displayName = fileExists ? fileName : `${fileName} (New File)`;
+            
+            editor.innerHTML = `
+                <div class="editor-header">
+                    <div class="editor-filename">${displayName}</div>
+                    <div class="editor-help">${ext.toUpperCase()} File</div>
+                </div>
+                <div class="editor-content">
+                    <textarea class="editor-textarea" id="editorTextarea">${escapeHTML(fileContent)}</textarea>
+                </div>
+                <div class="editor-footer">
+                    Ctrl+O: Save | Ctrl+X: Exit | Ctrl+C: Cancel
+                </div>
+            `;
+
+            // 保存当前终端内容并替换为编辑器
+            const terminalContent = state.elements.terminalContent;
+            const currentTerminalContent = terminalContent.innerHTML;
+            state.terminalContentBackup = currentTerminalContent;
+            
+            terminalContent.innerHTML = '';
+            terminalContent.appendChild(editor);
+            
+            // 获取编辑器文本区域并聚焦
+            const textarea = document.getElementById('editorTextarea');
+            textarea.focus();
+            
+            // 滚动到最后一行
+            textarea.scrollTop = textarea.scrollHeight;
+
+            // 绑定编辑器快捷键
+            const handleEditorKeydown = (e) => {
+                // Ctrl+O: 保存文件
+                if (e.ctrlKey && e.key === 'o') {
+                    e.preventDefault();
+                    saveFile(textarea.value);
+                    return;
+                }
+                
+                // Ctrl+X: 退出编辑器
+                if (e.ctrlKey && e.key === 'x') {
+                    e.preventDefault();
+                    exitEditor();
+                    return;
+                }
+                
+                // Ctrl+C: 取消操作（在保存确认时）
+                if (e.ctrlKey && e.key === 'c') {
+                    e.preventDefault();
+                    const savePrompt = document.getElementById('editorSavePrompt');
+                    if (savePrompt) {
+                        savePrompt.remove();
+                        textarea.focus();
+                    }
+                    return;
+                }
+            };
+
+            // 添加事件监听器
+            document.addEventListener('keydown', handleEditorKeydown);
+            state.editorKeydownHandler = handleEditorKeydown;
+        }
+
+        // 保存文件
+        function saveFile(content) {
+            if (!state.editorFile) return;
+            
+            const { name, dirContents, exists } = state.editorFile;
+            
+            // 提取文件扩展名
+            const extMatch = name.match(/\.([^.]+)$/);
+            const ext = extMatch ? extMatch[1] : '';
+            
+            // 更新或创建文件
+            if (exists) {
+                dirContents[name].content = content;
+                dirContents[name].size = content.length;
+                dirContents[name].mtime = getFormattedDate();
+            } else {
+                dirContents[name] = {
+                    type: 'file',
+                    ext: ext,
+                    perm: '-rw-r--r--',
+                    user: state.systemInfo.user,
+                    group: state.systemInfo.user,
+                    size: content.length,
+                    mtime: getFormattedDate(),
+                    content: content
+                };
+                state.editorFile.exists = true;
+                
+                // 更新文件名显示
+                const filenameElement = document.querySelector('.editor-filename');
+                if (filenameElement) {
+                    filenameElement.textContent = name;
+                }
+            }
+            
+            // 显示保存成功提示
+            showEditorMessage('File saved successfully');
+            
+            // 更新磁盘使用情况
+            updateDiskUsageFromFilesystem();
+        }
+
+        // 显示编辑器消息
+        function showEditorMessage(message) {
+            // 移除任何现有提示
+            const existingPrompt = document.getElementById('editorMessage');
+            if (existingPrompt) {
+                existingPrompt.remove();
+            }
+            
+            // 创建新提示
+            const messageElement = document.createElement('div');
+            messageElement.id = 'editorMessage';
+            messageElement.style.position = 'absolute';
+            messageElement.style.top = '50%';
+            messageElement.style.left = '50%';
+            messageElement.style.transform = 'translate(-50%, -50%)';
+            messageElement.style.backgroundColor = '#282828';
+            messageElement.style.color = '#b8bb26';
+            messageElement.style.padding = '8px 16px';
+            messageElement.style.borderRadius = '4px';
+            messageElement.style.zIndex = '100';
+            messageElement.textContent = message;
+            
+            // 添加到编辑器
+            const editor = document.getElementById('editor');
+            if (editor) {
+                editor.appendChild(messageElement);
+                
+                // 3秒后自动移除
+                setTimeout(() => {
+                    const msg = document.getElementById('editorMessage');
+                    if (msg) msg.remove();
+                }, 2000);
+            }
+        }
+
+        // 退出编辑器
+        function exitEditor() {
+            if (!state.inEditor) return;
+            
+            // 移除事件监听器
+            if (state.editorKeydownHandler) {
+                document.removeEventListener('keydown', state.editorKeydownHandler);
+                state.editorKeydownHandler = null;
+            }
+            
+            // 恢复终端内容
+            const terminalContent = state.elements.terminalContent;
+            terminalContent.innerHTML = state.terminalContentBackup;
+            
+            // 重置状态
+            state.inEditor = false;
+            state.editorFile = null;
+            
+            // 聚焦到命令输入
+            state.elements.commandInput.focus();
+            
+            // 显示退出消息
+            addOutput(`<span class="info">Exited nano editor</span>`);
+        }
+
+        // 辅助函数：转义HTML特殊字符
+        function escapeHTML(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // 8.2 ls：列表显示
+        function listDirectory(args) {
+            let showDetailed = false;
+            let humanReadable = false;
+            let targetDir = state.currentDir;
+
+            args.forEach(arg => {
+                switch (arg) {
+                    case '-l':
+                        showDetailed = true;
+                        break;
+                    case '-lh':
+                        showDetailed = true;
+                        humanReadable = true;
+                        break;
+                    default:
+                        targetDir = arg;
+                }
+            });
+
+            const absDir = resolveAbsolutePath(targetDir);
+            const dirContents = getDirectoryContents(absDir);
+
+            if (!dirContents) {
+                addOutput(`<span class="error">ls: cannot access '${targetDir}': No such file or directory</span>`);
+                return;
+            }
+
+            const items = Object.entries(dirContents).map(([name, item]) => {
+                const isDir = item.type === 'directory';
+                const isExec = item.perm?.includes('x') && item.type === 'file';
+                let itemClass = '';
+
+                if (isDir) itemClass = 'dir';
+                else if (isExec) itemClass = 'exec';
+                else if (['txt', 'md', 'py', 'sh', 'hosts', 'passwd', 'bashrc', 'log'].includes(item.ext)) itemClass = 'text-file';
+
+                const displayName = isDir ? `${name}/` : (isExec ? `${name}*` : name);
+
+                // 计算文件大小（目录大小动态计算）
+                let fileSize = isDir ? calculateDirectorySize(item) : (item.size || 0);
+                if (humanReadable) {
+                    fileSize = formatFileSize(fileSize);
+                }
+
+                return {
+                    name: displayName,
+                    class: itemClass,
+                    perm: item.perm || (isDir ? 'drwxr-xr-x' : '-rw-r--r--'),
+                    links: isDir ? 2 : 1, // 简化：目录2个链接，文件1个
+                    user: item.user || (isDir ? 'root' : 'user'),
+                    group: item.group || (isDir ? 'root' : 'user'),
+                    size: fileSize,
+                    mtime: item.mtime || getFormattedDate()
+                };
+            });
+
+            items.sort((a, b) => {
+                const aIsDir = a.name.endsWith('/');
+                const bIsDir = b.name.endsWith('/');
+                if (aIsDir && !bIsDir) return -1;
+                if (!aIsDir && bIsDir) return 1;
+                return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+            });
+
+            if (showDetailed) {
+                addOutput(`<span class="hint">total ${items.length}</span>`);
+                
+                items.forEach(item => {
+                    const perm = `<span class="ls-perm">${item.perm}</span>`.padEnd(11);
+                    const links = item.links.toString().padStart(3) + ' ';
+                    const user = `<span class="ls-user">${item.user}</span>`.padEnd(11);
+                    const group = `<span class="ls-group">${item.group}</span>`.padEnd(11);
+                    const size = humanReadable 
+                        ? `<span class="ls-size">${item.size}</span>`.padStart(8) 
+                        : `<span class="ls-size">${item.size}</span>`.padStart(8);
+                    const mtime = `<span class="ls-date">${item.mtime}</span>`.padEnd(13);
+                    const name = `<span class="${item.class}">${item.name}</span>`;
+
+                    const line = `${perm} ${links} ${user} ${group} ${size} ${mtime} ${name}`;
+                    addOutput(line);
+                });
+            } else {
+                let line = '';
+                items.forEach((item, idx) => {
+                    const itemText = `<span class="${item.class}">${item.name}</span>`;
+                    const spaceCount = Math.max(0, 22 - item.name.length);
+                    const paddedItem = itemText + ' '.repeat(spaceCount);
+                    
+                    line += paddedItem;
+                    
+                    if ((idx + 1) % 4 === 0 || idx === items.length - 1) {
+                        addOutput(line);
+                        line = '';
+                    }
+                });
+            }
+        }
+
+        // 计算目录大小（包括所有子目录和文件）
+        function calculateDirectorySize(dirItem) {
+            if (dirItem.type !== 'directory') return 0;
+            
+            let totalSize = 0; // 目录本身大小不计入，仅计算内容
+            
+            // 递归计算所有子项大小
+            for (const childName in dirItem.contents) {
+                const child = dirItem.contents[childName];
+                if (child.type === 'directory') {
+                    totalSize += calculateDirectorySize(child);
+                } else {
+                    totalSize += child.size || 0;
+                }
+            }
+            
+            return totalSize;
+        }
+
+        // 8.3 mkdir：创建目录
+        function makeDirectory(args) {
+            if (args.length === 0) {
+                addOutput(`<span class="error">mkdir: missing operand</span>`);
+                addOutput(`<span class="hint">Try 'help mkdir' for more information.</span>`);
+                return;
+            }
+
+            let createParents = false;
+            const dirsToCreate = [];
+
+            // 解析参数
+            args.forEach(arg => {
+                if (arg === '-p') {
+                    createParents = true;
+                } else {
+                    dirsToCreate.push(arg);
+                }
+            });
+
+            if (dirsToCreate.length === 0) {
+                addOutput(`<span class="error">mkdir: missing operand after ‘-p’</span>`);
+                return;
+            }
+
+            dirsToCreate.forEach(dirPath => {
+                const absPath = resolveAbsolutePath(dirPath);
+                const pathParts = absPath.split('/').filter(part => part);
+                
+                if (pathParts.length === 0) {
+                    addOutput(`<span class="error">mkdir: cannot create directory ‘/’: File exists</span>`);
+                    return;
+                }
+
+                let currentDir = state.fileSystem;
+                let currentPath = '';
+                let success = true;
+
+                // 如果需要创建父目录
+                if (createParents) {
+                    for (let i = 0; i < pathParts.length; i++) {
+                        const part = pathParts[i];
+                        currentPath += `/${part}`;
+                        
+                        if (!currentDir[part]) {
+                            // 创建新目录（只存储必要元数据）
+                            currentDir[part] = {
+                                type: 'directory',
+                                perm: 'drwxr-xr-x',
+                                user: state.systemInfo.user,
+                                group: state.systemInfo.user,
+                                mtime: getFormattedDate(),
+                                contents: {}
+                            };
+                            addOutput(`<span class="success">mkdir: created directory ‘${currentPath}’</span>`);
+                        } else if (currentDir[part].type !== 'directory') {
+                            addOutput(`<span class="error">mkdir: cannot create directory ‘${currentPath}’: File exists</span>`);
+                            success = false;
+                            break;
+                        }
+                        
+                        // 进入下一级目录
+                        currentDir = currentDir[part].contents;
+                    }
+                } else {
+                    // 只创建最后一级目录
+                    const dirName = pathParts.pop();
+                    const parentPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+                    const parentDir = getDirectoryContents(parentPath);
+                    
+                    if (!parentDir) {
+                        addOutput(`<span class="error">mkdir: cannot create directory ‘${absPath}’: No such file or directory</span>`);
+                        return;
+                    }
+                    
+                    if (parentDir[dirName]) {
+                        addOutput(`<span class="error">mkdir: cannot create directory ‘${absPath}’: File exists</span>`);
+                        return;
+                    }
+                    
+                    // 创建新目录
+                    parentDir[dirName] = {
+                        type: 'directory',
+                        perm: 'drwxr-xr-x',
+                        user: state.systemInfo.user,
+                        group: state.systemInfo.user,
+                        mtime: getFormattedDate(),
+                        contents: {}
+                    };
+                    
+                    addOutput(`<span class="success">mkdir: created directory ‘${absPath}’</span>`);
+                }
+            });
+            
+            // 更新磁盘使用情况
+            updateDiskUsageFromFilesystem();
+        }
+
+        // 8.4 rm：删除文件或目录
+        function removeFileOrDir(args) {
+            if (args.length === 0) {
+                addOutput(`<span class="error">rm: missing operand</span>`);
+                addOutput(`<span class="hint">Try 'help rm' for more information.</span>`);
+                return;
+            }
+
+            let recursive = false;
+            let force = false;
+            const itemsToRemove = [];
+
+            // 解析参数
+            args.forEach(arg => {
+                if (arg === '-r' || arg === '-R' || arg === '--recursive') {
+                    recursive = true;
+                } else if (arg === '-f' || arg === '--force') {
+                    force = true;
+                } else {
+                    itemsToRemove.push(arg);
+                }
+            });
+
+            if (itemsToRemove.length === 0) {
+                addOutput(`<span class="error">rm: missing operand</span>`);
+                return;
+            }
+
+            itemsToRemove.forEach(itemPath => {
+                const absPath = resolveAbsolutePath(itemPath);
+                const pathParts = absPath.split('/').filter(part => part);
+                
+                if (pathParts.length === 0) {
+                    addOutput(`<span class="error">rm: cannot remove ‘/’: Is a directory</span>`);
+                    return;
+                }
+
+                const itemName = pathParts.pop();
+                const parentPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+                const parentDir = getDirectoryContents(parentPath);
+                
+                if (!parentDir) {
+                    if (!force) {
+                        addOutput(`<span class="error">rm: cannot remove ‘${itemPath}’: No such file or directory</span>`);
+                    }
+                    return;
+                }
+                
+                if (!parentDir[itemName]) {
+                    if (!force) {
+                        addOutput(`<span class="error">rm: cannot remove ‘${itemPath}’: No such file or directory</span>`);
+                    }
+                    return;
+                }
+
+                const item = parentDir[itemName];
+                
+                // 处理目录
+                if (item.type === 'directory') {
+                    if (!recursive) {
+                        addOutput(`<span class="error">rm: cannot remove ‘${itemPath}’: Is a directory</span>`);
+                        return;
+                    }
+                    
+                    // 删除目录及其内容
+                    delete parentDir[itemName];
+                    addOutput(`<span class="success">rm: removed directory ‘${absPath}’</span>`);
+                } else {
+                    // 删除文件
+                    delete parentDir[itemName];
+                    addOutput(`<span class="success">rm: removed ‘${absPath}’</span>`);
+                }
+            });
+            
+            // 更新磁盘使用情况
+            updateDiskUsageFromFilesystem();
+        }
+
+        // 8.5 cp：复制文件
+        function copyFile(args) {
+            if (args.length < 2) {
+                addOutput(`<span class="error">cp: missing file operand</span>`);
+                if (args.length === 1) {
+                    addOutput(`<span class="error">cp: missing destination file operand after ‘${args[0]}’</span>`);
+                }
+                addOutput(`<span class="hint">Try 'help cp' for more information.</span>`);
+                return;
+            }
+
+            const sourcePath = args[0];
+            const destPath = args[1];
+            
+            const sourceAbs = resolveAbsolutePath(sourcePath);
+            const destAbs = resolveAbsolutePath(destPath);
+            
+            // 解析源文件
+            const sourceParts = sourceAbs.split('/').filter(part => part);
+            if (sourceParts.length === 0) {
+                addOutput(`<span class="error">cp: cannot copy directory ‘/’</span>`);
+                return;
+            }
+            
+            const sourceName = sourceParts.pop();
+            const sourceParentPath = sourceParts.length === 0 ? '/' : `/${sourceParts.join('/')}`;
+            const sourceParentDir = getDirectoryContents(sourceParentPath);
+            
+            if (!sourceParentDir || !sourceParentDir[sourceName] || sourceParentDir[sourceName].type !== 'file') {
+                addOutput(`<span class="error">cp: cannot stat ‘${sourcePath}’: No such file</span>`);
+                return;
+            }
+            
+            const sourceFile = sourceParentDir[sourceName];
+            
+            // 解析目标路径
+            const destParts = destAbs.split('/').filter(part => part);
+            let destParentDir, destFileName;
+            
+            // 检查目标是否为目录
+            const destParentPath = destParts.length === 0 ? '/' : `/${destParts.slice(0, -1).join('/')}`;
+            const destParent = getDirectoryContents(destParentPath);
+            
+            if (destParent && destParent[destParts[destParts.length - 1]] && 
+                destParent[destParts[destParts.length - 1]].type === 'directory') {
+                // 目标是目录，使用源文件名作为目标文件名
+                destParentDir = destParent[destParts[destParts.length - 1]].contents;
+                destFileName = sourceName;
+            } else {
+                // 目标是文件或新文件
+                destParentDir = getDirectoryContents(destParentPath);
+                destFileName = destParts[destParts.length - 1] || sourceName;
+            }
+            
+            if (!destParentDir) {
+                addOutput(`<span class="error">cp: cannot create regular file ‘${destPath}’: No such file or directory</span>`);
+                return;
+            }
+            
+            // 复制文件（只复制必要元数据）
+            destParentDir[destFileName] = {
+                ...sourceFile,
+                mtime: getFormattedDate() // 更新修改时间
+            };
+            
+            addOutput(`<span class="success">cp: copied ‘${sourcePath}’ to ‘${destPath}’</span>`);
+            
+            // 更新磁盘使用情况
+            updateDiskUsageFromFilesystem();
+        }
+
+        // 8.6 mv：移动或重命名
+        function moveOrRename(args) {
+            if (args.length < 2) {
+                addOutput(`<span class="error">mv: missing file operand</span>`);
+                if (args.length === 1) {
+                    addOutput(`<span class="error">mv: missing destination file operand after ‘${args[0]}’</span>`);
+                }
+                addOutput(`<span class="hint">Try 'help mv' for more information.</span>`);
+                return;
+            }
+
+            const sourcePath = args[0];
+            const destPath = args[1];
+            
+            const sourceAbs = resolveAbsolutePath(sourcePath);
+            const destAbs = resolveAbsolutePath(destPath);
+            
+            // 解析源
+            const sourceParts = sourceAbs.split('/').filter(part => part);
+            if (sourceParts.length === 0) {
+                addOutput(`<span class="error">mv: cannot move ‘/’</span>`);
+                return;
+            }
+            
+            const sourceName = sourceParts.pop();
+            const sourceParentPath = sourceParts.length === 0 ? '/' : `/${sourceParts.join('/')}`;
+            const sourceParentDir = getDirectoryContents(sourceParentPath);
+            
+            if (!sourceParentDir || !sourceParentDir[sourceName]) {
+                addOutput(`<span class="error">mv: cannot stat ‘${sourcePath}’: No such file or directory</span>`);
+                return;
+            }
+            
+            const sourceItem = sourceParentDir[sourceName];
+            
+            // 解析目标
+            const destParts = destAbs.split('/').filter(part => part);
+            let destParentDir, destName;
+            
+            // 检查目标是否为目录
+            const destParentPath = destParts.length === 0 ? '/' : `/${destParts.slice(0, -1).join('/')}`;
+            const destParent = getDirectoryContents(destParentPath);
+            
+            if (destParent && destParts.length > 0 && destParent[destParts[destParts.length - 1]] && 
+                destParent[destParts[destParts.length - 1]].type === 'directory') {
+                // 目标是目录，使用源名称
+                destParentDir = destParent[destParts[destParts.length - 1]].contents;
+                destName = sourceName;
+            } else {
+                // 目标是文件或新名称
+                destParentDir = getDirectoryContents(destParentPath);
+                destName = destParts[destParts.length - 1] || sourceName;
+            }
+            
+            if (!destParentDir) {
+                addOutput(`<span class="error">mv: cannot move to ‘${destPath}’: No such file or directory</span>`);
+                return;
+            }
+            
+            if (destParentDir[destName]) {
+                addOutput(`<span class="error">mv: cannot move ‘${sourcePath}’ to ‘${destPath}’: File exists</span>`);
+                return;
+            }
+            
+            // 移动/重命名
+            // 从源目录删除
+            delete sourceParentDir[sourceName];
+            // 添加到目标目录
+            destParentDir[destName] = {
+                ...sourceItem,
+                mtime: getFormattedDate() // 更新修改时间
+            };
+            
+            addOutput(`<span class="success">mv: moved ‘${sourcePath}’ to ‘${destPath}’</span>`);
+        }
+
+        // 8.7 touch：创建空文件
+        function createEmptyFile(args) {
+            if (args.length === 0) {
+                addOutput(`<span class="error">touch: missing file operand</span>`);
+                addOutput(`<span class="hint">Try 'help touch' for more information.</span>`);
+                return;
+            }
+
+            args.forEach(filePath => {
+                const absPath = resolveAbsolutePath(filePath);
+                const pathParts = absPath.split('/').filter(part => part);
+                
+                if (pathParts.length === 0) {
+                    addOutput(`<span class="error">touch: cannot touch ‘/’: Is a directory</span>`);
+                    return;
+                }
+
+                const fileName = pathParts.pop();
+                const parentPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+                const parentDir = getDirectoryContents(parentPath);
+                
+                if (!parentDir) {
+                    addOutput(`<span class="error">touch: cannot touch ‘${filePath}’: No such file or directory</span>`);
+                    return;
+                }
+                
+                // 提取文件扩展名
+                const extMatch = fileName.match(/\.([^.]+)$/);
+                const ext = extMatch ? extMatch[1] : '';
+                
+                if (parentDir[fileName]) {
+                    // 文件已存在，更新修改时间
+                    if (parentDir[fileName].type === 'file') {
+                        parentDir[fileName].mtime = getFormattedDate();
+                        addOutput(`<span class="success">touch: updated ‘${absPath}’</span>`);
+                    } else {
+                        addOutput(`<span class="error">touch: cannot touch ‘${filePath}’: Is a directory</span>`);
+                    }
+                } else {
+                    // 创建新文件（只存储必要元数据）
+                    parentDir[fileName] = {
+                        type: 'file',
+                        ext: ext,
+                        perm: '-rw-r--r--',
+                        user: state.systemInfo.user,
+                        group: state.systemInfo.user,
+                        size: 0, // 空文件
+                        mtime: getFormattedDate(),
+                        content: ''
+                    };
+                    
+                    addOutput(`<span class="success">touch: created ‘${absPath}’</span>`);
+                }
+            });
+            
+            // 更新磁盘使用情况
+            updateDiskUsageFromFilesystem();
+        }
+
+        // 8.8 grep：搜索文本
+        function searchText(args) {
+            if (args.length < 2) {
+                addOutput(`<span class="error">grep: missing arguments</span>`);
+                addOutput(`<span class="hint">Try 'help grep' for more information.</span>`);
+                return;
+            }
+
+            let ignoreCase = false;
+            let lineNumbers = false;
+            let pattern, filePath;
+            
+            // 解析参数
+            for (let i = 0; i < args.length; i++) {
+                if (args[i] === '-i') {
+                    ignoreCase = true;
+                } else if (args[i] === '-n') {
+                    lineNumbers = true;
+                } else if (!pattern) {
+                    pattern = args[i];
+                } else if (!filePath) {
+                    filePath = args[i];
+                }
+            }
+            
+            if (!pattern || !filePath) {
+                addOutput(`<span class="error">grep: missing pattern or file</span>`);
+                return;
+            }
+            
+            const absPath = resolveAbsolutePath(filePath);
+            const pathParts = absPath.split('/').filter(part => part);
+            
+            if (pathParts.length === 0) {
+                addOutput(`<span class="error">grep: /: Is a directory</span>`);
+                return;
+            }
+
+            const fileName = pathParts.pop();
+            const dirPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+            const dirContents = getDirectoryContents(dirPath);
+            
+            if (!dirContents || !dirContents[fileName] || dirContents[fileName].type !== 'file') {
+                addOutput(`<span class="error">grep: ${filePath}: No such file or directory</span>`);
+                return;
+            }
+
+            const file = dirContents[fileName];
+            const textExts = ['txt', 'md', 'py', 'sh', 'hosts', 'passwd', 'bashrc', 'log'];
+            if (!textExts.includes(file.ext) || !file.content) {
+                addOutput(`<span class="error">grep: ${filePath}: Cannot search non-text file</span>`);
+                return;
+            }
+            
+            // 执行搜索
+            const lines = file.content.split('\n');
+            const matches = [];
+            const searchPattern = new RegExp(pattern, ignoreCase ? 'i' : '');
+            
+            lines.forEach((line, index) => {
+                if (searchPattern.test(line)) {
+                    // 高亮匹配文本
+                    const highlightedLine = line.replace(searchPattern, match => 
+                        `<span class="success">${match}</span>`
+                    );
+                    
+                    if (lineNumbers) {
+                        matches.push(`<span class="hint">${(index + 1).toString().padEnd(4)}</span>${highlightedLine}`);
+                    } else {
+                        matches.push(highlightedLine);
+                    }
+                }
+            });
+            
+            if (matches.length === 0) {
+                addOutput(`<span class="hint">grep: No matches found for '${pattern}' in '${filePath}'</span>`);
+            } else {
+                addOutput(`<span class="info">Matches for '${pattern}' in '${filePath}':</span>`);
+                matches.forEach(match => addOutput(match));
+                addOutput(`<span class="hint">${matches.length} match(es) found</span>`);
+            }
+        }
+
+        // 8.9 chmod：修改权限
+        function changePermissions(args) {
+            if (args.length < 2) {
+                addOutput(`<span class="error">chmod: missing arguments</span>`);
+                addOutput(`<span class="hint">Try 'help chmod' for more information.</span>`);
+                return;
+            }
+
+            const mode = args[0];
+            const filePath = args[1];
+            
+            // 简单验证权限模式（数字或+/-模式）
+            if (!/^[0-7]{3}$/.test(mode) && !/^[+-][rwx]+$/.test(mode)) {
+                addOutput(`<span class="error">chmod: invalid mode: ‘${mode}’</span>`);
+                return;
+            }
+            
+            const absPath = resolveAbsolutePath(filePath);
+            const pathParts = absPath.split('/').filter(part => part);
+            
+            if (pathParts.length === 0) {
+                addOutput(`<span class="error">chmod: cannot change permissions of ‘/’</span>`);
+                return;
+            }
+
+            const fileName = pathParts.pop();
+            const dirPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+            const dirContents = getDirectoryContents(dirPath);
+            
+            if (!dirContents || !dirContents[fileName]) {
+                addOutput(`<span class="error">chmod: cannot access ‘${filePath}’: No such file or directory</span>`);
+                return;
+            }
+
+            const item = dirContents[fileName];
+            let newPerm = item.perm;
+            
+            // 处理数字模式（如755）
+            if (/^[0-7]{3}$/.test(mode)) {
+                const types = item.type === 'directory' ? 'd' : '-';
+                const owner = parseInt(mode[0], 8);
+                const group = parseInt(mode[1], 8);
+                const others = parseInt(mode[2], 8);
+                
+                newPerm = types + 
+                    (owner & 4 ? 'r' : '-') + (owner & 2 ? 'w' : '-') + (owner & 1 ? 'x' : '-') +
+                    (group & 4 ? 'r' : '-') + (group & 2 ? 'w' : '-') + (group & 1 ? 'x' : '-') +
+                    (others & 4 ? 'r' : '-') + (others & 2 ? 'w' : '-') + (others & 1 ? 'x' : '-');
+            } 
+            // 处理符号模式（如+x）
+            else if (/^[+-][rwx]+$/.test(mode)) {
+                const op = mode[0]; // + 或 -
+                const perms = mode.slice(1).split('');
+                
+                newPerm = newPerm.split('');
+                
+                // 应用权限更改（只修改所有者权限，简化实现）
+                for (let i = 1; i <= 3; i++) { // 所有者权限位置
+                    if (perms.includes('r') && i === 1) {
+                        newPerm[i] = op === '+' ? 'r' : '-';
+                    }
+                    if (perms.includes('w') && i === 2) {
+                        newPerm[i] = op === '+' ? 'w' : '-';
+                    }
+                    if (perms.includes('x') && i === 3) {
+                        newPerm[i] = op === '+' ? 'x' : '-';
+                    }
+                }
+                
+                newPerm = newPerm.join('');
+            }
+            
+            // 更新权限和修改时间
+            item.perm = newPerm;
+            item.mtime = getFormattedDate();
+            
+            addOutput(`<span class="success">chmod: changed permissions of ‘${filePath}’ to ‘${newPerm}’</span>`);
+        }
+
+        // 8.10 df：显示磁盘空间
+        function showDiskUsage(args) {
+            let humanReadable = false;
+            
+            args.forEach(arg => {
+                if (arg === '-h') {
+                    humanReadable = true;
+                }
+            });
+            
+            addOutput('<span class="info">Filesystem      Size       Used       Avail      Use%       Mounted on</span>');
+            
+            state.systemInfo.disks.forEach(disk => {
+                let size, used, avail;
+                
+                if (humanReadable) {
+                    size = formatFileSize(disk.total * 1024 * 1024); // 转换为字节后格式化
+                    used = formatFileSize(disk.used * 1024 * 1024);
+                    avail = formatFileSize(disk.avail * 1024 * 1024);
+                } else {
+                    size = `${disk.total}M`;
+                    used = `${disk.used}M`;
+                    avail = `${disk.avail}M`;
+                }
+                
+                const line = `${disk.name.padEnd(15)} ${size.padEnd(10)} ${used.padEnd(10)} ${avail.padEnd(10)} ${disk.use.padEnd(10)} ${disk.mount}`;
+                addOutput(line);
+            });
+        }
+
+        // 8.11 du：显示目录大小
+        function showDirectorySize(args) {
+            let humanReadable = false;
+            let summaryOnly = false;
+            let targetPaths = [state.currentDir];
+            
+            // 解析参数
+            args.forEach(arg => {
+                if (arg === '-h') {
+                    humanReadable = true;
+                } else if (arg === '-s') {
+                    summaryOnly = true;
+                } else {
+                    // 如果提供了路径参数，替换默认路径
+                    if (targetPaths.length === 1 && targetPaths[0] === state.currentDir) {
+                        targetPaths = [];
+                    }
+                    targetPaths.push(arg);
+                }
+            });
+            
+            // 处理每个目标路径
+            targetPaths.forEach(targetPath => {
+                const absPath = resolveAbsolutePath(targetPath);
+                const pathParts = absPath.split('/').filter(part => part);
+                
+                // 特殊处理根目录
+                if (absPath === '/') {
+                    if (summaryOnly) {
+                        addOutput(`0B       ${targetPath}`);
+                    } else {
+                        addOutput(`0B       total`);
+                    }
+                    return;
+                }
+                
+                // 获取目标项
+                let targetItem = state.fileSystem;
+                let currentPath = '';
+                let isValid = true;
+                
+                // 遍历路径部分找到目标项
+                for (const part of pathParts) {
+                    if (!targetItem[part]) {
+                        addOutput(`<span class="error">du: cannot access ‘${targetPath}’: No such file or directory</span>`);
+                        isValid = false;
+                        break;
+                    }
+                    currentPath += `/${part}`;
+                    targetItem = targetItem[part];
+                }
+                
+                if (!isValid) return;
+                
+                // 计算大小的递归函数
+                const calculateSize = (item) => {
+                    if (item.type === 'file') {
+                        return item.size || 0;
+                    }
+                    
+                    // 目录本身大小不计入，仅计算内容
+                    let total = 0;
+                    
+                    // 递归计算所有子项大小
+                    for (const childName in item.contents) {
+                        const child = item.contents[childName];
+                        if (child.type === 'directory') {
+                            total += calculateSize(child);
+                        } else {
+                            total += child.size || 0;
+                        }
+                    }
+                    
+                    return total;
+                };
+                
+                // 显示内容的递归函数
+                const displayContents = (item, path, parentTotal = 0) => {
+                    let totalSize = 0;
+                    
+                    // 先处理文件
+                    const files = [];
+                    const dirs = [];
+                    
+                    // 分离文件和目录以便排序
+                    for (const name in item.contents) {
+                        const child = item.contents[name];
+                        if (child.type === 'directory') {
+                            dirs.push(name);
+                        } else {
+                            files.push(name);
+                        }
+                    }
+                    
+                    // 先显示文件
+                    files.sort().forEach(name => {
+                        const child = item.contents[name];
+                        const childSize = child.size || 0;
+                        totalSize += childSize;
+                        
+                        const displaySize = humanReadable ? formatFileSize(childSize) : childSize.toString();
+                        const childPath = path === '/' ? `/${name}` : `${path}/${name}`;
+                        
+                        addOutput(`${displaySize.padEnd(8)} ${childPath}`);
+                    });
+                    
+                    // 再显示目录（递归）
+                    dirs.sort().forEach(name => {
+                        const child = item.contents[name];
+                        const childPath = path === '/' ? `/${name}` : `${path}/${name}`;
+                        const childSize = calculateSize(child);
+                        
+                        totalSize += childSize;
+                        displayContents(child, childPath, totalSize);
+                    });
+                    
+                    // 如果不是根目录，显示目录本身大小
+                    if (path !== '/') {
+                        const displaySize = humanReadable ? formatFileSize(totalSize) : totalSize.toString();
+                        addOutput(`${displaySize.padEnd(8)} ${path}`);
+                    }
+                    
+                    return totalSize;
+                };
+                
+                // 计算总大小
+                const totalSize = calculateSize(targetItem);
+                const displaySize = humanReadable ? formatFileSize(totalSize) : totalSize.toString();
+                
+                // 显示结果
+                if (summaryOnly || targetItem.type === 'file') {
+                    // 只显示总计或文件大小
+                    addOutput(`${displaySize.padEnd(8)} ${targetPath}`);
+                } else {
+                    // 递归显示所有内容
+                    if (targetPaths.length > 1) {
+                        addOutput(`<span class="hint">${targetPath}:</span>`);
+                    }
+                    const calculatedTotal = displayContents(targetItem, absPath);
+                    addOutput(`${formatFileSize(calculatedTotal).padEnd(8)} total`);
+                }
+            });
+        }
+
+        // 8.12 man：显示命令手册
+        function showManual(args) {
+            if (args.length === 0) {
+                addOutput(`<span class="error">man: What manual page do you want?</span>`);
+                addOutput(`<span class="hint">Try 'man man' for more information.</span>`);
+                return;
+            }
+            
+            const cmd = args[0].toLowerCase();
+            const helpInfo = getCommandHelp(cmd);
+            
+            if (!helpInfo) {
+                addOutput(`<span class="error">No manual entry for ${cmd}</span>`);
+                return;
+            }
+            
+            // 模拟man命令的手册页格式
+            addOutput(`<span class="info">${helpInfo.name.toUpperCase()}(${1})${' '.repeat(60 - helpInfo.name.length - 4)}${helpInfo.name.toUpperCase()}(${1})</span>`);
+            addOutput('');
+            addOutput(`<span class="hint">NAME</span>`);
+            addOutput(`   ${helpInfo.name} - ${helpInfo.description}`);
+            addOutput('');
+            addOutput(`<span class="hint">SYNOPSIS</span>`);
+            addOutput(`   <span class="cmd">${helpInfo.syntax}</span>`);
+            addOutput('');
+            
+            if (helpInfo.options && helpInfo.options.length > 0) {
+                addOutput(`<span class="hint">OPTIONS</span>`);
+                helpInfo.options.forEach(opt => {
+                    addOutput(`   <span class="option">${opt.flag}</span>`);
+                    addOutput(`       ${opt.description}`);
+                });
+                addOutput('');
+            }
+            
+            if (helpInfo.examples && helpInfo.examples.length > 0) {
+                addOutput(`<span class="hint">EXAMPLES</span>`);
+                helpInfo.examples.forEach(ex => {
+                    addOutput(`   <span class="example">$ ${ex}</span>`);
+                });
+                addOutput('');
+            }
+
+            // 显示nano特有的快捷键说明
+            if (cmd === 'nano' && helpInfo.notes) {
+                addOutput(`<span class="hint">NOTES</span>`);
+                helpInfo.notes.forEach(note => {
+                    addOutput(`   ${note}`);
+                });
+                addOutput('');
+            }
+            
+            addOutput(`<span class="hint">SEE ALSO</span>`);
+            addOutput(`   help(1)`);
+            addOutput('');
+            addOutput(`<span class="info">Arch Terminal Simulator Manual</span>`);
+        }
+
+        // 8.13 cd：切换目录
+        function changeDirectory(targetPath) {
+            const absPath = resolveAbsolutePath(targetPath);
+            const dirContents = getDirectoryContents(absPath);
+
+            if (!dirContents) {
+                addOutput(`<span class="error">cd: ${targetPath}: No such file or directory</span>`);
+                return;
+            }
+
+            state.currentDir = absPath;
+            state.elements.prompt.textContent = getPromptText();
+            addOutput('');
+        }
+
+        // 8.14 pwd：显示当前路径
+        function showPwd() {
+            addOutput(state.currentDir);
+        }
+
+        // 8.15 cat：查看文件内容
+        function showFile(args) {
+            if (args.length === 0) {
+                addOutput(`<span class="error">cat: missing operand</span>`);
+                addOutput(`<span class="hint">Try 'help cat' for more information.</span>`);
+                return;
+            }
+
+            const filePath = args[0];
+            const absPath = resolveAbsolutePath(filePath);
+            const pathParts = absPath.split('/').filter(part => part);
+
+            if (pathParts.length === 0) {
+                addOutput(`<span class="error">cat: /: Is a directory</span>`);
+                return;
+            }
+
+            const fileName = pathParts.pop();
+            const dirPath = pathParts.length === 0 ? '/' : `/${pathParts.join('/')}`;
+            const dirContents = getDirectoryContents(dirPath);
+
+            if (!dirContents || !dirContents[fileName] || dirContents[fileName].type !== 'file') {
+                addOutput(`<span class="error">cat: ${filePath}: No such file or directory</span>`);
+                addOutput(`<span class="hint">Files in current directory (${dirPath}):</span>`);
+                listDirectory(['.', '-l']);
+                return;
+            }
+
+            const file = dirContents[fileName];
+            const textExts = ['txt', 'md', 'py', 'sh', 'hosts', 'passwd', 'bashrc', 'log'];
+            if (!textExts.includes(file.ext) || !file.content) {
+                addOutput(`<span class="error">cat: ${filePath}: Cannot display non-text file</span>`);
+                return;
+            }
+
+            file.content.split('\n').forEach(line => addOutput(line));
+        }
+
+        // 8.16 neofetch：美化系统信息显示
+        function showNeofetch() {
+            const logo = [
+                '<span style="color:#00afff">               .-/+oossssoo+/-.               </span>',
+                '<span style="color:#00afff">           `:+ssssssssssssssssss+:`           </span>',
+                '<span style="color:#00afff">         -+ssssssssssssssssssyyssss+-         </span>',
+                '<span style="color:#00afff">       .ossssssssssssssssssdMMMNysssso.       </span>',
+                '<span style="color:#00afff">      /ssssssssssshdmmNNmmyNMMMMhssssss/      </span>',
+                '<span style="color:#00afff">     +ssssssssshmydMMMMMMMNddddyssssssss+     </span>',
+                '<span style="color:#00afff">    /sssssssshNMMMyhhyyyyhmNMMMNhssssssss/    </span>',
+                '<span style="color:#00afff">   .ssssssssdMMMNhssssssssshNMMMdssssssss.   </span>'
+            ];
+
+            // 显示最新的系统信息
+            const info = [
+                `<b>${state.systemInfo.user}@${state.systemInfo.hostname}</b>`,
+                '---------------------------',
+                `<span class="info">OS:</span> ${state.systemInfo.os}`,
+                `<span class="info">Kernel:</span> ${state.systemInfo.kernel}`,
+                `<span class="info">Uptime:</span> ${state.systemInfo.uptime}`,
+                `<span class="info">Packages:</span> ${state.systemInfo.packages}`,
+                `<span class="info">Shell:</span> ${state.systemInfo.shell}`,
+                `<span class="info">Resolution:</span> 1920x1080`,
+                `<span class="info">DE:</span> GNOME 46.1`,
+                `<span class="info">WM:</span> Mutter`,
+                `<span class="info">CPU:</span> ${state.systemInfo.cpu}`,
+                `<span class="info">GPU:</span> ${state.systemInfo.gpu}`,
+                `<span class="info">Memory:</span> ${state.systemInfo.memory}`
+            ];
+
+            const neofetchDiv = document.createElement('div');
+            neofetchDiv.style.display = 'flex';
+            neofetchDiv.style.flexWrap = 'wrap';
+            neofetchDiv.style.gap = '20px';
+            neofetchDiv.style.margin = '4px 0';
+
+            const logoCol = document.createElement('div');
+            logoCol.innerHTML = logo.join('<br>');
+            const infoCol = document.createElement('div');
+            infoCol.innerHTML = info.join('<br>');
+
+            neofetchDiv.appendChild(logoCol);
+            neofetchDiv.appendChild(infoCol);
+
+            state.elements.currentInput.remove();
+            state.elements.terminalContent.appendChild(neofetchDiv);
+            state.elements.terminalContent.appendChild(state.elements.currentInput);
+            state.elements.commandInput.focus();
+            scrollToBottom();
+        }
+
+        // 8.17 clear：清空终端
+        function clearTerminal() {
+            const content = state.elements.terminalContent;
+            const welcomeLines = Array.from(content.children).slice(0, 3);
+            
+            content.innerHTML = '';
+            welcomeLines.forEach(line => content.appendChild(line));
+            content.appendChild(state.elements.currentInput);
+            
+            state.elements.commandInput.focus();
+            content.scrollTop = 0;
+        }
+
+        // 8.18 echo：显示文本
+        function showEcho(args) {
+            const text = args.join(' ');
+            const parsedText = text.replace(/\\n/g, '<br>');
+            addOutput(parsedText);
+        }
+
+        // 8.19 whoami：显示当前用户
+        function showWhoami() {
+            addOutput(state.systemInfo?.user || 'user');
+        }
+
+        // 9. 核心工具函数：解析绝对路径
+        function resolveAbsolutePath(path) {
+            if (!path) return state.currentDir;
+
+            if (path === '~') {
+                return `/home/${state.systemInfo?.user || 'user'}`;
+            }
+
+            if (path.startsWith('~/')) {
+                return `/home/${state.systemInfo?.user || 'user'}/${path.slice(2)}`;
+            }
+
+            const isAbsolute = path.startsWith('/');
+            let baseParts = isAbsolute 
+                ? [] 
+                : state.currentDir.split('/').filter(part => part);
+            const pathParts = path.split('/').filter(part => part && part !== '.');
+
+            pathParts.forEach(part => {
+                if (part === '..') {
+                    if (baseParts.length > 0) baseParts.pop();
+                } else {
+                    baseParts.push(part);
+                }
+            });
+
+            return baseParts.length === 0 ? '/' : `/${baseParts.join('/')}`;
+        }
+
+        // 10. 核心工具函数：获取目录内容
+        function getDirectoryContents(absPath) {
+            const pathParts = absPath.split('/').filter(part => part);
+            let current = state.fileSystem;
+
+            for (const part of pathParts) {
+                if (!current[part] || current[part].type !== 'directory') {
+                    return null;
+                }
+                current = current[part].contents;
+            }
+
+            return current;
+        }
+
+        // 辅助函数：格式化文件大小为人类可读格式（B/KB/MB）
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return `${bytes}B`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+        }
+
+        // 辅助函数：获取当前格式化日期（如Jun 13 10:30）
+        function getFormattedDate() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const date = new Date();
+            
+            const month = months[date.getMonth()];
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${month} ${day} ${hours}:${minutes}`;
+        }
+
+        // 辅助函数：获取过去某天数的格式化日期
+        function getPastFormattedDate(daysAgo) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const date = new Date();
+            date.setDate(date.getDate() - daysAgo);
+            
+            const month = months[date.getMonth()];
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${month} ${day} ${hours}:${minutes}`;
+        }
+
+        // 页面加载完成后初始化终端
+        window.onload = initTerminal;
+    </script>
+</body>
+</html>

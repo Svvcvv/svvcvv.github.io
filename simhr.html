@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR智能评估系统</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 自定义Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        success: '#52C41A',
+                        warning: '#FAAD14',
+                        danger: '#FF4D4F',
+                        neutral: {
+                            100: '#F5F7FA',
+                            200: '#E4E6EB',
+                            300: '#C9CDD4',
+                            700: '#4E5969',
+                            800: '#272E3B',
+                            900: '#1D2129'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 10px 30px rgba(22, 93, 255, 0.12)',
+                    }
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+            .card-transition {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .pulse-animation {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.03); }
+                100% { transform: scale(1); }
+            }
+            .opacity-0 {
+                opacity: 0;
+            }
+            .pointer-events-none {
+                pointer-events: none;
+            }
+        }
+        #loadingIndicator {
+            transition: opacity 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-neutral-100 font-inter min-h-screen flex flex-col">
+    <div id="loadingIndicator" class="fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center">
+        <div class="text-primary text-4xl mb-4">
+            <i class="fa fa-database fa-spin" aria-hidden="true"></i>
+        </div>
+        <h3 class="text-neutral-800 text-xl mb-2">加载评估数据中...</h3>
+        <p id="loadingProgressText" class="text-neutral-600 mb-4">0%</p>
+        <div class="w-64 h-2 bg-neutral-200 rounded-full overflow-hidden">
+            <div id="loadingProgressBar" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p id="loadingError" class="text-danger mt-4 hidden"></p>
+    </div>
+    <!-- 联系作者浮动按钮 -->
+    <div class="fixed top-6 right-6 z-50">
+        <a href="https://www.simcompanies.com/zh-cn/company/0/AUZC/" 
+           class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-full shadow-lg card-transition
+                  flex items-center gap-2 group">
+            <i class="fa fa-envelope-o" aria-hidden="true"></i>
+            <span class="font-medium">联系作者</span>
+            <i class="fa fa-arrow-right ml-1 text-xs opacity-0 group-hover:opacity-100 card-transition"></i>
+        </a>
+    </div>
+
+    <main class="container mx-auto px-4 py-10 flex-grow max-w-6xl">
+        <!-- 标题区域 -->
+        <div class="text-center mb-10">
+            <h1 class="text-[clamp(1.8rem,5vw,3rem)] font-bold text-neutral-800 mb-2">
+                一种基于SC HR评语的SC高管评估系统
+                <span class="inline-block ml-2 text-primary text-lg font-normal">v1.4</span>
+            </h1>
+            <p class="text-neutral-600 max-w-2xl mx-auto">通过JS算法对往期HR评语分析，快速匹配候选人与核心岗位的适配度</p>
+        </div>
+        
+        <!-- 说明栏 -->
+        <div class="bg-white rounded-xl shadow-card p-6 mb-8 card-transition hover:shadow-card-hover">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="flex flex-col">
+                    <div class="flex items-center mb-3">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                            <i class="fa fa-info" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="font-semibold text-neutral-800">使用声明</h3>
+                    </div>
+                    <p class="text-neutral-600 text-sm">免费招聘匹配工具，专为SC玩家高效筛选候选人设计，不介意转载</p>
+                    <p class="text-neutral-600 text-sm">样本更新日期:2025/6</p>
+                </div>
+                
+                <div class="flex flex-col border-t md:border-t-0 md:border-x border-neutral-200 md:px-6 pt-6 md:pt-0">
+                    <div class="flex items-center mb-3">
+                        <div class="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success mr-3">
+                            <i class="fa fa-star" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="font-semibold text-neutral-800">评分规则</h3>
+                    </div>
+                    <ul class="text-neutral-600 text-sm space-y-1">
+                        <li><span class="text-danger">0-0.75</span>：不建议考虑</li>
+                        <li><span class="text-warning">0.75-1</span>：可以考虑</li>
+                        <li><span class="text-success">1-1.5</span>：建议考虑</li>
+                        <li><span class="text-primary">1.5以上</span>：直接入职</li>
+                    </ul>
+                </div>
+                
+                <div class="flex flex-col">
+                    <div class="flex items-center mb-3">
+                        <div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mr-3">
+                            <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="font-semibold text-neutral-800">问题反馈</h3>
+                    </div>
+                    <p class="text-neutral-600 text-sm">发现bug或有优化建议？请通过右上角按钮联系作者反馈</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 评语匹配区域 -->
+        <div class="bg-white rounded-xl shadow-card p-6 mb-8 card-transition hover:shadow-card-hover">
+            <h2 class="text-xl font-semibold text-neutral-800 mb-5 flex items-center">
+                <i class="fa fa-commenting-o text-primary mr-2" aria-hidden="true"></i>
+                评语匹配
+            </h2>
+            <div class="space-y-5">
+                <div>
+                    <label for="hrComment" class="block text-sm font-medium text-neutral-700 mb-2">请输入HR评语</label>
+                    <textarea id="hrComment" rows="4" 
+                        class="w-full p-4 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none resize-none transition-all" 
+                        placeholder="例如：Evelyn Biondi的所有推荐信都核实无误。他/她的教授说如果我们不雇用他/她，那我们就是愚蠢的。"></textarea>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="matchBtn" class="flex-1 bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-medium card-transition flex items-center justify-center gap-2">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <span>开始匹配</span>
+                    </button>
+                    <button id="clearBtn" class="flex-1 bg-white border border-danger text-danger hover:bg-danger/5 px-6 py-3 rounded-lg font-medium card-transition flex items-center justify-center gap-2">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        <span>清空评语</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 匹配结果展示 -->
+        <div id="resultArea" class="hidden">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="text-xl font-semibold text-neutral-800 flex items-center">
+                    <i class="fa fa-bar-chart text-primary mr-2" aria-hidden="true"></i>
+                    匹配结果分析
+                </h2>
+                <span id="resultTimestamp" class="text-xs text-neutral-500"></span>
+            </div>
+            
+            <!-- 评分卡片区域 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- 结果卡片将通过JS动态生成 -->
+            </div>
+            
+            <!-- 相似评语参考 -->
+            <div id="similarCommentsContainer" class="bg-white rounded-xl shadow-card p-6 card-transition hover:shadow-card-hover">
+                <h3 class="text-lg font-semibold text-neutral-800 mb-4 flex items-center">
+                    <i class="fa fa-history text-primary mr-2" aria-hidden="true"></i>
+                    相似评语参考（前3名）
+                </h3>
+                <div id="topSamplesContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- 样本卡片将通过JS动态生成 -->
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                    <p class="text-sm text-neutral-600">数据基于历史评估样本分析</p>
+                    <span class="text-xs text-neutral-500">样本更新日期:2025/6</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部统计栏 -->
+    <footer class="bg-white border-t border-neutral-200 py-4 mt-10">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 text-neutral-700">
+                <i class="fa fa-line-chart text-primary" aria-hidden="true"></i>
+                <span class="font-medium">累计帮助(您)</span>
+                <span id="assessmentCount" class="text-xl font-bold text-primary mx-1 pulse-animation">0</span>
+                <span class="font-medium">次企业招聘决策</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/comp.js"></script>
+    <script>
+        // 页面加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化计数器
+            const initialCount = parseInt(localStorage.getItem('assessmentCount') || 0);
+            document.getElementById('assessmentCount').textContent = initialCount;
+            
+            // 启动初始化
+            window.talentApp.initialize();
+        });
+
+        // 清空评语
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('hrComment').value = '';
+            document.getElementById('hrComment').focus();
+        });
+
+        // 评语匹配处理
+        document.getElementById('matchBtn').addEventListener('click', async () => {
+            const comment = document.getElementById('hrComment').value.trim();
+            if (!comment) {
+                alert('请输入HR评语内容');
+                document.getElementById('hrComment').focus();
+                return;
+            }
+
+            // 显示加载状态
+            const matchBtn = document.getElementById('matchBtn');
+            const originalBtnText = matchBtn.innerHTML;
+            matchBtn.disabled = true;
+            matchBtn.innerHTML = '<i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i><span>分析中...</span>';
+
+            try {
+                const result = await window.talentApp.matchComment(comment);
+                if (result.success) {
+                    // 更新使用次数
+                    const count = parseInt(localStorage.getItem('assessmentCount') || 0) + 1;
+                    localStorage.setItem('assessmentCount', count);
+                    document.getElementById('assessmentCount').textContent = count;
+                    
+                    // 显示结果
+                    displayResults(result.data);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('匹配失败，请重试');
+                console.error(error);
+            } finally {
+                // 恢复按钮状态
+                matchBtn.disabled = false;
+                matchBtn.innerHTML = originalBtnText;
+            }
+        });
+
+        // 显示匹配结果
+        function displayResults(data) {
+            const resultArea = document.getElementById('resultArea');
+            const resultGrid = resultArea.querySelector('.grid');
+            const timestamp = new Date().toLocaleString();
+            document.getElementById('resultTimestamp').textContent = `分析时间: ${timestamp}`;
+            
+            resultArea.classList.remove('hidden');
+            resultGrid.innerHTML = '';
+            
+            // 职位配置（增加图标和描述增强可读性）
+            const positions = [
+                { code: 'COO', name: '首席运营官', icon: 'fa-cogs', desc: '侧重运营管理与执行' },
+                { code: 'CFO', name: '首席财务官', icon: 'fa-money', desc: '侧重财务分析与管控' },
+                { code: 'CMO', name: '首席营销官', icon: 'fa-bullhorn', desc: '侧重市场策略与推广' },
+                { code: 'CTO', name: '首席技术官', icon: 'fa-microchip', desc: '侧重技术研发与架构' }
+            ];
+            
+            positions.forEach(pos => {
+                const score = data.scores[pos.code];
+                const percentile = data.percentiles[pos.code];
+                let statusClass = '';
+                let statusText = '';
+                let progressClass = '';
+
+                if (score >= 1.5) {
+                    statusClass = 'bg-blue-50 border-l-4 border-primary';
+                    statusText = '直接入职';
+                    progressClass = 'bg-primary';
+                } else if (score >= 1) {
+                    statusClass = 'bg-green-50 border-l-4 border-success';
+                    statusText = '建议考虑';
+                    progressClass = 'bg-success';
+                } else if (score >= 0.75) {
+                    statusClass = 'bg-yellow-50 border-l-4 border-warning';
+                    statusText = '可以考虑';
+                    progressClass = 'bg-warning';
+                } else {
+                    statusClass = 'bg-red-50 border-l-4 border-danger';
+                    statusText = '不建议考虑';
+                    progressClass = 'bg-danger';
+                }
+
+                // 计算进度条百分比（映射到0-100）
+                const progressPercent = Math.min(Math.max(score / 2 * 100, 0), 100);
+                
+                resultGrid.innerHTML += `
+                    <div class="score-card ${statusClass} p-5 rounded-xl shadow-sm card-transition hover:shadow-md">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-neutral-800">${pos.name}</h3>
+                                <p class="text-xs text-neutral-500">${pos.desc}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center text-primary shadow-sm">
+                                <i class="fa ${pos.icon}" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium text-neutral-700">匹配得分</span>
+                                <span class="text-2xl font-bold ${score >= 0.75 ? 'text-primary' : 'text-neutral-600'}">${score.toFixed(2)}</span>
+                            </div>
+                            <div class="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                <div class="${progressClass} h-full rounded-full card-transition" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-600">
+                                <i class="fa fa-users mr-1" aria-hidden="true"></i>
+                                超过 ${percentile}% 候选人
+                            </div>
+                            <span class="text-xs font-medium px-2 py-1 rounded-full ${
+                                score >= 1.5 ? 'bg-primary/10 text-primary' :
+                                score >= 1 ? 'bg-success/10 text-success' :
+                                score >= 0.75 ? 'bg-warning/10 text-warning' :
+                                'bg-danger/10 text-danger'
+                            }">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 显示相似度前三的样本
+            const topSamplesContainer = document.getElementById('topSamplesContainer');
+            topSamplesContainer.innerHTML = '';
+            
+            if (data.topSamples && data.topSamples.length > 0) {
+                data.topSamples.forEach((sample, index) => {
+                    const rankClass = index === 0 ? 'bg-yellow-50 border-yellow-200' : 
+                                      index === 1 ? 'bg-gray-50 border-gray-200' : 
+                                      'bg-amber-50 border-amber-200';
+                    const rankIcon = index === 0 ? 'fa-trophy text-yellow-500' : 
+                                      index === 1 ? 'fa-medal text-gray-500' : 
+                                      'fa-award text-amber-500';
+                    
+                    topSamplesContainer.innerHTML += `
+                        <div class="sample-card bg-white border rounded-lg overflow-hidden card-transition hover:shadow-md ${rankClass}">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center">
+                                        <i class="fa ${rankIcon} text-lg mr-2" aria-hidden="true"></i>
+                                        <span class="font-medium">TOP ${index + 1}</span>
+                                    </div>
+                                    <span class="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                        相似度: ${(sample.similarity * 100).toFixed(1)}%
+                                    </span>
+                                </div>
+                                <div class="bg-neutral-50 p-3 rounded-lg mb-3">
+                                    <p class="text-neutral-700 text-sm leading-relaxed">${sample.comment}</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="bg-neutral-50 p-2 rounded text-center">
+                                        <div class="text-neutral-500">COO评分</div>
+                                        <div class="font-bold ${sample.scores.COO >= 1.5 ? 'text-primary' : sample.scores.COO >= 1 ? 'text-success' : 'text-warning'}">${sample.scores.COO.toFixed(2)}</div>
+                                    </div>
+                                    <div class="bg-neutral-50 p-2 rounded text-center">
+                                        <div class="text-neutral-500">CFO评分</div>
+                                        <div class="font-bold ${sample.scores.CFO >= 1.5 ? 'text-primary' : sample.scores.CFO >= 1 ? 'text-success' : 'text-warning'}">${sample.scores.CFO.toFixed(2)}</div>
+                                    </div>
+                                    <div class="bg-neutral-50 p-2 rounded text-center">
+                                        <div class="text-neutral-500">CMO评分</div>
+                                        <div class="font-bold ${sample.scores.CMO >= 1.5 ? 'text-primary' : sample.scores.CMO >= 1 ? 'text-success' : 'text-warning'}">${sample.scores.CMO.toFixed(2)}</div>
+                                    </div>
+                                    <div class="bg-neutral-50 p-2 rounded text-center">
+                                        <div class="text-neutral-500">CTO评分</div>
+                                        <div class="font-bold ${sample.scores.CTO >= 1.5 ? 'text-primary' : sample.scores.CTO >= 1 ? 'text-success' : 'text-warning'}">${sample.scores.CTO.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex justify-between text-xs text-neutral-500">
+                                    <span>平均技能: ${sample.avgSkills}</span>
+                                    <span>样本数: ${sample.samples}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                topSamplesContainer.innerHTML = '<p class="text-neutral-600 text-center py-4">无相似历史评语</p>';
+            }
+            
+            // 平滑滚动到结果区域
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

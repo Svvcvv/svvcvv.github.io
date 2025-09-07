@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooteater - Home</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="icons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb', // 主色调：信任蓝
+                        secondary: '#f59e0b', // 辅助色：活力橙
+                        neutral: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                        code: ['Cascadia Code', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1);
+            }
+            .btn-pop {
+                transition: all 0.2s ease;
+            }
+            .btn-pop:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            }
+            .control-hover {
+                @apply transition-all duration-300 hover:bg-primary/90 hover:scale-105;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-inter bg-neutral-50 text-neutral-800 min-h-screen">
+    <!-- Navigation - 与视频播放器保持一致 -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-home text-primary text-xl"></i>
+                <span class="font-semibold text-lg">Rooteater.netlify.app</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1 md:gap-3">
+                <a href="index.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Home</a>
+                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
+                <a href="SCMN.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
+                <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content - 调整为与第二个页面相同的最大宽度 -->
+    <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
+
+        <!-- 主要内容区域 - 移除max-w-3xl限制，使其使用main容器的max-w-6xl宽度 -->
+        <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover p-6 md:p-8 mx-auto">
+            <!-- 计时器面板 -->
+            <div class="timer-panel bg-neutral-50 p-6 rounded-lg mb-8">
+                <input type="text" id="timeValue" value="0s" readonly 
+                    class="text-center text-[clamp(1.5rem,3vw,2rem)] py-4 border-2 border-primary rounded-lg w-full max-w-xs mx-auto bg-white font-semibold text-neutral-800">
+                
+                <div class="flex flex-wrap justify-center gap-4 mt-6">
+                    <button onclick="startTimer()" 
+                        class="bg-primary text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
+                        <i class="fa fa-play"></i> Start
+                    </button>
+                    <button onclick="stopTimer()" 
+                        class="bg-neutral-700 text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
+                        <i class="fa fa-pause"></i> Pause
+                    </button>
+                    <button onclick="resetTimer()" 
+                        class="bg-secondary text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
+                        <i class="fa fa-refresh"></i> Restart
+                    </button>
+                </div>
+            </div>
+
+            <!-- 高亮文本区域 -->
+            <div class="bg-blue-50 border-l-4 border-primary p-4 rounded mb-8">
+                <p class="text-neutral-800 italic">Learning HTML started on January 13, 2025 at 18:48</p>
+            </div>
+
+            <!-- 日期时间显示 -->
+            <div id="datetime" class="text-neutral-600 text-center mb-6 py-2 border-b border-t border-neutral-200"></div>
+            
+            <!-- 图片 - 现在会随容器宽度自适应，达到更宽的显示效果 -->
+            <div class="rounded-lg overflow-hidden mb-6 shadow-sm">
+                <img src="https://tu.ltyuanfang.cn/api/fengjing.php" alt="Beautiful landscape image" class="w-full h-auto object-cover">
+            </div>
+
+            <!-- 评论区 -->
+            <div class="giscus font-code text-xs transition-all duration-800 cursor-crosshair mt-8">
+                <!-- <script src="https://giscus.app/client.js"
+                    data-repo="ShenBBBBTTTT/ShenBBBBTTTT.github.io"
+                    data-repo-id="R_kgDONpj9rg"
+                    data-category="General"
+                    data-category-id="DIC_kwDONpj9rs4CoFkj"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="top"
+                    data-theme="light"
+                    data-lang="zh-CN"
+                    crossorigin="anonymous"
+                    async>
+                </script> -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer - 与视频播放器保持一致 -->
+    <footer class="bg-neutral-800 text-neutral-300 py-6 mt-20">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm">
+            <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--RootEater.netlify.app</p>
+            <a href = "https://67f1f3e17229500008d81184--rooteater.netlify.app/">A snapshot of the website taken on April 6, 2025 ↗</a>
+            <p class="text-neutral-500">© 2025 All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <script>
+        // 计时器逻辑保持不变
+        let second = 0;
+        let clock;
+
+        function resetTimer() {
+            clearInterval(clock);
+            second = 0;
+            document.getElementById('timeValue').value = second + 's';
+        }
+
+        function startTimer() {
+            clock = setInterval(() => {
+                second++;
+                document.getElementById('timeValue').value = second + 's';
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(clock);
+        }
+
+        // 时间显示功能
+        function updateTime() {
+            const date = new Date();
+            document.getElementById("datetime").textContent = date.toLocaleString();
+        }
+        setInterval(updateTime, 1000);
+        window.onload = updateTime;
+
+        // 导航栏滚动效果 - 与视频播放器一致
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow');
+                nav.classList.remove('shadow-sm');
+            } else {
+                nav.classList.remove('shadow');
+                nav.classList.add('shadow-sm');
+            }
+        });
+    </script>
+</body>
+</html>

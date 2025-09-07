@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>凸透镜成像原理模拟器</title>
+  <script src="js/taiwindcss.js"></script>
+   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="js/chart.umd.css"></script>
+  <link href="js/fonts.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#10B981',
+            accent: '#F59E0B',
+            dark: '#1F2937',
+            light: '#F9FAFB'
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .glass {
+        backdrop-filter: blur(10px);
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+      .slider-thumb::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #3B82F6;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+      }
+      .slider-thumb::-webkit-slider-thumb:hover {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
+      }
+      .formula-highlight {
+        @apply bg-yellow-100 px-2 py-1 rounded font-medium;
+      }
+      .lens-gradient {
+        background: linear-gradient(90deg, rgba(148,187,233,0.2) 0%, rgba(238,174,202,0.2) 50%, rgba(148,187,233,0.2) 100%);
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="sticky top-0 z-50 glass border-b border-gray-200">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-lightbulb-o text-primary text-2xl"></i>
+        <h1 class="text-xl md:text-2xl font-bold text-dark">凸透镜成像原理模拟器</h1>
+      </div>
+      <nav class="hidden md:flex space-x-6">
+        <a href="#simulation" class="text-gray-700 hover:text-primary transition-colors duration-200">模拟器</a>
+        <a href="#theory" class="text-gray-700 hover:text-primary transition-colors duration-200">光学原理</a>
+        <a href="#formula" class="text-gray-700 hover:text-primary transition-colors duration-200">公式推导</a>
+        <a href="#applications" class="text-gray-700 hover:text-primary transition-colors duration-200">应用实例</a>
+      </nav>
+      <button class="md:hidden text-gray-700">
+        <i class="fa fa-bars text-xl"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-8">
+    <!-- 介绍部分 -->
+    <section class="mb-12 text-center max-w-4xl mx-auto">
+      <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-4">探索凸透镜成像的奥秘</h2>
+      <p class="text-gray-600 mb-6 text-lg">通过这个交互式模拟器，你可以直观理解物距(u)、像距(v)和焦距(f)之间的关系，以及它们如何影响成像的性质。</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-md flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <i class="fa fa-arrows-h text-primary"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-dark">物距(u)</h3>
+            <p class="text-sm text-gray-500">物体到透镜的距离</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-md flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+            <i class="fa fa-arrows-h text-secondary"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-dark">像距(v)</h3>
+            <p class="text-sm text-gray-500">像到透镜的距离</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-md flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+            <i class="fa fa-dot-circle-o text-accent"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-dark">焦距(f)</h3>
+            <p class="text-sm text-gray-500">焦点到透镜的距离</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模拟器部分 -->
+    <section id="simulation" class="mb-16 bg-white rounded-xl shadow-xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
+      <div class="p-6 md:p-8">
+        <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+          <i class="fa fa-sliders text-primary mr-3"></i>交互式光路模拟器
+        </h3>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- 控制面板 -->
+          <div class="lg:col-span-1 bg-gray-50 p-6 rounded-lg">
+            <h4 class="text-lg font-semibold text-dark mb-4 flex items-center">
+              <i class="fa fa-cog text-primary mr-2"></i>参数控制
+            </h4>
+            
+            <div class="space-y-6">
+              <div>
+                <label for="focalLength" class="block text-sm font-medium text-gray-700 mb-2">焦距 (f)</label>
+                <div class="flex items-center space-x-2">
+                  <input type="range" id="focalLength" min="5" max="20" value="10" step="1" 
+                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                  <span id="focalLengthValue" class="text-sm font-medium text-primary min-w-[3rem] text-center">10 cm</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">焦距决定了透镜的汇聚能力，标准放大镜的焦距通常在10cm左右</p>
+              </div>
+              
+              <div>
+                <label for="objectDistance" class="block text-sm font-medium text-gray-700 mb-2">物距 (u)</label>
+                <div class="flex items-center space-x-2">
+                  <input type="range" id="objectDistance" min="1" max="50" value="30" step="1" 
+                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                  <span id="objectDistanceValue" class="text-sm font-medium text-primary min-w-[3rem] text-center">30 cm</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">物距是物体到透镜中心的距离，拖动滑块改变物距</p>
+              </div>
+              
+              <div class="pt-2">
+                <h5 class="text-sm font-medium text-gray-700 mb-3">预设位置</h5>
+                <div class="grid grid-cols-3 gap-2">
+                  <button class="preset-btn bg-blue-100 hover:bg-blue-200 text-primary text-sm py-2 px-3 rounded transition-colors duration-200" data-u="25" data-label="u > 2f">u > 2f</button>
+                  <button class="preset-btn bg-green-100 hover:bg-green-200 text-secondary text-sm py-2 px-3 rounded transition-colors duration-200" data-u="15" data-label="f < u < 2f">f < u < 2f</button>
+                  <button class="preset-btn bg-orange-100 hover:bg-orange-200 text-accent text-sm py-2 px-3 rounded transition-colors duration-200" data-u="5" data-label="u < f">u < f</button>
+                </div>
+              </div>
+              
+              <div class="pt-2">
+                <h5 class="text-sm font-medium text-gray-700 mb-3">显示选项</h5>
+                <div class="space-y-2">
+                  <label class="flex items-center">
+                    <input type="checkbox" id="showRays" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-700">显示光路</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="showLabels" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-700">显示标签</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="showFormula" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-700">显示公式</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 光路图 -->
+          <div class="lg:col-span-2">
+            <div class="aspect-[4/3] bg-gradient-to-b from-blue-50 to-indigo-50 rounded-lg overflow-hidden relative">
+              <canvas id="lensCanvas" class="w-full h-full"></canvas>
+              
+              <!-- 动态信息显示 -->
+              <div class="absolute top-3 right-3 glass p-3 rounded-lg shadow-md">
+                <div class="text-sm font-medium text-dark mb-1">成像特性</div>
+                <div id="imageCharacteristics" class="text-xs text-gray-700 space-y-1">
+                  <div><span class="font-medium">虚实：</span><span id="imageType">实像</span></div>
+                  <div><span class="font-medium">正倒：</span><span id="imageOrientation">倒立</span></div>
+                  <div><span class="font-medium">大小：</span><span id="imageSize">缩小</span></div>
+                  <div><span class="font-medium">位置：</span><span id="imagePosition">异侧</span></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 数值关系显示 -->
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <div class="text-xs text-blue-700 mb-1">物距</div>
+                <div class="flex items-center">
+                  <i class="fa fa-arrows-h text-primary mr-2"></i>
+                  <span id="uValue" class="text-lg font-semibold text-dark">u = 30 cm</span>
+                </div>
+              </div>
+              
+              <div class="bg-green-50 p-3 rounded-lg border border-green-100">
+                <div class="text-xs text-green-700 mb-1">像距</div>
+                <div class="flex items-center">
+                  <i class="fa fa-arrows-h text-secondary mr-2"></i>
+                  <span id="vValue" class="text-lg font-semibold text-dark">v = 15 cm</span>
+                </div>
+              </div>
+              
+              <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
+                <div class="text-xs text-orange-700 mb-1">焦距</div>
+                <div class="flex items-center">
+                  <i class="fa fa-dot-circle-o text-accent mr-2"></i>
+                  <span id="fValue" class="text-lg font-semibold text-dark">f = 10 cm</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 成像公式 -->
+            <div id="formulaDisplay" class="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div class="text-sm font-medium text-gray-700 mb-2">透镜公式</div>
+              <div class="flex items-center justify-center">
+                <div class="text-lg font-medium text-dark">
+                  <span class="formula-highlight">1/f</span> = <span class="formula-highlight">1/u</span> + <span class="formula-highlight">1/v</span>
+                </div>
+              </div>
+              <div class="mt-2 text-sm text-gray-600 text-center">
+                <span id="formulaCalculation">1/10 = 1/30 + 1/15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 光学原理部分 -->
+    <section id="theory" class="mb-16">
+      <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+        <i class="fa fa-book text-primary mr-3"></i>凸透镜成像光学原理
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h4 class="text-xl font-semibold text-dark mb-4">基本概念</h4>
+          <p class="text-gray-700 mb-4">凸透镜是中央较厚、边缘较薄的透镜，能够汇聚光线。当平行光线通过凸透镜时，它们会在焦点(F)处汇聚。</p>
+          
+          <div class="space-y-4 mt-6">
+            <div class="flex items-start">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fa fa-dot-circle-o text-primary"></i>
+              </div>
+              <div>
+                <h5 class="font-medium text-dark">焦点(F)</h5>
+                <p class="text-sm text-gray-600">平行于主光轴的光线通过凸透镜后汇聚的点</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fa fa-arrows-h text-primary"></i>
+              </div>
+              <div>
+                <h5 class="font-medium text-dark">焦距(f)</h5>
+                <p class="text-sm text-gray-600">透镜中心到焦点的距离</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fa fa-object-group text-primary"></i>
+              </div>
+              <div>
+                <h5 class="font-medium text-dark">光心(O)</h5>
+                <p class="text-sm text-gray-600">透镜的几何中心，光线通过光心方向不变</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h4 class="text-xl font-semibold text-dark mb-4">成像规律</h4>
+          <p class="text-gray-700 mb-4">凸透镜成像的性质（大小、正倒、虚实）取决于物距(u)与焦距(f)的关系。</p>
+          
+          <div class="overflow-x-auto mt-4">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物距范围</th>
+                  <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">像的性质</th>
+                  <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-3 py-2 text-sm text-gray-900">u > 2f</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">倒立、缩小、实像</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">照相机</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-2 text-sm text-gray-900">u = 2f</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">倒立、等大、实像</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">测焦距</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-2 text-sm text-gray-900">f < u < 2f</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">倒立、放大、实像</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">投影仪</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-2 text-sm text-gray-900">u = f</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">不成像</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">平行光源</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-2 text-sm text-gray-900">u < f</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">正立、放大、虚像</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">放大镜</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 公式推导部分 -->
+    <section id="formula" class="mb-16">
+      <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+        <i class="fa fa-calculator text-primary mr-3"></i>透镜公式推导
+      </h3>
+      
+      <div class="bg-white p-6 rounded-xl shadow-lg">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div class="lg:col-span-2">
+            <h4 class="text-xl font-semibold text-dark mb-4">凸透镜公式</h4>
+            <p class="text-gray-700 mb-4">凸透镜成像的物距(u)、像距(v)和焦距(f)之间的关系可以用以下公式表示：</p>
+            
+            <div class="flex justify-center my-6">
+              <div class="text-2xl font-bold text-dark p-4 bg-gray-50 rounded-lg">
+                <span class="text-primary">1/f</span> = <span class="text-secondary">1/u</span> + <span class="text-accent">1/v</span>
+              </div>
+            </div>
+            
+            <p class="text-gray-700 mb-4">这个公式可以通过相似三角形推导得出。当物体发出的光线通过凸透镜时，会在另一侧形成一个实像或虚像。</p>
+            
+            <div class="mt-6">
+              <h5 class="font-medium text-dark mb-2">放大率公式</h5>
+              <p class="text-gray-700 mb-2">像的大小与物体大小的比值称为放大率(m)：</p>
+              <div class="flex justify-center my-3">
+                <div class="text-xl font-medium text-dark p-3 bg-gray-50 rounded-lg">
+                  m = |v/u|
+                </div>
+              </div>
+              <p class="text-gray-700">当m > 1时，像比物体大；当m < 1时，像比物体小。</p>
+            </div>
+          </div>
+          
+          <div class="lg:col-span-3">
+            <h4 class="text-xl font-semibold text-dark mb-4">公式推导过程</h4>
+            
+            <div class="space-y-6">
+              <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h5 class="font-medium text-dark mb-2 flex items-center">
+                  <span class="bg-blue-100 text-primary text-sm font-bold px-2 py-1 rounded-full mr-2">1</span>
+                  相似三角形分析
+                </h5>
+                <p class="text-gray-700">考虑从物体顶部发出的两条光线：一条平行于主光轴，经过凸透镜后通过焦点；另一条通过光心，方向不变。这两条光线在像点处相交。</p>
+                <div class="mt-3 flex justify-center">
+                  <img src="https://img.baidu.re/i/2025/07/qi11k7.png" alt="相似三角形示意图" class="rounded-lg shadow-sm">
+                </div>
+              </div>
+              
+              <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h5 class="font-medium text-dark mb-2 flex items-center">
+                  <span class="bg-blue-100 text-primary text-sm font-bold px-2 py-1 rounded-full mr-2">2</span>
+                  建立比例关系
+                </h5>
+                <p class="text-gray-700">通过分析这两条光线形成的三角形，可以得到以下比例关系：</p>
+                <div class="mt-2 text-center">
+                  <div class="text-lg font-medium text-dark">h'/h = v/u</div>
+                  <div class="text-sm text-gray-600 mt-1">其中h是物体高度，h'是像的高度</div>
+                </div>
+              </div>
+              
+              <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h5 class="font-medium text-dark mb-2 flex items-center">
+                  <span class="bg-blue-100 text-primary text-sm font-bold px-2 py-1 rounded-full mr-2">3</span>
+                  焦距关系
+                </h5>
+                <p class="text-gray-700">利用另一个相似三角形，可以得到：</p>
+                <div class="mt-2 text-center">
+                  <div class="text-lg font-medium text-dark">h/(u-f) = h'/f</div>
+                </div>
+              </div>
+              
+              <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h5 class="font-medium text-dark mb-2 flex items-center">
+                  <span class="bg-blue-100 text-primary text-sm font-bold px-2 py-1 rounded-full mr-2">4</span>
+                  联立方程
+                </h5>
+                <p class="text-gray-700">将上述两个方程联立并简化，最终可以得到：</p>
+                <div class="mt-2 text-center">
+                  <div class="text-xl font-bold text-dark">1/f = 1/u + 1/v</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 应用实例部分 -->
+    <section id="applications" class="mb-16">
+      <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+        <i class="fa fa-lightbulb-o text-primary mr-3"></i>凸透镜的实际应用
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <img src="https://img.baidu.re/i/2025/07/qgpbaf.png" alt="照相机" class="w-full h-48 object-cover">
+          <div class="p-5">
+            <h4 class="text-lg font-semibold text-dark mb-2">照相机</h4>
+            <p class="text-gray-600 mb-4">照相机使用凸透镜将远处物体的实像聚焦在胶片或图像传感器上。物距(u)大于2倍焦距，因此在像平面上形成倒立、缩小的实像。</p>
+            <div class="flex items-center">
+              <i class="fa fa-camera text-primary mr-2"></i>
+              <span class="text-sm text-gray-500">物距(u) > 2f，像距(f < v < 2f)</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <img src="https://img.baidu.re/i/2025/07/qh8iyz.png" alt="投影仪" class="w-full h-48 object-cover">
+          <div class="p-5">
+            <h4 class="text-lg font-semibold text-dark mb-2">投影仪</h4>
+            <p class="text-gray-600 mb-4">投影仪利用凸透镜将小物体（如幻灯片）的实像投射到屏幕上。物距(f < u < 2f)，因此在屏幕上形成倒立、放大的实像。</p>
+            <div class="flex items-center">
+              <i class="fa fa-film text-primary mr-2"></i>
+              <span class="text-sm text-gray-500">f < 物距(u) < 2f，像距(v > 2f)</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <img src="https://img.baidu.re/i/2025/07/qhdv7c.png" alt="放大镜" class="w-full h-48 object-cover">
+          <div class="p-5">
+            <h4 class="text-lg font-semibold text-dark mb-2">放大镜</h4>
+            <p class="text-gray-600 mb-4">放大镜是一个简单的凸透镜，当物距小于焦距(u < f)时，形成正立、放大的虚像。这种虚像不能投射到屏幕上，但可以被眼睛观察到。</p>
+            <div class="flex items-center">
+              <i class="fa fa-search-plus text-primary mr-2"></i>
+              <span class="text-sm text-gray-500">物距(u) < f，虚像在物体同侧</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取DOM元素
+      const canvas = document.getElementById('lensCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      // 控制面板元素
+      const focalLengthSlider = document.getElementById('focalLength');
+      const focalLengthValue = document.getElementById('focalLengthValue');
+      const objectDistanceSlider = document.getElementById('objectDistance');
+      const objectDistanceValue = document.getElementById('objectDistanceValue');
+      const presetButtons = document.querySelectorAll('.preset-btn');
+      const showRaysCheckbox = document.getElementById('showRays');
+      const showLabelsCheckbox = document.getElementById('showLabels');
+      const showFormulaCheckbox = document.getElementById('showFormula');
+      
+      // 显示结果元素
+      const uValue = document.getElementById('uValue');
+      const vValue = document.getElementById('vValue');
+      const fValue = document.getElementById('fValue');
+      const imageType = document.getElementById('imageType');
+      const imageOrientation = document.getElementById('imageOrientation');
+      const imageSize = document.getElementById('imageSize');
+      const imagePosition = document.getElementById('imagePosition');
+      const formulaDisplay = document.getElementById('formulaDisplay');
+      const formulaCalculation = document.getElementById('formulaCalculation');
+      
+      // 物理参数
+      let focalLength = parseInt(focalLengthSlider.value); // 焦距(cm)
+      let objectDistance = parseInt(objectDistanceSlider.value); // 物距(cm)
+      let showRays = showRaysCheckbox.checked;
+      let showLabels = showLabelsCheckbox.checked;
+      let showFormula = showFormulaCheckbox.checked;
+      
+      // 计算像距
+      function calculateImageDistance() {
+        // 透镜公式: 1/f = 1/u + 1/v
+        if (objectDistance === focalLength) {
+          return Infinity; // 物距等于焦距时，像在无穷远处
+        }
+        return 1 / (1/focalLength - 1/objectDistance);
+      }
+      
+      // 更新显示值
+      function updateDisplayValues() {
+        const imageDistance = calculateImageDistance();
+        
+        // 更新滑块值显示
+        focalLengthValue.textContent = `${focalLength} cm`;
+        objectDistanceValue.textContent = `${objectDistance} cm`;
+        
+        // 更新u、v、f值显示
+        uValue.textContent = `u = ${objectDistance} cm`;
+        fValue.textContent = `f = ${focalLength} cm`;
+        
+        // 更新像距显示
+        if (Math.abs(imageDistance) > 1000) {
+          vValue.textContent = 'v = ∞';
+          formulaCalculation.textContent = `1/${focalLength} = 1/${objectDistance} + 1/∞`;
+        } else {
+          const roundedImageDistance = Math.round(imageDistance * 10) / 10; // 保留一位小数
+          vValue.textContent = `v = ${roundedImageDistance} cm`;
+          formulaCalculation.textContent = `1/${focalLength} = 1/${objectDistance} + 1/${roundedImageDistance}`;
+        }
+        
+        // 更新成像特性
+        updateImageCharacteristics(imageDistance);
+        
+        // 重新绘制光路图
+        drawLensSystem();
+      }
+      
+      // 更新成像特性描述
+      function updateImageCharacteristics(imageDistance) {
+        if (objectDistance < focalLength) {
+          // 虚像 (u < f)
+          imageType.textContent = '虚像';
+          imageOrientation.textContent = '正立';
+          imagePosition.textContent = '同侧';
+          
+          if (Math.abs(imageDistance) > objectDistance) {
+            imageSize.textContent = '放大';
+          } else if (Math.abs(imageDistance) < objectDistance) {
+            imageSize.textContent = '缩小';
+          } else {
+            imageSize.textContent = '等大';
+          }
+        } else if (objectDistance === focalLength) {
+          // 不成像 (u = f)
+          imageType.textContent = '不成像';
+          imageOrientation.textContent = '-';
+          imageSize.textContent = '-';
+          imagePosition.textContent = '-';
+        } else {
+          // 实像 (u > f)
+          imageType.textContent = '实像';
+          imageOrientation.textContent = '倒立';
+          imagePosition.textContent = '异侧';
+          
+          if (Math.abs(imageDistance) > objectDistance) {
+            imageSize.textContent = '放大';
+          } else if (Math.abs(imageDistance) < objectDistance) {
+            imageSize.textContent = '缩小';
+          } else {
+            imageSize.textContent = '等大';
+          }
+        }
+      }
+      
+      // 绘制光路系统
+      function drawLensSystem() {
+        // 设置画布尺寸
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        
+        // 清空画布
+        ctx.clearRect(0, 0, width, height);
+        
+        // 如果物距等于焦距，显示特殊消息
+        if (objectDistance === focalLength) {
+          ctx.fillStyle = '#333';
+          ctx.font = '16px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillText('当物距等于焦距时，光线平行射出，不成像', width/2, height/2);
+          return;
+        }
+        
+        // 坐标系缩放因子和原点
+        const scale = 15; // 1cm = scale pixels
+        const originX = width / 2;
+        const originY = height / 2;
+        
+        // 计算像距
+        const imageDistance = calculateImageDistance();
+        
+        // 物体高度(cm)
+        const objectHeight = 5;
+        
+        // 计算像高
+        const magnification = -imageDistance / objectDistance; // 放大率
+        const imageHeight = objectHeight * magnification;
+        
+        // 绘制主光轴
+        ctx.beginPath();
+        ctx.moveTo(0, originY);
+        ctx.lineTo(width, originY);
+        ctx.strokeStyle = '#aaa';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // 绘制凸透镜
+        const lensThickness = 20;
+        const lensHeight = 80;
+        
+        ctx.beginPath();
+        ctx.moveTo(originX, originY - lensHeight/2);
+        ctx.bezierCurveTo(
+          originX - lensThickness/2, originY - lensHeight/2,
+          originX - lensThickness/2, originY + lensHeight/2,
+          originX, originY + lensHeight/2
+        );
+        ctx.moveTo(originX, originY - lensHeight/2);
+        ctx.bezierCurveTo(
+          originX + lensThickness/2, originY - lensHeight/2,
+          originX + lensThickness/2, originY + lensHeight/2,
+          originX, originY + lensHeight/2
+        );
+        ctx.strokeStyle = '#3B82F6';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // 填充透镜
+        const gradient = ctx.createLinearGradient(originX - lensThickness/2, 0, originX + lensThickness/2, 0);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)');
+        gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.2)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // 绘制焦点
+        const focusRadius = 6;
+        
+        // 左侧焦点 F
+        ctx.beginPath();
+        ctx.arc(originX - focalLength * scale, originY, focusRadius, 0, Math.PI * 2);
+        ctx.fillStyle = '#F59E0B';
+        ctx.fill();
+        
+        // 右侧焦点 F'
+        ctx.beginPath();
+        ctx.arc(originX + focalLength * scale, originY, focusRadius, 0, Math.PI * 2);
+        ctx.fillStyle = '#F59E0B';
+        ctx.fill();
+        
+        // 绘制物体
+        const objectX = originX - objectDistance * scale;
+        const objectTopY = originY - objectHeight * scale;
+        
+        ctx.beginPath();
+        ctx.moveTo(objectX, originY);
+        ctx.lineTo(objectX, objectTopY);
+        ctx.lineTo(objectX - 5, objectTopY + 10);
+        ctx.lineTo(objectX + 5, objectTopY + 10);
+        ctx.closePath();
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        
+        // 绘制像
+        if (Math.abs(imageDistance) < 1000) { // 排除无穷远的情况
+          const imageX = originX + imageDistance * scale;
+          const imageTopY = originY - imageHeight * scale;
+          
+          ctx.beginPath();
+          
+          if (objectDistance < focalLength) {
+            // 虚像用虚线表示
+            ctx.setLineDash([5, 3]);
+            ctx.moveTo(imageX, originY);
+            ctx.lineTo(imageX, imageTopY);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 虚像箭头
+            ctx.beginPath();
+            if (imageHeight > 0) {
+              ctx.moveTo(imageX - 5, imageTopY + 10);
+              ctx.lineTo(imageX, imageTopY);
+              ctx.lineTo(imageX + 5, imageTopY + 10);
+            } else {
+              ctx.moveTo(imageX - 5, imageTopY - 10);
+              ctx.lineTo(imageX, imageTopY);
+              ctx.lineTo(imageX + 5, imageTopY - 10);
+            }
+            ctx.fillStyle = '#333';
+            ctx.fill();
+          } else {
+            // 实像用实线表示
+            ctx.moveTo(imageX, originY);
+            ctx.lineTo(imageX, imageTopY);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 实像箭头
+            ctx.beginPath();
+            if (imageHeight > 0) {
+              ctx.moveTo(imageX - 5, imageTopY + 10);
+              ctx.lineTo(imageX, imageTopY);
+              ctx.lineTo(imageX + 5, imageTopY + 10);
+            } else {
+              ctx.moveTo(imageX - 5, imageTopY - 10);
+              ctx.lineTo(imageX, imageTopY);
+              ctx.lineTo(imageX + 5, imageTopY - 10);
+            }
+            ctx.fillStyle = '#333';
+            ctx.fill();
+          }
+        }
+        
+        // 绘制光线
+        if (showRays) {
+          ctx.lineWidth = 1.5;
+          
+          // 1. 平行于主光轴的光线
+          ctx.beginPath();
+          ctx.moveTo(objectX, objectTopY);
+          ctx.lineTo(originX, objectTopY);
+          ctx.strokeStyle = '#10B981';
+          ctx.stroke();
+          
+          if (objectDistance > focalLength) {
+            // 折射后通过右侧焦点
+            ctx.beginPath();
+            ctx.moveTo(originX, objectTopY);
+            ctx.lineTo(originX + focalLength * scale, originY);
+            ctx.strokeStyle = '#10B981';
+            ctx.stroke();
+            
+            // 如果是实像，继续延伸到像点
+            if (imageDistance > 0) {
+              ctx.beginPath();
+              ctx.moveTo(originX + focalLength * scale, originY);
+              ctx.lineTo(originX + imageDistance * scale, originY - imageHeight * scale);
+              ctx.setLineDash([5, 3]);
+              ctx.strokeStyle = '#10B981';
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          } else {
+            // 虚像：折射光线的反向延长线通过左侧焦点
+            ctx.beginPath();
+            ctx.moveTo(originX, objectTopY);
+            ctx.lineTo(originX - focalLength * scale, originY);
+            ctx.setLineDash([5, 3]);
+            ctx.strokeStyle = '#10B981';
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+          
+          // 2. 通过光心的光线
+          ctx.beginPath();
+          ctx.moveTo(objectX, objectTopY);
+          ctx.lineTo(originX, originY);
+          ctx.strokeStyle = '#F59E0B';
+          ctx.stroke();
+          
+          if (Math.abs(imageDistance) < 1000) {
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + imageDistance * scale, originY - imageHeight * scale);
+            if (objectDistance < focalLength) {
+              ctx.setLineDash([5, 3]);
+            }
+            ctx.strokeStyle = '#F59E0B';
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+          
+          // 3. 通过左侧焦点的光线（或其延长线）
+          if (objectDistance > focalLength) {
+            ctx.beginPath();
+            ctx.moveTo(objectX, objectTopY);
+            ctx.lineTo(originX - focalLength * scale, originY);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(originX - focalLength * scale, originY);
+            ctx.lineTo(originX, objectTopY);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(originX, objectTopY);
+            ctx.lineTo(originX + imageDistance * scale, originY - imageHeight * scale);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.stroke();
+          } else {
+            // 物距小于焦距时，光线的反向延长线通过像点
+            ctx.beginPath();
+            ctx.moveTo(objectX, objectTopY);
+            ctx.lineTo(originX, objectTopY + (focalLength - objectDistance) * scale);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(originX, objectTopY + (focalLength - objectDistance) * scale);
+            ctx.lineTo(originX + imageDistance * scale, originY - imageHeight * scale);
+            ctx.setLineDash([5, 3]);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+        
+        // 绘制标签
+        if (showLabels) {
+          ctx.font = '12px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#333';
+          
+          // 标记光心 O
+          ctx.fillText('O', originX, originY - 20);
+          
+          // 标记焦点 F 和 F'
+          ctx.fillText('F', originX - focalLength * scale, originY - 20);
+          ctx.fillText("F'", originX + focalLength * scale, originY - 20);
+          
+          // 标记物体和像
+          ctx.fillText('物体', objectX, objectTopY - 10);
+          
+          if (Math.abs(imageDistance) < 1000) {
+            const imageX = originX + imageDistance * scale;
+            const imageTopY = originY - imageHeight * scale;
+            
+            if (objectDistance < focalLength) {
+              ctx.fillText('虚像', imageX, imageTopY - (imageHeight > 0 ? 10 : -10));
+            } else {
+              ctx.fillText('实像', imageX, imageTopY - (imageHeight > 0 ? 10 : -10));
+            }
+          }
+          
+          // 标记物距 u
+          ctx.beginPath();
+          ctx.moveTo(originX, originY + 30);
+          ctx.lineTo(objectX, originY + 30);
+          ctx.strokeStyle = '#666';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(originX, originY + 25);
+          ctx.lineTo(originX, originY + 35);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(objectX, originY + 25);
+          ctx.lineTo(objectX, originY + 35);
+          ctx.stroke();
+          
+          ctx.fillText('u', originX - objectDistance * scale/2, originY + 50);
+          
+          // 标记焦距 f
+          ctx.beginPath();
+          ctx.moveTo(originX, originY + 60);
+          ctx.lineTo(originX - focalLength * scale, originY + 60);
+          ctx.strokeStyle = '#666';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(originX, originY + 55);
+          ctx.lineTo(originX, originY + 65);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(originX - focalLength * scale, originY + 55);
+          ctx.lineTo(originX - focalLength * scale, originY + 65);
+          ctx.stroke();
+          
+          ctx.fillText('f', originX - focalLength * scale/2, originY + 80);
+          
+          // 标记像距 v
+          if (Math.abs(imageDistance) < 1000 && imageDistance > 0) {
+            ctx.beginPath();
+            ctx.moveTo(originX, originY + 90);
+            ctx.lineTo(originX + imageDistance * scale, originY + 90);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(originX, originY + 85);
+            ctx.lineTo(originX, originY + 95);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(originX + imageDistance * scale, originY + 85);
+            ctx.lineTo(originX + imageDistance * scale, originY + 95);
+            ctx.stroke();
+            
+            ctx.fillText('v', originX + imageDistance * scale/2, originY + 110);
+          }
+        }
+      }
+      
+      // 事件监听器
+      focalLengthSlider.addEventListener('input', function() {
+        focalLength = parseInt(this.value);
+        updateDisplayValues();
+      });
+      
+      objectDistanceSlider.addEventListener('input', function() {
+        objectDistance = parseInt(this.value);
+        updateDisplayValues();
+      });
+      
+      presetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          objectDistance = parseInt(this.dataset.u);
+          objectDistanceSlider.value = objectDistance;
+          updateDisplayValues();
+        });
+      });
+      
+      showRaysCheckbox.addEventListener('change', function() {
+        showRays = this.checked;
+        drawLensSystem();
+      });
+      
+      showLabelsCheckbox.addEventListener('change', function() {
+        showLabels = this.checked;
+        drawLensSystem();
+      });
+      
+      showFormulaCheckbox.addEventListener('change', function() {
+        showFormula = this.checked;
+        formulaDisplay.style.display = showFormula ? 'block' : 'none';
+      });
+      
+      // 窗口大小变化时重新绘制
+      window.addEventListener('resize', function() {
+        drawLensSystem();
+      });
+      
+      // 初始化显示
+      updateDisplayValues();
+    });
+  </script>
+</body>
+</html>  
