@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arch Linux Terminal</title>
     <style>
+        /* 保持原有样式不变 */
         /* 基础重置 */
         * {
             margin: 0;
@@ -278,21 +279,21 @@
             setInterval(updateDynamicSystemInfo, 60000); // 每分钟更新一次
         }
 
-        // 1. 加载系统信息（简化版文件系统，减少元数据）
+        // 1. 加载系统信息
         function loadSystemInfo() {
-            // 初始系统信息（静态部分）
+            // 初始系统信息
             const baseSystemInfo = {
                 user: 'user',
                 hostname: 'arch',
                 os: 'Arch Linux x86_64',
                 kernel: '6.6.3-arch1-1',
                 packages: '1356 (pacman)',
-                shell: 'bash 5.2.21',
+                shell: 'HTML Terminal 2.0.1',
                 cpu: 'Intel i5-12400F (12) @ 4.400GHz',
-                gpu: 'NVIDIA GeForce GTX 1660 SUPER',
-                totalMemory: 16384, // MB
+                gpu: 'NVIDIA GeForce RTX 5060 ti',
+                totalMemory: 32768, // MB
                 disks: [
-                    { name: '/dev/sda1', total: 16380, used: 9214, mount: '/' }
+                    { name: '/dev/sda1', total: 4096, used: 0, mount: '/' } // 初始化为0，将动态计算
                 ]
             };
             
@@ -311,14 +312,14 @@
             // 更新最后登录时间
             state.elements.lastLoginTime.textContent = getFormattedDate();
 
-            // 简化的文件系统：只保留必要元数据
+            // 文件系统
             state.fileSystem = {
                 home: {
                     type: 'directory',
                     perm: 'drwxr-xr-x',
                     user: 'root',
                     group: 'root',
-                    mtime: getPastFormattedDate(3), // 3天前
+                    mtime: getPastFormattedDate(3),
                     contents: {
                         user: {
                             type: 'directory',
@@ -340,7 +341,6 @@
                                             perm: '-rw-r--r--',
                                             user: 'user',
                                             group: 'user',
-                                            size: 186, // 字节
                                             mtime: getPastFormattedDate(2),
                                             content: 'Arch Terminal Report\n==================\n1. Fixed path parsing\n2. Added input history\n3. Improved styling\n4. Enhanced ls command with detailed list\n5. Added new commands: mkdir, rm, cp, mv, touch, grep, chmod, df, du, man'
                                         },
@@ -350,7 +350,6 @@
                                             perm: '-rw-r--r--',
                                             user: 'user',
                                             group: 'user',
-                                            size: 218,
                                             mtime: getPastFormattedDate(2),
                                             content: '# Notes\n- Use `cd ..` to go back\n- Use `cat [file]` to view text\n- Use `neofetch` for system info\n- Use `ls -l` for detailed file information\n- Directories end with /, executables with *\n- New commands: mkdir, rm, cp, mv, touch, grep, chmod, df, du, man\n- Type `help [command]` for detailed command help'
                                         }
@@ -366,10 +365,9 @@
                                         'script.sh': {
                                             type: 'file',
                                             ext: 'sh',
-                                            perm: '-rwxr-xr-x', // 可执行
+                                            perm: '-rwxr-xr-x',
                                             user: 'user',
                                             group: 'user',
-                                            size: 118,
                                             mtime: getPastFormattedDate(2),
                                             content: '#!/bin/bash\necho "Hello from shell script"\necho "Current dir: $PWD"\necho "Script executed at: $(date)"\necho "User: $USER"'
                                         },
@@ -379,7 +377,6 @@
                                             perm: '-rw-r--r--',
                                             user: 'user',
                                             group: 'user',
-                                            size: 124,
                                             mtime: getPastFormattedDate(2),
                                             content: 'print("Hello Arch!")\nimport os\nprint(f"Current path: {os.getcwd()}")\nprint(f"File list: {os.listdir()}")\nprint(f"User: {os.getlogin()}")'
                                         }
@@ -391,7 +388,6 @@
                                     perm: '-rw-r--r--',
                                     user: 'user',
                                     group: 'user',
-                                    size: 236,
                                     mtime: getPastFormattedDate(4),
                                     content: 'alias ll="ls -l"\nalias la="ls -la"\nalias update="sudo pacman -Syu"\nalias cls="clear"\nalias ..="cd .."\nalias home="cd ~"\nexport PATH=$PATH:~/bin\nexport PS1="\\u@\\h:\\w\\$ "\n# Custom aliases\nalias df="df -h"\nalias du="du -h"'
                                 }
@@ -412,7 +408,6 @@
                             perm: '-rw-r--r--',
                             user: 'root',
                             group: 'root',
-                            size: 276,  // 精确匹配要求的大小
                             mtime: getPastFormattedDate(3),
                             content: '127.0.0.1       localhost\n127.0.1.1       arch\n::1             localhost ip6-localhost ip6-loopback\nff02::1         ip6-allnodes\nff02::2         ip6-allrouters\n# Added for local development\n192.168.1.100   dev-server\n192.168.1.101   web-server\n192.168.1.102   db-server'
                         },
@@ -422,7 +417,6 @@
                             perm: '-rw-r--r--',
                             user: 'root',
                             group: 'root',
-                            size: 256,  // 精确匹配要求的大小
                             mtime: getPastFormattedDate(3),
                             content: 'root:x:0:0:root:/root:/bin/bash\nbin:x:1:1:bin:/bin:/sbin/nologin\ndaemon:x:2:2:daemon:/sbin:/sbin/nologin\nadm:x:3:4:adm:/var/adm:/sbin/nologin\nlp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\nsync:x:5:0:sync:/sbin:/bin/sync\nshutdown:x:6:0:shutdown:/sbin:/sbin/shutdown\nhalt:x:7:0:halt:/sbin:/sbin/halt\nmail:x:8:12:mail:/var/spool/mail:/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash'
                         }
@@ -448,7 +442,6 @@
                                     perm: '-rw-r--r--',
                                     user: 'root',
                                     group: 'root',
-                                    size: 528,
                                     mtime: getPastFormattedDate(1),
                                     content: '[2024-06-10 10:00] [ALPM] installed linux (6.6.3-arch1-1)\n[2024-06-10 10:05] [ALPM] installed nvidia (550.78-1)\n[2024-06-10 10:10] [ALPM] installed python (3.11.8-1)\n[2024-06-11 14:30] [ALPM] installed git (2.45.1-1)\n[2024-06-11 15:45] [ALPM] installed neofetch (7.1.0-6)\n[2024-06-12 10:15] [ALPM] upgraded firefox (126.0.1-1 -> 126.0.2-1)\n[2024-06-12 16:30] [ALPM] installed nodejs (20.14.0-1)\n[2024-06-12 16:35] [ALPM] installed npm (10.7.0-1)'
                                 }
@@ -462,7 +455,6 @@
                     perm: '-rw-r--r--',
                     user: 'root',
                     group: 'root',
-                    size: 428,
                     mtime: getPastFormattedDate(3),
                     content: 'Arch Terminal Simulator v2.0\n=========================\nAdded commands in v2.0:\n- mkdir: Create new directories\n- rm: Remove files or directories\n- cp: Copy files\n- mv: Move or rename files/directories\n- touch: Create empty files\n- grep: Search text in files\n- chmod: Change file permissions\n- df: Show disk space usage\n- du: Show directory/file sizes\n- man: Show manual for commands\n- nano: Simple text editor\n\nType \'help\' for all commands or \'help [command]\' for specific help.'
                 }
@@ -482,7 +474,8 @@
                 for (const name in dir) {
                     const item = dir[name];
                     if (item.type === 'file') {
-                        total += item.size || 0;
+                        // 文件大小是内容的长度
+                        total += (item.content || '').length;
                     } else if (item.type === 'directory') {
                         total += calculateTotalFileSize(item.contents);
                     }
@@ -674,13 +667,13 @@
                 case 'df': showDiskUsage(args); break;
                 case 'du': showDirectorySize(args); break;
                 case 'man': showManual(args); break;
-                case 'nano': openEditor(args[0]); break; // 新增：文本编辑器命令
+                case 'nano': openEditor(args[0]); break;
                 default: addOutput(`<span class="error">bash: ${command}: command not found</span>`);
             }
         }
 
         // 8. 命令实现
-        // 8.1 help：帮助信息（更新以包含nano命令）
+        // 8.1 help：帮助信息
         function showHelp(args) {
             // 显示特定命令的帮助
             if (args.length > 0) {
@@ -737,7 +730,7 @@
                 { cmd: 'cat', desc: 'View text file content' },
                 { cmd: 'grep', desc: 'Search text in files' },
                 { cmd: 'echo', desc: 'Print text to terminal' },
-                { cmd: 'nano', desc: 'Simple text editor' } // 新增：nano命令
+                { cmd: 'nano', desc: 'Simple text editor' }
             ].forEach(item => {
                 addOutput(`  <span class="cmd">${item.cmd.padEnd(8)}</span>${item.desc}`);
             });
@@ -774,11 +767,9 @@
             addOutput('  /          Root directory');
         }
 
-        // 辅助函数：获取特定命令的详细帮助信息（更新以包含nano命令）
+        // 辅助函数：获取特定命令的详细帮助信息
         function getCommandHelp(command) {
             const helpDB = {
-                // ... 其他命令的帮助信息保持不变 ...
-                
                 'nano': {
                     name: 'nano',
                     description: 'Simple text editor',
@@ -794,8 +785,6 @@
                         '  Ctrl+C: Cancel operation'
                     ]
                 },
-                
-                // ... 其他命令的帮助信息 ...
                 'ls': {
                     name: 'ls',
                     description: 'List directory contents',
@@ -1002,7 +991,7 @@
             return helpDB[command];
         }
 
-        // 新增：文本编辑器实现
+        // 文本编辑器实现
         function openEditor(filePath) {
             if (!filePath) {
                 addOutput(`<span class="error">nano: missing filename</span>`);
@@ -1120,7 +1109,7 @@
             state.editorKeydownHandler = handleEditorKeydown;
         }
 
-        // 保存文件
+        // 保存文件 - 动态计算文件大小
         function saveFile(content) {
             if (!state.editorFile) return;
             
@@ -1130,10 +1119,12 @@
             const extMatch = name.match(/\.([^.]+)$/);
             const ext = extMatch ? extMatch[1] : '';
             
+            // 文件大小是内容的长度
+            const fileSize = content.length;
+            
             // 更新或创建文件
             if (exists) {
                 dirContents[name].content = content;
-                dirContents[name].size = content.length;
                 dirContents[name].mtime = getFormattedDate();
             } else {
                 dirContents[name] = {
@@ -1142,9 +1133,9 @@
                     perm: '-rw-r--r--',
                     user: state.systemInfo.user,
                     group: state.systemInfo.user,
-                    size: content.length,
                     mtime: getFormattedDate(),
                     content: content
+                    // 不存储size，而是动态计算
                 };
                 state.editorFile.exists = true;
                 
@@ -1232,7 +1223,7 @@
                 .replace(/'/g, '&#039;');
         }
 
-        // 8.2 ls：列表显示
+        // 8.2 ls：列表显示 - 使用动态计算的大小
         function listDirectory(args) {
             let showDetailed = false;
             let humanReadable = false;
@@ -1271,8 +1262,8 @@
 
                 const displayName = isDir ? `${name}/` : (isExec ? `${name}*` : name);
 
-                // 计算文件大小（目录大小动态计算）
-                let fileSize = isDir ? calculateDirectorySize(item) : (item.size || 0);
+                // 计算文件大小（目录大小动态计算，文件大小是内容长度）
+                let fileSize = isDir ? calculateDirectorySize(item) : (item.content ? item.content.length : 0);
                 if (humanReadable) {
                     fileSize = formatFileSize(fileSize);
                 }
@@ -1343,7 +1334,8 @@
                 if (child.type === 'directory') {
                     totalSize += calculateDirectorySize(child);
                 } else {
-                    totalSize += child.size || 0;
+                    // 文件大小是内容的长度
+                    totalSize += child.content ? child.content.length : 0;
                 }
             }
             
@@ -1395,7 +1387,7 @@
                         currentPath += `/${part}`;
                         
                         if (!currentDir[part]) {
-                            // 创建新目录（只存储必要元数据）
+                            // 创建新目录
                             currentDir[part] = {
                                 type: 'directory',
                                 perm: 'drwxr-xr-x',
@@ -1526,7 +1518,7 @@
             updateDiskUsageFromFilesystem();
         }
 
-        // 8.5 cp：复制文件
+        // 8.5 cp：复制文件 - 动态计算复制后的大小
         function copyFile(args) {
             if (args.length < 2) {
                 addOutput(`<span class="error">cp: missing file operand</span>`);
@@ -1585,10 +1577,15 @@
                 return;
             }
             
-            // 复制文件（只复制必要元数据）
+            // 复制文件 - 不复制size，而是动态计算
             destParentDir[destFileName] = {
-                ...sourceFile,
-                mtime: getFormattedDate() // 更新修改时间
+                type: 'file',
+                ext: sourceFile.ext,
+                perm: sourceFile.perm,
+                user: sourceFile.user,
+                group: sourceFile.group,
+                mtime: getFormattedDate(), // 更新修改时间
+                content: sourceFile.content // 复制内容，大小将基于此计算
             };
             
             addOutput(`<span class="success">cp: copied ‘${sourcePath}’ to ‘${destPath}’</span>`);
@@ -1673,7 +1670,7 @@
             addOutput(`<span class="success">mv: moved ‘${sourcePath}’ to ‘${destPath}’</span>`);
         }
 
-        // 8.7 touch：创建空文件
+        // 8.7 touch：创建空文件 - 空文件大小为0
         function createEmptyFile(args) {
             if (args.length === 0) {
                 addOutput(`<span class="error">touch: missing file operand</span>`);
@@ -1712,16 +1709,15 @@
                         addOutput(`<span class="error">touch: cannot touch ‘${filePath}’: Is a directory</span>`);
                     }
                 } else {
-                    // 创建新文件（只存储必要元数据）
+                    // 创建新文件（空文件，大小为0）
                     parentDir[fileName] = {
                         type: 'file',
                         ext: ext,
                         perm: '-rw-r--r--',
                         user: state.systemInfo.user,
                         group: state.systemInfo.user,
-                        size: 0, // 空文件
                         mtime: getFormattedDate(),
-                        content: ''
+                        content: '' // 空内容，大小为0
                     };
                     
                     addOutput(`<span class="success">touch: created ‘${absPath}’</span>`);
@@ -1894,7 +1890,7 @@
             addOutput(`<span class="success">chmod: changed permissions of ‘${filePath}’ to ‘${newPerm}’</span>`);
         }
 
-        // 8.10 df：显示磁盘空间
+        // 8.10 df：显示磁盘空间 - 基于根目录实际大小
         function showDiskUsage(args) {
             let humanReadable = false;
             
@@ -1904,27 +1900,55 @@
                 }
             });
             
+            // 计算根目录实际大小（字节）
+            const calculateRootSize = () => {
+                const rootDir = { type: 'directory', contents: state.fileSystem };
+                
+                const calculateSize = (item) => {
+                    if (item.type === 'file') {
+                        return item.content ? item.content.length : 0;
+                    }
+                    
+                    let total = 0;
+                    for (const childName in item.contents) {
+                        const child = item.contents[childName];
+                        total += calculateSize(child);
+                    }
+                    return total;
+                };
+                
+                return calculateSize(rootDir);
+            };
+            
+            const rootSizeBytes = calculateRootSize();
+            const rootSizeMB = rootSizeBytes / (1024 * 1024); // 转换为MB
+            
             addOutput('<span class="info">Filesystem      Size       Used       Avail      Use%       Mounted on</span>');
             
             state.systemInfo.disks.forEach(disk => {
                 let size, used, avail;
                 
+                // 对于根目录磁盘，使用实际计算的根目录大小
+                const actualUsed = disk.mount === '/' ? rootSizeMB : disk.used;
+                const actualAvail = disk.total - actualUsed;
+                const actualUsePercent = Math.round((actualUsed / disk.total) * 100) + '%';
+                
                 if (humanReadable) {
-                    size = formatFileSize(disk.total * 1024 * 1024); // 转换为字节后格式化
-                    used = formatFileSize(disk.used * 1024 * 1024);
-                    avail = formatFileSize(disk.avail * 1024 * 1024);
+                    size = formatFileSize(disk.total * 1024 * 1024);
+                    used = formatFileSize(actualUsed * 1024 * 1024);
+                    avail = formatFileSize(actualAvail * 1024 * 1024);
                 } else {
                     size = `${disk.total}M`;
-                    used = `${disk.used}M`;
-                    avail = `${disk.avail}M`;
+                    used = `${Math.round(actualUsed)}M`;
+                    avail = `${Math.round(actualAvail)}M`;
                 }
                 
-                const line = `${disk.name.padEnd(15)} ${size.padEnd(10)} ${used.padEnd(10)} ${avail.padEnd(10)} ${disk.use.padEnd(10)} ${disk.mount}`;
+                const line = `${disk.name.padEnd(15)} ${size.padEnd(10)} ${used.padEnd(10)} ${avail.padEnd(10)} ${actualUsePercent.padEnd(10)} ${disk.mount}`;
                 addOutput(line);
             });
         }
 
-        // 8.11 du：显示目录大小
+        // 8.11 du：显示目录大小 - 与df保持数据一致性
         function showDirectorySize(args) {
             let humanReadable = false;
             let summaryOnly = false;
@@ -1937,7 +1961,6 @@
                 } else if (arg === '-s') {
                     summaryOnly = true;
                 } else {
-                    // 如果提供了路径参数，替换默认路径
                     if (targetPaths.length === 1 && targetPaths[0] === state.currentDir) {
                         targetPaths = [];
                     }
@@ -1945,27 +1968,95 @@
                 }
             });
             
+            // 计算大小的递归函数
+            const calculateSize = (item) => {
+                if (item.type === 'file') {
+                    return item.content ? item.content.length : 0;
+                }
+                
+                let total = 0;
+                for (const childName in item.contents) {
+                    const child = item.contents[childName];
+                    total += calculateSize(child);
+                }
+                return total;
+            };
+            
+            // 显示内容的递归函数
+            const displayContents = (item, path) => {
+                let totalSize = 0;
+                
+                const files = [];
+                const dirs = [];
+                
+                for (const name in item.contents) {
+                    const child = item.contents[name];
+                    if (child.type === 'directory') {
+                        dirs.push(name);
+                    } else {
+                        files.push(name);
+                    }
+                }
+                
+                // 显示文件
+                files.sort().forEach(name => {
+                    const child = item.contents[name];
+                    const childSize = child.content ? child.content.length : 0;
+                    totalSize += childSize;
+                    
+                    const displaySize = humanReadable ? formatFileSize(childSize) : childSize.toString();
+                    const childPath = path === '/' ? `/${name}` : `${path}/${name}`;
+                    
+                    addOutput(`${displaySize.padEnd(8)} ${childPath}`);
+                });
+                
+                // 显示目录（递归）
+                dirs.sort().forEach(name => {
+                    const child = item.contents[name];
+                    const childPath = path === '/' ? `/${name}` : `${path}/${name}`;
+                    const childSize = calculateSize(child);
+                    
+                    totalSize += childSize;
+                    displayContents(child, childPath);
+                });
+                
+                // 显示目录总大小（非根目录）
+                if (path !== '/') {
+                    const displaySize = humanReadable ? formatFileSize(totalSize) : totalSize.toString();
+                    addOutput(`${displaySize.padEnd(8)} ${path}`);
+                }
+                
+                return totalSize;
+            };
+            
             // 处理每个目标路径
             targetPaths.forEach(targetPath => {
                 const absPath = resolveAbsolutePath(targetPath);
                 const pathParts = absPath.split('/').filter(part => part);
                 
-                // 特殊处理根目录
+                // 处理根目录
                 if (absPath === '/') {
+                    const rootDir = { type: 'directory', contents: state.fileSystem };
+                    const totalSize = calculateSize(rootDir);
+                    const displaySize = humanReadable ? formatFileSize(totalSize) : totalSize.toString();
+                    
                     if (summaryOnly) {
-                        addOutput(`0B       ${targetPath}`);
+                        addOutput(`${displaySize.padEnd(8)} ${targetPath}`);
                     } else {
-                        addOutput(`0B       total`);
+                        if (targetPaths.length > 1) {
+                            addOutput(`<span class="hint">${targetPath}:</span>`);
+                        }
+                        const calculatedTotal = displayContents(rootDir, absPath);
+                        addOutput(`${formatFileSize(calculatedTotal).padEnd(8)} total`);
                     }
                     return;
                 }
                 
-                // 获取目标项
+                // 处理其他路径
                 let targetItem = state.fileSystem;
                 let currentPath = '';
                 let isValid = true;
                 
-                // 遍历路径部分找到目标项
                 for (const part of pathParts) {
                     if (!targetItem[part]) {
                         addOutput(`<span class="error">du: cannot access ‘${targetPath}’: No such file or directory</span>`);
@@ -1978,87 +2069,12 @@
                 
                 if (!isValid) return;
                 
-                // 计算大小的递归函数
-                const calculateSize = (item) => {
-                    if (item.type === 'file') {
-                        return item.size || 0;
-                    }
-                    
-                    // 目录本身大小不计入，仅计算内容
-                    let total = 0;
-                    
-                    // 递归计算所有子项大小
-                    for (const childName in item.contents) {
-                        const child = item.contents[childName];
-                        if (child.type === 'directory') {
-                            total += calculateSize(child);
-                        } else {
-                            total += child.size || 0;
-                        }
-                    }
-                    
-                    return total;
-                };
-                
-                // 显示内容的递归函数
-                const displayContents = (item, path, parentTotal = 0) => {
-                    let totalSize = 0;
-                    
-                    // 先处理文件
-                    const files = [];
-                    const dirs = [];
-                    
-                    // 分离文件和目录以便排序
-                    for (const name in item.contents) {
-                        const child = item.contents[name];
-                        if (child.type === 'directory') {
-                            dirs.push(name);
-                        } else {
-                            files.push(name);
-                        }
-                    }
-                    
-                    // 先显示文件
-                    files.sort().forEach(name => {
-                        const child = item.contents[name];
-                        const childSize = child.size || 0;
-                        totalSize += childSize;
-                        
-                        const displaySize = humanReadable ? formatFileSize(childSize) : childSize.toString();
-                        const childPath = path === '/' ? `/${name}` : `${path}/${name}`;
-                        
-                        addOutput(`${displaySize.padEnd(8)} ${childPath}`);
-                    });
-                    
-                    // 再显示目录（递归）
-                    dirs.sort().forEach(name => {
-                        const child = item.contents[name];
-                        const childPath = path === '/' ? `/${name}` : `${path}/${name}`;
-                        const childSize = calculateSize(child);
-                        
-                        totalSize += childSize;
-                        displayContents(child, childPath, totalSize);
-                    });
-                    
-                    // 如果不是根目录，显示目录本身大小
-                    if (path !== '/') {
-                        const displaySize = humanReadable ? formatFileSize(totalSize) : totalSize.toString();
-                        addOutput(`${displaySize.padEnd(8)} ${path}`);
-                    }
-                    
-                    return totalSize;
-                };
-                
-                // 计算总大小
                 const totalSize = calculateSize(targetItem);
                 const displaySize = humanReadable ? formatFileSize(totalSize) : totalSize.toString();
                 
-                // 显示结果
                 if (summaryOnly || targetItem.type === 'file') {
-                    // 只显示总计或文件大小
                     addOutput(`${displaySize.padEnd(8)} ${targetPath}`);
                 } else {
-                    // 递归显示所有内容
                     if (targetPaths.length > 1) {
                         addOutput(`<span class="hint">${targetPath}:</span>`);
                     }
@@ -2067,6 +2083,7 @@
                 }
             });
         }
+
 
         // 8.12 man：显示命令手册
         function showManual(args) {
@@ -2187,15 +2204,30 @@
         // 8.16 neofetch：美化系统信息显示
         function showNeofetch() {
             const logo = [
-                '<span style="color:#00afff">               .-/+oossssoo+/-.               </span>',
-                '<span style="color:#00afff">           `:+ssssssssssssssssss+:`           </span>',
-                '<span style="color:#00afff">         -+ssssssssssssssssssyyssss+-         </span>',
-                '<span style="color:#00afff">       .ossssssssssssssssssdMMMNysssso.       </span>',
-                '<span style="color:#00afff">      /ssssssssssshdmmNNmmyNMMMMhssssss/      </span>',
-                '<span style="color:#00afff">     +ssssssssshmydMMMMMMMNddddyssssssss+     </span>',
-                '<span style="color:#00afff">    /sssssssshNMMMyhhyyyyhmNMMMNhssssssss/    </span>',
-                '<span style="color:#00afff">   .ssssssssdMMMNhssssssssshNMMMdssssssss.   </span>'
+                '<span style="color:#00afff">                   -`                    </span>',
+                '<span style="color:#00afff">                  .o+`                   </span>',
+                '<span style="color:#00afff">                 `ooo/                   </span>',
+                '<span style="color:#00afff">                `+oooo:                  </span>',
+                '<span style="color:#00afff">               `+oooooo:                 </span>',
+                '<span style="color:#00afff">               -+oooooo+:                </span>',
+                '<span style="color:#00afff">             `/:-:++oooo+:               </span>',
+                '<span style="color:#00afff">            `/++++/+++++++:              </span>',
+                '<span style="color:#00afff">           `/++++++++++++++:             </span>',
+                '<span style="color:#00afff">          `/+++ooooooooooooo/`           </span>',
+                '<span style="color:#00afff">         ./ooosssso++osssssso+`          </span>',
+                '<span style="color:#00afff">        .oossssso-````/ossssss+`         </span>',
+                '<span style="color:#00afff">       -osssssso.      :ssssssso.        </span>',
+                '<span style="color:#00afff">      :osssssss/        osssso+++.       </span>',
+                '<span style="color:#00afff">     /ossssssss/        +ssssooo/-       </span>',
+                '<span style="color:#00afff">   `/ossssso+/:-        -:/+osssso+-     </span>',
+                '<span style="color:#00afff">  `+sso+:-`                 `.-/+oso:    </span>',
+                '<span style="color:#00afff"> `++:.                           `-/+/   </span>',
+                '<span style="color:#00afff"> .`                                 `/   </span>'
             ];
+            for (let i = 0; i < logo.length; i++) {
+                logo[i] = logo[i].replace(/ /g, '&nbsp;');
+            }
+    
 
             // 显示最新的系统信息
             const info = [
