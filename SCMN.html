@@ -20,13 +20,67 @@
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+	<!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb', // 主色调：信任蓝
+                        secondary: '#f59e0b', // 辅助色：活力橙
+                        neutral: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                        code: ['Cascadia Code', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1);
+            }
+            .btn-pop {
+                transition: all 0.2s ease;
+            }
+            .btn-pop:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            }
+            .control-hover {
+                @apply transition-all duration-300 hover:bg-primary/90 hover:scale-105;
+            }
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <style>
         /* 基础样式 */
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
             margin: 20px;
@@ -45,12 +99,6 @@
             margin: 0 10px;
         }
 
-        nav a:hover {
-            background-color: #3498db;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
 
         /* 主要内容区域 */
         .main-content {
@@ -108,16 +156,6 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.2);
         }
 
-        .giscus{
-            font-family: 'Cascadia Code', Arial, sans-serif;
-            font-size: 10px;
-            transition: all 0.8s ease;
-            cursor: crosshair;
-            margin: 0;
-        }
-        .giscus:hover {
-            transform: scale(1.015);
-        }
         footer {
             font-size: 0.1em;
             color: #A4A6C2;
@@ -344,14 +382,22 @@
 			}
 		}
 </script>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="down.html">Download</a>
-        <a href="vid.html">Video</a>
-        <a href="SCMN.html">Documents</a>
-		<a href="webs.html">Web</a>
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-file text-primary text-xl"></i>
+                <span class="font-semibold text-lg">Documents</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1 md:gap-3">
+                <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
+                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
+                <a href="SCMN.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Documents</a>
+                <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
+            </div>
+        </div>
     </nav>
-    <div class="main-content">
+    <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
         <p style="margin-top:0pt; margin-bottom:8pt; line-height:116%; widows:0; orphans:0; font-size:11pt"><img src="img/ae03g-sbdc6.001.png" width="267" height="153" alt="" style="margin:3.6pt 9pt; -aw-left-pos:251.74pt; -aw-rel-hpos:column; -aw-rel-vpos:paragraph; -aw-top-pos:14.3pt; -aw-wrap-type:square; float:left" /></p>
         <div style="-aw-sdt-tag:''">
             <p style="margin-top:0pt; margin-bottom:8pt; line-height:116%; widows:0; orphans:0; font-size:11pt"><span style="font-family:'等线'">&#xa0;</span></p>
@@ -1308,7 +1354,7 @@
 
         !function(){function n(n,e,t){return n.getAttribute(e)||t}function e(n){return document.getElementsByTagName(n)}function t(){var t=e("script"),o=t.length,i=t[o-1];return{l:o,z:n(i,"zIndex",-1),o:n(i,"opacity",.5),c:n(i,"color","0,0,0"),n:n(i,"count",99)}}function o(){a=m.width=window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth,c=m.height=window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight}function i(){r.clearRect(0,0,a,c);var n,e,t,o,m,l;s.forEach(function(i,x){for(i.x+=i.xa,i.y+=i.ya,i.xa*=i.x>a||i.x<0?-1:1,i.ya*=i.y>c||i.y<0?-1:1,r.fillRect(i.x-.5,i.y-.5,1,1),e=x+1;e<u.length;e++)n=u[e],null!==n.x&&null!==n.y&&(o=i.x-n.x,m=i.y-n.y,l=o*o+m*m,l<n.max&&(n===y&&l>=n.max/2&&(i.x-=.03*o,i.y-=.03*m),t=(n.max-l)/n.max,r.beginPath(),r.lineWidth=t/2,r.strokeStyle="rgba("+d.c+","+(t+.2)+")",r.moveTo(i.x,i.y),r.lineTo(n.x,n.y),r.stroke()))}),x(i)}var a,c,u,m=document.createElement("canvas"),d=t(),l="c_n"+d.l,r=m.getContext("2d"),x=window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(n){window.setTimeout(n,1e3/45)},w=Math.random,y={x:null,y:null,max:2e4};m.id=l,m.style.cssText="position:fixed;top:0;left:0;z-index:"+d.z+";opacity:"+d.o,e("body")[0].appendChild(m),o(),window.onresize=o,window.onmousemove=function(n){n=n||window.event,y.x=n.clientX,y.y=n.clientY},window.onmouseout=function(){y.x=null,y.y=null};for(var s=[],f=0;d.n>f;f++){var h=w()*a,g=w()*c,v=2*w()-1,p=2*w()-1;s.push({x:h,y:g,xa:v,ya:p,max:6e3})}u=s.concat([y]),setTimeout(function(){i()},100)}();
     </script>
-</body>
+</main>
 <footer ><u><em><strong>蚊帐系统性崩溃事件--RootEater.netlify.app
 	</strong></em></u>--<span id="datetime"></span>
 </footer>

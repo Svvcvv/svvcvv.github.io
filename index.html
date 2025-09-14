@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rooteater - Home</title>
+    <title> Home - Rooteater</title>
     <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-icon-72x72.png">
@@ -72,15 +72,26 @@
             }
         }
     </style>
+    <style>
+     nav a {
+            font-family: 'Cascadia Code', Arial, sans-serif;
+            font-size: 15px;
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+    </style>
 </head>
 
 <body class="font-inter bg-neutral-50 text-neutral-800 min-h-screen">
-    <!-- Navigation - 与视频播放器保持一致 -->
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
         <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-2">
                 <i class="fa fa-home text-primary text-xl"></i>
-                <span class="font-semibold text-lg">Rooteater.netlify.app</span>
+                <span class="font-semibold text-lg">Home</span>
             </div>
             <div class="flex flex-wrap items-center gap-1 md:gap-3">
                 <a href="index.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Home</a>
@@ -130,29 +141,9 @@
             <div class="rounded-lg overflow-hidden mb-6 shadow-sm">
                 <img src="https://tu.ltyuanfang.cn/api/fengjing.php" alt="Beautiful landscape image" class="w-full h-auto object-cover">
             </div>
-
-            <!-- 评论区 -->
-            <div class="giscus font-code text-xs transition-all duration-800 cursor-crosshair mt-8">
-                <!-- <script src="https://giscus.app/client.js"
-                    data-repo="ShenBBBBTTTT/ShenBBBBTTTT.github.io"
-                    data-repo-id="R_kgDONpj9rg"
-                    data-category="General"
-                    data-category-id="DIC_kwDONpj9rs4CoFkj"
-                    data-mapping="pathname"
-                    data-strict="0"
-                    data-reactions-enabled="1"
-                    data-emit-metadata="0"
-                    data-input-position="top"
-                    data-theme="light"
-                    data-lang="zh-CN"
-                    crossorigin="anonymous"
-                    async>
-                </script> -->
-            </div>
         </div>
     </main>
 
-    <!-- Footer - 与视频播放器保持一致 -->
     <footer class="bg-neutral-800 text-neutral-300 py-6 mt-20">
         <div class="max-w-6xl mx-auto px-4 text-center text-sm">
             <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--RootEater.netlify.app</p>

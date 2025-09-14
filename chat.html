@@ -62,6 +62,24 @@
                 50% { opacity: 0.7; }
                 100% { opacity: 1; }
             }
+            .message-image {
+                max-width: 100%;
+                max-height: 300px;
+                border-radius: 8px;
+                margin: 4px 0;
+            }
+            .format-btn {
+                @apply px-3 py-1 rounded text-sm flex items-center gap-1 hover:bg-gray-100 transition-colors;
+            }
+            .message-link {
+                @apply underline font-medium;
+            }
+            .message-link-outgoing {
+                @apply text-cyan-200 hover:text-white;
+            }
+            .message-link-incoming {
+                @apply text-primary-600 hover:text-primary-800;
+            }
         }
     </style>
 </head>
@@ -117,7 +135,16 @@
         <!-- 主聊天区域 -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <div class="bg-gray-50 border-b p-3 flex items-center justify-between">
-                <h2 id="current-room-name" class="font-bold text-lg">公共聊天室</h2>
+                <div>
+                    <h2 id="current-room-name" class="font-bold text-lg">公共聊天室</h2>
+                    <div class="text-xs text-gray-500 mt-0.5 flex items-center">
+                        <i class="fa fa-key mr-1"></i>
+                        <span id="current-room-key" class="font-mono truncate max-w-[200px]"></span>
+                        <button id="copy-key-btn" class="ml-2 text-primary hover:text-primary-700 btn-effect">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="flex items-center space-x-2">
                     <button id="refresh-btn" class="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-700 transition-colors flex items-center text-sm btn-effect">
                         <i class="fa fa-refresh mr-1"></i>
@@ -149,6 +176,17 @@
                             </span>
                         </div>
                     </div>
+                    
+                    <!-- 格式按钮 -->
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button id="insert-image-btn" class="format-btn border border-gray-300 text-gray-700">
+                            <i class="fa fa-picture-o"></i>插入图片
+                        </button>
+                        <button id="insert-link-btn" class="format-btn border border-gray-300 text-gray-700">
+                            <i class="fa fa-link"></i>插入链接
+                        </button>
+                    </div>
+                    
                     <div class="flex space-x-2">
                         <input 
                             type="text" 
@@ -171,6 +209,76 @@
         </main>
     </div>
 
+    <!-- 插入图片模态框 -->
+    <div id="insert-image-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-95 opacity-0" id="image-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">插入图片</h3>
+                <button class="close-image-modal text-gray-500 hover:text-gray-700 p-1 btn-effect">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <label for="image-url" class="block text-sm font-medium text-gray-700 mb-1">图片URL</label>
+                <input 
+                    type="text" 
+                    id="image-url" 
+                    placeholder="https://example.com/image.png" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                >
+            </div>
+            <div class="mb-4">
+                <label for="image-description" class="block text-sm font-medium text-gray-700 mb-1">图片描述（可选）</label>
+                <input 
+                    type="text" 
+                    id="image-description" 
+                    placeholder="描述图片内容" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                >
+            </div>
+            <div class="flex justify-end">
+                <button id="confirm-image-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors btn-effect">
+                    插入
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 插入链接模态框 -->
+    <div id="insert-link-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-95 opacity-0" id="link-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">插入链接</h3>
+                <button class="close-link-modal text-gray-500 hover:text-gray-700 p-1 btn-effect">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <label for="link-url" class="block text-sm font-medium text-gray-700 mb-1">链接URL</label>
+                <input 
+                    type="text" 
+                    id="link-url" 
+                    placeholder="https://example.com" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                >
+            </div>
+            <div class="mb-4">
+                <label for="link-text" class="block text-sm font-medium text-gray-700 mb-1">显示文本</label>
+                <input 
+                    type="text" 
+                    id="link-text" 
+                    placeholder="点击查看" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                >
+            </div>
+            <div class="flex justify-end">
+                <button id="confirm-link-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors btn-effect">
+                    插入
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 创建聊天室模态框 -->
     <div id="create-room-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-95 opacity-0" id="modal-content">
@@ -189,9 +297,45 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 >
             </div>
+            <div id="new-room-key" class="mb-4 hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">聊天室Key（自动生成）</label>
+                <div class="flex">
+                    <input 
+                        type="text" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-l-md bg-gray-100 focus:outline-none font-mono text-sm"
+                        readonly
+                    >
+                    <button class="copy-new-key-btn bg-gray-200 hover:bg-gray-300 px-3 rounded-r-md border border-l-0 border-gray-300 btn-effect">
+                        <i class="fa fa-copy"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">分享此Key给他人，加入同一个聊天室</p>
+            </div>
             <div class="flex justify-end">
                 <button id="confirm-create-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors btn-effect">
                     创建
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作确认模态框 -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-95 opacity-0" id="confirm-modal-content">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-center" id="confirm-modal-title">确认操作</h3>
+                <p class="text-gray-600 mt-2 text-center" id="confirm-modal-message">确认信息将显示在这里</p>
+                <div class="mt-4 bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
+                    <i class="fa fa-info-circle mr-1"></i>
+                    <span>此操作将消耗您的每日操作次数</span>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancel-confirm-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors btn-effect">
+                    取消
+                </button>
+                <button id="accept-confirm-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors btn-effect">
+                    确认
                 </button>
             </div>
         </div>
@@ -272,10 +416,11 @@
         let refreshTimer = null;
         let username = '';
         let messageIdCounter = 0;
+        let confirmAction = null; // 用于存储需要确认的操作
         
         // API限制配置
         const API_LIMITS = {
-            totalOperations: 500,  // 创建、更新操作总和限制（删除已改为本地操作，不消耗次数）
+            totalOperations: 500,  // 创建、更新操作总和限制
             read: 1000000000       // 读取不受限制
         };
         
@@ -286,12 +431,13 @@
             
             // 生成默认聊天室的key
             currentRoomKey = stringToHashKey(currentRoomName);
+            document.getElementById('current-room-key').textContent = currentRoomKey;
             
             // 初始化UI
             updateUI();
             
             // 加载聊天室消息
-            loadMessages();
+            loadMessages(false); // 首次加载不显示动画
             
             // 设置自动刷新
             setupAutoRefresh();
@@ -417,7 +563,10 @@
                 roomElement.className = `p-3 rounded-lg cursor-pointer transition-all duration-200 ${currentRoomKey === room.key ? 'bg-primary-100 text-primary font-medium' : 'hover:bg-gray-100'}`;
                 roomElement.innerHTML = `
                     <div class="flex justify-between items-center">
-                        <span>${room.name}</span>
+                        <div>
+                            <span>${room.name}</span>
+                            <div class="text-xs text-gray-500 mt-0.5 font-mono truncate">${room.key}</div>
+                        </div>
                         ${currentRoomKey !== room.key ? `<button class="delete-room-btn text-gray-400 hover:text-red-500 p-1 transition-colors btn-effect" data-key="${room.key}" data-name="${room.name}">
                             <i class="fa fa-trash-o"></i>
                         </button>` : ''}
@@ -457,7 +606,10 @@
                 const roomElement = document.createElement('div');
                 roomElement.className = 'flex justify-between items-center p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors';
                 roomElement.innerHTML = `
-                    <span>${room.name}</span>
+                    <div>
+                        <span>${room.name}</span>
+                        <div class="text-xs text-gray-500 font-mono truncate">${room.key}</div>
+                    </div>
                     ${room.name !== '公共聊天室' ? `<button class="delete-joined-room-btn text-gray-400 hover:text-red-500 p-1 transition-colors btn-effect" data-key="${room.key}" data-name="${room.name}">
                         <i class="fa fa-times"></i>
                     </button>` : ''}
@@ -484,7 +636,8 @@
             currentRoomKey = key;
             currentRoomName = name;
             document.getElementById('current-room-name').textContent = name;
-            loadMessages();
+            document.getElementById('current-room-key').textContent = key;
+            loadMessages(true); // 切换聊天室时显示动画
             loadRoomsList(); // 更新列表选中状态
             
             // 添加切换动画效果
@@ -500,15 +653,33 @@
             }
         }
         
+        // 打开确认模态框
+        function openConfirmModal(title, message, action) {
+            document.getElementById('confirm-modal-title').textContent = title;
+            document.getElementById('confirm-modal-message').textContent = message;
+            confirmAction = action; // 存储需要确认的操作
+            
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('confirm-modal-content').classList.remove('scale-95', 'opacity-0');
+                document.getElementById('confirm-modal-content').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+        
+        // 关闭确认模态框
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal-content').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('confirm-modal-content').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('confirm-modal').classList.add('hidden');
+                confirmAction = null; // 清除操作
+            }, 300);
+        }
+        
         // 创建新聊天室
         function createRoom(roomName) {
             if (!roomName || roomName.trim() === '') {
-                alert('请输入聊天室名称');
-                return;
-            }
-            
-            // 创建操作需要确认
-            if (!confirm(`确定要创建"${roomName}"聊天室吗？此操作会消耗您的每日操作次数。`)) {
+                showNotification('请输入聊天室名称', 'error');
                 return;
             }
             
@@ -516,7 +687,7 @@
             
             // 检查是否已存在同名聊天室
             if (rooms.some(room => room.name === roomName.trim())) {
-                alert('已存在同名聊天室');
+                showNotification('已存在同名聊天室', 'error');
                 return;
             }
             
@@ -526,30 +697,43 @@
                 return;
             }
             
-            const key = stringToHashKey(roomName.trim());
-            
-            // 添加新聊天室
-            rooms.push({
-                name: roomName.trim(),
-                key: key
-            });
-            
-            saveRoomsList(rooms);
-            loadRoomsList();
-            
-            // 切换到新聊天室
-            switchRoom(key, roomName.trim());
-            
-            // 关闭模态框并添加动画
-            document.getElementById('modal-content').classList.remove('scale-100', 'opacity-100');
-            document.getElementById('modal-content').classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                document.getElementById('create-room-modal').classList.add('hidden');
-                document.getElementById('room-name').value = '';
-            }, 300);
-            
-            // 记录创建请求
-            recordOperation('create');
+            // 使用HTML模态框确认操作，替代alert
+            openConfirmModal(
+                '创建聊天室',
+                `确定要创建"${roomName}"聊天室吗？`,
+                () => {
+                    const key = stringToHashKey(roomName.trim());
+                    
+                    // 显示生成的key
+                    const newRoomKeyInput = document.querySelector('#new-room-key input');
+                    newRoomKeyInput.value = key;
+                    document.getElementById('new-room-key').classList.remove('hidden');
+                    
+                    // 添加新聊天室
+                    rooms.push({
+                        name: roomName.trim(),
+                        key: key
+                    });
+                    
+                    saveRoomsList(rooms);
+                    loadRoomsList();
+                    
+                    // 切换到新聊天室
+                    switchRoom(key, roomName.trim());
+                    
+                    // 关闭模态框并添加动画
+                    document.getElementById('modal-content').classList.remove('scale-100', 'opacity-100');
+                    document.getElementById('modal-content').classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        document.getElementById('create-room-modal').classList.add('hidden');
+                        document.getElementById('room-name').value = '';
+                        document.getElementById('new-room-key').classList.add('hidden');
+                    }, 300);
+                    
+                    // 记录创建请求
+                    recordOperation('create');
+                }
+            );
         }
         
         // 仅从本地删除聊天室（不向服务器发送请求）
@@ -576,8 +760,108 @@
             }
         }
         
+        // 插入图片到消息输入框
+        function insertImage() {
+            const url = document.getElementById('image-url').value.trim();
+            const description = document.getElementById('image-description').value.trim() || '图片';
+            
+            if (!url) {
+                showNotification('请输入图片URL', 'error');
+                return;
+            }
+            
+            // 生成图片标签
+            const imageTag = `[img=${url}]${description}[/img]`;
+            
+            // 插入到输入框
+            const input = document.getElementById('message-input');
+            input.value += imageTag;
+            input.focus();
+            
+            // 关闭模态框
+            closeImageModal();
+        }
+        
+        // 插入链接到消息输入框
+        function insertLink() {
+            const url = document.getElementById('link-url').value.trim();
+            const text = document.getElementById('link-text').value.trim() || url;
+            
+            if (!url) {
+                showNotification('请输入链接URL', 'error');
+                return;
+            }
+            
+            // 生成链接标签
+            const linkTag = `[link=${url}]${text}[/link]`;
+            
+            // 插入到输入框
+            const input = document.getElementById('message-input');
+            input.value += linkTag;
+            input.focus();
+            
+            // 关闭模态框
+            closeLinkModal();
+        }
+        
+        // 关闭图片插入模态框
+        function closeImageModal() {
+            document.getElementById('image-url').value = '';
+            document.getElementById('image-description').value = '';
+            
+            document.getElementById('image-modal-content').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('image-modal-content').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('insert-image-modal').classList.add('hidden');
+            }, 300);
+        }
+        
+        // 关闭链接插入模态框
+        function closeLinkModal() {
+            document.getElementById('link-url').value = '';
+            document.getElementById('link-text').value = '';
+            
+            document.getElementById('link-modal-content').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('link-modal-content').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('insert-link-modal').classList.add('hidden');
+            }, 300);
+        }
+        
+        // 解析消息内容，处理图片和链接格式
+        function parseMessageContent(content, isOutgoing) {
+            let parsedContent = escapeHtml(content);
+            
+            // 处理图片格式: [img=URL]描述[/img]
+            const imgRegex = /\[img=([^\]]+)\](.*?)\[\/img\]/g;
+            parsedContent = parsedContent.replace(imgRegex, (match, url, altText) => {
+                // 简单验证URL是否合法
+                if (url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
+                    return `<img src="${url}" alt="${altText || '图片'}" class="message-image">`;
+                }
+                return `<span class="text-red-500">[无效图片链接]</span>`;
+            });
+            
+            // 处理链接格式: [link=URL]文字[/link]
+            const linkRegex = /\[link=([^\]]+)\](.*?)\[\/link\]/g;
+            parsedContent = parsedContent.replace(linkRegex, (match, url, text) => {
+                // 简单验证URL是否合法
+                if (url.match(/^https?:\/\/.+/i)) {
+                    // 根据消息方向使用不同的链接样式
+                    const linkClass = isOutgoing ? 'message-link message-link-outgoing' : 'message-link message-link-incoming';
+                    return `<a href="${url}" target="_blank" class="${linkClass}">${text || url}</a>`;
+                }
+                return `<span class="text-red-500">[无效链接]</span>`;
+            });
+            
+            // 替换换行符为<br>
+            parsedContent = parsedContent.replace(/\n/g, '<br>');
+            
+            return parsedContent;
+        }
+        
         // 加载消息
-        async function loadMessages() {
+        async function loadMessages(showAnimation = true) {
             if (!currentRoomKey) return;
             
             // 显示加载状态
@@ -594,14 +878,14 @@
                     const data = await response.text();
                     if (data) {
                         const messages = JSON.parse(data);
-                        renderMessages(messages);
+                        renderMessages(messages, showAnimation);
                     } else {
-                        // 没有消息
-                        renderMessages([]);
+                        // 没有消息，显示使用提示
+                        renderEmptyState();
                     }
                 } else if (response.status === 404) {
-                    // 聊天室不存在，初始化空消息
-                    renderMessages([]);
+                    // 聊天室不存在，初始化空消息并显示使用提示
+                    renderEmptyState();
                 } else {
                     showNotification('加载消息失败', 'error');
                     console.error('加载消息失败:', response.status);
@@ -614,13 +898,28 @@
             }
         }
         
+        // 渲染空状态提示信息
+        function renderEmptyState() {
+            const messagesContainer = document.querySelector('#messages-container > div');
+            messagesContainer.innerHTML = `
+                <div class="text-center text-gray-500 py-8 space-y-4">
+                    <p>暂无消息，发送第一条消息吧！</p>
+                    <div class="text-sm bg-gray-100 p-3 rounded-lg inline-block text-left max-w-xs">
+                        <p class="mb-2"><i class="fa fa-info-circle text-primary mr-1"></i>支持以下格式：</p>
+                        <p><i class="fa fa-picture-o text-primary mr-1"></i>图片: [img=URL]描述[/img]</p>
+                        <p><i class="fa fa-link text-primary mr-1"></i>链接: [link=URL]文字[/link]</p>
+                    </div>
+                </div>
+            `;
+        }
+        
         // 渲染消息
-        function renderMessages(messages) {
+        function renderMessages(messages, showAnimation = true) {
             const messagesContainer = document.querySelector('#messages-container > div');
             messagesContainer.innerHTML = '';
             
             if (messages.length === 0) {
-                messagesContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">暂无消息，发送第一条消息吧！</div>';
+                renderEmptyState();
                 return;
             }
             
@@ -632,17 +931,20 @@
                 // 严格比较用户名，确保消息归属正确
                 const isCurrentUser = message.username === username;
                 const messageElement = document.createElement('div');
-                messageElement.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-fadeIn`;
+                messageElement.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`;
                 
                 const bubbleClass = isCurrentUser 
                     ? 'bg-primary text-white chat-bubble-right' 
                     : 'bg-white text-dark chat-bubble-left shadow-sm';
                 
+                // 解析消息内容，处理图片和链接
+                const parsedContent = parseMessageContent(message.content, isCurrentUser);
+                
                 messageElement.innerHTML = `
                     <div class="max-w-[80%]">
                         <div class="${bubbleClass} p-3">
                             <div class="font-medium ${isCurrentUser ? '' : 'text-primary'}">${message.username}</div>
-                            <div class="mt-1">${escapeHtml(message.content)}</div>
+                            <div class="mt-1">${parsedContent}</div>
                         </div>
                         <div class="text-xs text-gray-400 mt-1 ${isCurrentUser ? 'text-right' : ''}">
                             ${formatTime(message.timestamp)}
@@ -650,18 +952,22 @@
                     </div>
                 `;
                 
-                // 添加淡入动画
-                messageElement.style.opacity = "0";
-                messageElement.style.transform = "translateY(10px)";
-                messageElement.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                // 根据需要添加淡入动画
+                if (showAnimation) {
+                    messageElement.style.opacity = "0";
+                    messageElement.style.transform = "translateY(10px)";
+                    messageElement.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                }
                 
                 messagesContainer.appendChild(messageElement);
                 
                 // 触发动画
-                setTimeout(() => {
-                    messageElement.style.opacity = "1";
-                    messageElement.style.transform = "translateY(0)";
-                }, 50);
+                if (showAnimation) {
+                    setTimeout(() => {
+                        messageElement.style.opacity = "1";
+                        messageElement.style.transform = "translateY(0)";
+                    }, 50);
+                }
             });
             
             // 滚动到底部
@@ -669,11 +975,9 @@
         }
         
         // 发送消息
-        async function sendMessage(content) {
+        function prepareSendMessage() {
             const input = document.getElementById('message-input');
-            const sendBtn = document.getElementById('send-btn');
-            const sendLoader = document.getElementById('send-loader');
-            const sendNotice = document.getElementById('send-notice');
+            const content = input.value;
             
             if (!content || content.trim() === '' || !currentRoomKey) return;
             
@@ -685,16 +989,26 @@
                 return;
             }
             
-            // 发送消息属于更新操作，需要确认
-            if (!confirm('确定要发送这条消息吗？此操作会消耗您的每日操作次数，且可能需要5-10秒时间。')) {
-                return;
-            }
-            
             // 检查是否还有操作次数
             if (!canMakeOperation('update')) {
                 showNotification('每日操作次数已达上限，请明天再试', 'error');
                 return;
             }
+            
+            // 使用HTML模态框确认操作，替代alert
+            openConfirmModal(
+                '发送消息',
+                '确定要发送这条消息吗？发送可能需要5-10秒时间。',
+                () => actuallySendMessage(content)
+            );
+        }
+        
+        // 实际执行发送消息的操作
+        async function actuallySendMessage(content) {
+            const input = document.getElementById('message-input');
+            const sendBtn = document.getElementById('send-btn');
+            const sendLoader = document.getElementById('send-loader');
+            const sendNotice = document.getElementById('send-notice');
             
             try {
                 // 显示加载动画和提示信息，禁用按钮和输入框
@@ -720,7 +1034,7 @@
                 const newMessage = {
                     id: Date.now() + '_' + (messageIdCounter++),
                     username: username,  // 明确使用当前用户名
-                    content: content.trim(),
+                    content: content.trim(),  // 保存原始内容，不解析
                     timestamp: new Date().toISOString()
                 };
                 
@@ -748,7 +1062,7 @@
                 if (result.status === 1) {
                     // 发送成功，清空输入框并重新加载消息
                     input.value = '';
-                    loadMessages();
+                    loadMessages(true); // 发送消息后显示动画
                     
                     // 记录更新请求
                     recordOperation('update');
@@ -766,7 +1080,18 @@
                 sendBtn.querySelector('i').classList.remove('hidden');
                 sendNotice.classList.add('hidden'); // 隐藏发送耗时提示
                 input.focus();
+                closeConfirmModal(); // 确保关闭确认模态框
             }
+        }
+        
+        // 复制聊天室key到剪贴板
+        function copyRoomKey(key) {
+            navigator.clipboard.writeText(key).then(() => {
+                showNotification('聊天室Key已复制到剪贴板', 'success');
+            }).catch(err => {
+                console.error('无法复制内容: ', err);
+                showNotification('复制失败，请手动复制', 'error');
+            });
         }
         
         // 记录操作（创建、更新）
@@ -829,7 +1154,7 @@
             
             // 设置新定时器 - 读取不受限制，无需检查
             refreshTimer = setInterval(() => {
-                loadMessages();
+                loadMessages(false); // 自动刷新不显示动画
             }, refreshInterval * 1000);
         }
         
@@ -879,6 +1204,7 @@
         // 更新UI
         function updateUI() {
             document.getElementById('current-room-name').textContent = currentRoomName;
+            document.getElementById('current-room-key').textContent = currentRoomKey;
             document.getElementById('refresh-interval').value = refreshInterval;
             updateOperationCounter();
         }
@@ -886,20 +1212,19 @@
         // 绑定事件监听器
         function bindEventListeners() {
             // 发送消息
-            document.getElementById('send-btn').addEventListener('click', () => {
-                const input = document.getElementById('message-input');
-                sendMessage(input.value);
-            });
+            document.getElementById('send-btn').addEventListener('click', prepareSendMessage);
             
             // 按Enter发送消息
             document.getElementById('message-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    sendMessage(e.target.value);
+                    prepareSendMessage();
                 }
             });
             
             // 手动刷新
-            document.getElementById('refresh-btn').addEventListener('click', loadMessages);
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                loadMessages(true); // 手动刷新显示动画
+            });
             
             // 创建聊天室
             document.getElementById('create-room-btn').addEventListener('click', () => {
@@ -909,6 +1234,7 @@
                     document.getElementById('modal-content').classList.add('scale-100', 'opacity-100');
                 }, 10);
                 document.getElementById('room-name').focus();
+                document.getElementById('new-room-key').classList.add('hidden');
             });
             
             // 关闭创建聊天室模态框
@@ -917,6 +1243,7 @@
                 document.getElementById('modal-content').classList.add('scale-95', 'opacity-0');
                 setTimeout(() => {
                     document.getElementById('create-room-modal').classList.add('hidden');
+                    document.getElementById('new-room-key').classList.add('hidden');
                 }, 300);
             });
             
@@ -992,6 +1319,7 @@
                     document.getElementById('modal-content').classList.add('scale-95', 'opacity-0');
                     setTimeout(() => {
                         document.getElementById('create-room-modal').classList.add('hidden');
+                        document.getElementById('new-room-key').classList.add('hidden');
                     }, 300);
                 }
             });
@@ -999,6 +1327,80 @@
             document.getElementById('settings-modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('settings-modal')) {
                     closeSettingsModal();
+                }
+            });
+            
+            // 复制当前聊天室key
+            document.getElementById('copy-key-btn').addEventListener('click', () => {
+                copyRoomKey(currentRoomKey);
+            });
+            
+            // 复制新创建聊天室的key
+            document.querySelectorAll('.copy-new-key-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const keyInput = btn.previousElementSibling;
+                    copyRoomKey(keyInput.value);
+                });
+            });
+            
+            // 插入图片相关事件
+            document.getElementById('insert-image-btn').addEventListener('click', () => {
+                document.getElementById('insert-image-modal').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('image-modal-content').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('image-modal-content').classList.add('scale-100', 'opacity-100');
+                }, 10);
+                document.getElementById('image-url').focus();
+            });
+            
+            document.querySelectorAll('.close-image-modal').forEach(btn => {
+                btn.addEventListener('click', closeImageModal);
+            });
+            
+            document.getElementById('confirm-image-btn').addEventListener('click', insertImage);
+            
+            // 插入链接相关事件
+            document.getElementById('insert-link-btn').addEventListener('click', () => {
+                document.getElementById('insert-link-modal').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('link-modal-content').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('link-modal-content').classList.add('scale-100', 'opacity-100');
+                }, 10);
+                document.getElementById('link-url').focus();
+            });
+            
+            document.querySelectorAll('.close-link-modal').forEach(btn => {
+                btn.addEventListener('click', closeLinkModal);
+            });
+            
+            document.getElementById('confirm-link-btn').addEventListener('click', insertLink);
+            
+            // 点击图片/链接模态框背景关闭模态框
+            document.getElementById('insert-image-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('insert-image-modal')) {
+                    closeImageModal();
+                }
+            });
+            
+            document.getElementById('insert-link-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('insert-link-modal')) {
+                    closeLinkModal();
+                }
+            });
+            
+            // 确认模态框相关事件
+            document.getElementById('accept-confirm-btn').addEventListener('click', () => {
+                if (confirmAction) {
+                    confirmAction(); // 执行确认的操作
+                }
+                closeConfirmModal();
+            });
+            
+            document.getElementById('cancel-confirm-btn').addEventListener('click', closeConfirmModal);
+            
+            document.getElementById('confirm-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('confirm-modal')) {
+                    closeConfirmModal();
                 }
             });
         }
