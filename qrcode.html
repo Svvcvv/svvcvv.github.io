@@ -50,14 +50,14 @@
 <body>
     <div class="container">
         <h2>QR Code Generator</h2>
-        <input type="text" id="text" value="https://rooteater.netlify.app" placeholder="Enter text to generate QR code">
+        <input type="text" id="text" value="https://github.com" placeholder="Enter text to generate QR code">
         <button onclick="makeCode()">Generate QR Code</button>
         <div id="qrcode" style="width:100px; height:100px; margin-top:15px;"></div>
         <button id="downloadBtn">Download QR Code</button>
     </div>
 
-    <script type="text/javascript" src="js/jquery.js"></script>
-	<script type="text/javascript" src="js/qrcode.js"></script>
+    <script type="text/javascript" src="assets/js/jquery.js"></script>
+	<script type="text/javascript" src="assets/js/qrcode.js"></script>
     <script>
         var qrcode = new QRCode(document.getElementById("qrcode"), {
 			width : 100,
