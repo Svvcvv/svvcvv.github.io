@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>目录结构查看器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        neutral: '#64748B',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .tree-line {
+                @apply border-l-2 border-gray-200 ml-3 pl-6;
+            }
+            .hover-highlight {
+                @apply hover:bg-gray-100 rounded px-2 transition-colors duration-150;
+            }
+            .children-container {
+                @apply overflow-hidden transition-all duration-300 ease-in-out;
+            }
+            .breadcrumb-item {
+                @apply hover:text-primary cursor-pointer transition-colors;
+            }
+            .breadcrumb-separator {
+                @apply mx-2 text-gray-400;
+            }
+            /* 自定义滚动条样式 */
+            #directory-tree::-webkit-scrollbar {
+                width: 8px;
+            }
+            #directory-tree::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+            #directory-tree::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 4px;
+            }
+            #directory-tree::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">目录结构查看器</h1>
+            <p class="text-gray-600">浏览目录和文件的组织结构</p>
+        </header>
+
+        <!-- 修改页面布局，添加固定高度的目录树容器 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8 ">
+            <!-- 面包屑导航 -->
+            <div class="flex flex-wrap items-center mb-6 text-sm text-gray-600" id="breadcrumb">
+                <span class="breadcrumb-item" data-path="">
+                    <i class="fa fa-home mr-1"></i>根目录
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa fa-folder-open text-primary text-xl"></i>
+                    <h2 id="current-dir-name" class="text-xl font-semibold text-gray-800">加载中...</h2>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="go-up"
+                        class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300 transition-colors"
+                        disabled>
+                        <i class="fa fa-arrow-up mr-1"></i>返回上级
+                    </button>
+                    <button id="expand-all"
+                        class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-plus-square mr-1"></i>全部展开
+                    </button>
+                    <button id="collapse-all"
+                        class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300 transition-colors">
+                        <i class="fa fa-minus-square mr-1"></i>全部折叠
+                    </button>
+                </div>
+            </div>
+
+            <!-- 添加固定高度的目录树容器 -->
+            <div id="directory-tree" class="text-gray-700 overflow-auto" style="max-height: 70vh;">
+                <div class="flex items-center justify-center py-8 text-gray-500">
+                    <i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在加载目录结构...
+                </div>
+            </div>
+        </div>
+        <!--
+        <footer class="text-center text-gray-500 text-sm">
+            <p>使用Python生成目录结构JSON，通过HTML展示</p>
+        </footer>   -->
+    </div>
+    <script>
+        // 存储完整的目录结构和当前导航路径
+        let fullDirectoryStructure = null;
+        let currentPath = [];
+        // 存储根目录名称（从JSON数据中获取）
+        let rootDirectoryName = '';
+        // 配置：是否使用网站根目录的绝对路径
+        const useAbsoluteRootPath = true;
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 根据路径获取目录
+        function getDirectoryByPath(pathSegments) {
+            if (!fullDirectoryStructure) return null;
+
+            let dir = fullDirectoryStructure;
+            for (const segment of pathSegments) {
+                const found = dir.children.find(item =>
+                    item.type === 'directory' && item.name === segment
+                );
+                if (!found) return null;
+                dir = found;
+            }
+            return dir;
+        }
+
+        // 获取当前目录
+        function getCurrentDirectory() {
+            return getDirectoryByPath(currentPath);
+        }
+
+        // 更新面包屑导航
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            breadcrumb.innerHTML = '';
+
+            // 添加根目录
+            const rootItem = document.createElement('span');
+            rootItem.className = 'breadcrumb-item';
+            rootItem.innerHTML = `<i class="fa fa-home mr-1"></i>${rootDirectoryName}`;
+            rootItem.addEventListener('click', () => navigateToPath([]));
+            breadcrumb.appendChild(rootItem);
+
+            // 添加路径片段
+            let currentPathSegments = [];
+            for (const segment of currentPath) {
+                currentPathSegments.push(segment);
+
+                const separator = document.createElement('span');
+                separator.className = 'breadcrumb-separator';
+                separator.textContent = '/';
+                breadcrumb.appendChild(separator);
+
+                const item = document.createElement('span');
+                item.className = 'breadcrumb-item';
+                item.textContent = segment;
+                // 保存完整路径片段用于导航
+                const pathToStore = [...currentPathSegments];
+                item.addEventListener('click', () => navigateToPath(pathToStore));
+                breadcrumb.appendChild(item);
+            }
+
+            // 更新当前目录名称
+            const currentDir = getCurrentDirectory();
+            if (currentDir) {
+                document.getElementById('current-dir-name').textContent = currentDir.name;
+            }
+
+            // 更新返回上级按钮状态
+            document.getElementById('go-up').disabled = currentPath.length === 0;
+        }
+
+        // 导航到指定路径
+        function navigateToPath(pathSegments) {
+            // 验证路径是否存在
+            const targetDir = getDirectoryByPath(pathSegments);
+            if (targetDir) {
+                currentPath = [...pathSegments];
+                renderCurrentDirectory();
+                updateBreadcrumb();
+            } else {
+                console.error('路径不存在:', pathSegments);
+            }
+        }
+
+        // 创建目录树节点
+        function createTreeNode(item, parentPathSegments = []) {
+            const isDirectory = item.type === 'directory';
+            const hasChildren = isDirectory && item.children && item.children.length > 0;
+            // 计算当前项的完整路径（从根目录开始）
+            const itemPathSegments = [...parentPathSegments, item.name];
+
+            // 创建主容器
+            const node = document.createElement('div');
+            node.className = `flex items-center py-1`;
+
+            // 创建展开/折叠按钮（仅目录有子项时）
+            if (hasChildren) {
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'mr-2 text-gray-500 hover:text-primary focus:outline-none transition-colors';
+                toggleBtn.innerHTML = '<i class="fa fa-caret-right transition-transform duration-300"></i>';
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleNode(node);
+                });
+                node.appendChild(toggleBtn);
+            } else {
+                // 空占位符，保持对齐
+                const spacer = document.createElement('span');
+                spacer.className = 'mr-2';
+                node.appendChild(spacer);
+            }
+
+            // 创建图标
+            const icon = document.createElement('i');
+            if (isDirectory) {
+                icon.className = 'fa fa-folder text-primary mr-2 transition-all duration-300';
+            } else {
+                // 根据文件扩展名设置不同图标
+                const ext = item.name.split('.').pop().toLowerCase();
+                if (['html', 'css', 'js', 'php', 'py', 'java', 'cpp', 'c', 'cs', 'rb', 'go', 'json'].includes(ext)) {
+                    icon.className = 'fa fa-file-code-o text-secondary mr-2';
+                } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(ext)) {
+                    icon.className = 'fa fa-file-image-o text-purple-500 mr-2';
+                } else if (['pdf'].includes(ext)) {
+                    icon.className = 'fa fa-file-pdf-o text-red-500 mr-2';
+                } else if (['doc', 'docx'].includes(ext)) {
+                    icon.className = 'fa fa-file-word-o text-blue-500 mr-2';
+                } else if (['xls', 'xlsx'].includes(ext)) {
+                    icon.className = 'fa fa-file-excel-o text-green-500 mr-2';
+                } else {
+                    icon.className = 'fa fa-file-o text-gray-500 mr-2';
+                }
+            }
+            node.appendChild(icon);
+
+            // 创建名称标签或链接
+            let nameElement;
+            if (isDirectory) {
+                nameElement = document.createElement('span');
+                nameElement.className = `hover-highlight cursor-pointer font-medium`;
+                nameElement.textContent = item.name;
+
+                // 点击名称时进入目录
+                nameElement.addEventListener('click', () => {
+                    navigateToPath(itemPathSegments);
+                });
+
+                // 双击展开/折叠
+                if (hasChildren) {
+                    node.addEventListener('dblclick', (e) => {
+                        if (e.target !== nameElement) {
+                            toggleNode(node);
+                        }
+                    });
+                }
+            } else {
+                const serverRootPath = `/${itemPathSegments.join('/')}`;
+
+                nameElement = document.createElement('a');
+                nameElement.className = `hover-highlight text-blue-600 hover:text-blue-800 hover:underline`;
+                nameElement.textContent = item.name;
+                nameElement.href = serverRootPath;
+                nameElement.target = '_blank'; // 在新窗口打开
+            }
+
+            node.appendChild(nameElement);
+
+            // 文件大小（仅文件显示）
+            if (!isDirectory) {
+                const sizeLabel = document.createElement('span');
+                sizeLabel.className = 'ml-2 text-xs text-gray-500';
+                sizeLabel.textContent = `(${formatFileSize(item.size)})`;
+                node.appendChild(sizeLabel);
+            }
+
+            // 如果是目录且有子项，创建子项容器
+            if (hasChildren) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'children-container ml-4 max-h-0 opacity-0';
+
+                // 递归添加子项
+                item.children.forEach(child => {
+                    childrenContainer.appendChild(createTreeNode(child, itemPathSegments));
+                });
+
+                node.appendChild(childrenContainer);
+            }
+
+            // 添加树形连接线
+            if (parentPathSegments.length > 0) {
+                node.classList.add('tree-line');
+            }
+
+            return node;
+        }
+
+        // 切换节点展开/折叠状态
+        function toggleNode(node) {
+            const toggleBtn = node.querySelector('button');
+            const childrenContainer = node.querySelector('.children-container');
+
+            if (toggleBtn && childrenContainer) {
+                const caretIcon = toggleBtn.querySelector('i');
+                const folderIcon = node.querySelector('.fa-folder, .fa-folder-open');
+
+                if (childrenContainer.classList.contains('max-h-0')) {
+                    // 展开
+                    childrenContainer.classList.remove('max-h-0', 'opacity-0');
+                    childrenContainer.classList.add('max-h-[2000px]', 'opacity-100');
+                    caretIcon.classList.add('rotate-90');
+                    if (folderIcon) {
+                        folderIcon.className = 'fa fa-folder-open text-primary mr-2 transition-all duration-300';
+                    }
+                } else {
+                    // 折叠
+                    childrenContainer.classList.remove('max-h-[2000px]', 'opacity-100');
+                    childrenContainer.classList.add('max-h-0', 'opacity-0');
+                    caretIcon.classList.remove('rotate-90');
+                    if (folderIcon) {
+                        folderIcon.className = 'fa fa-folder text-primary mr-2 transition-all duration-300';
+                    }
+                }
+            }
+        }
+
+        // 渲染当前目录内容
+        function renderCurrentDirectory() {
+            const currentDir = getCurrentDirectory();
+            const treeContainer = document.getElementById('directory-tree');
+
+            if (!currentDir) {
+                treeContainer.innerHTML = `
+                <div class="text-red-500 py-4">
+                    <i class="fa fa-exclamation-circle mr-2"></i>无法找到指定目录
+                </div>
+            `;
+                return;
+            }
+
+            // 清空容器
+            treeContainer.innerHTML = '';
+
+            // 创建目录树
+            if (currentDir.children && currentDir.children.length > 0) {
+                // 先添加目录，再添加文件，保持一致性
+                const directories = currentDir.children.filter(item => item.type === 'directory');
+                const files = currentDir.children.filter(item => item.type === 'file');
+
+                directories.forEach(dir => {
+                    treeContainer.appendChild(createTreeNode(dir, currentPath));
+                });
+
+                files.forEach(file => {
+                    treeContainer.appendChild(createTreeNode(file, currentPath));
+                });
+            } else {
+                treeContainer.innerHTML = '<div class="text-gray-500 italic">目录为空</div>';
+            }
+        }
+
+        // 展开所有节点
+        function expandAll() {
+            document.querySelectorAll('.children-container.max-h-0').forEach(container => {
+                container.classList.remove('max-h-0', 'opacity-0');
+                container.classList.add('max-h-[2000px]', 'opacity-100');
+
+                const toggleBtn = container.parentElement.querySelector('button');
+                if (toggleBtn) {
+                    const caretIcon = toggleBtn.querySelector('i');
+                    caretIcon.classList.add('rotate-90');
+                }
+
+                const folderIcon = container.parentElement.querySelector('.fa-folder');
+                if (folderIcon) {
+                    folderIcon.className = 'fa fa-folder-open text-primary mr-2 transition-all duration-300';
+                }
+            });
+        }
+
+        // 折叠所有节点
+        function collapseAll() {
+            document.querySelectorAll('.children-container').forEach(container => {
+                if (!container.classList.contains('max-h-0')) {
+                    container.classList.remove('max-h-[2000px]', 'opacity-100');
+                    container.classList.add('max-h-0', 'opacity-0');
+
+                    const toggleBtn = container.parentElement.querySelector('button');
+                    if (toggleBtn) {
+                        const caretIcon = toggleBtn.querySelector('i');
+                        caretIcon.classList.remove('rotate-90');
+                    }
+
+                    const folderIcon = container.parentElement.querySelector('.fa-folder-open');
+                    if (folderIcon) {
+                        folderIcon.className = 'fa fa-folder text-primary mr-2 transition-all duration-300';
+                    }
+                }
+            });
+        }
+
+        // 返回上级目录
+        function goUp() {
+            if (currentPath.length > 0) {
+                const newPath = [...currentPath];
+                newPath.pop();
+                navigateToPath(newPath);
+            }
+        }
+
+        // 加载目录结构
+        async function loadDirectoryStructure() {
+            try {
+                const response = await fetch('directory_structure.json');
+                if (!response.ok) {
+                    throw new Error('无法加载目录结构文件');
+                }
+
+                fullDirectoryStructure = await response.json();
+                // 保存根目录名称
+                rootDirectoryName = fullDirectoryStructure.name;
+                currentPath = []; // 重置为根目录
+
+                // 渲染目录并更新导航
+                renderCurrentDirectory();
+                updateBreadcrumb();
+
+            } catch (error) {
+                console.error('加载目录结构失败:', error);
+                document.getElementById('directory-tree').innerHTML = `
+                <div class="text-red-500 py-4">
+                    <i class="fa fa-exclamation-circle mr-2"></i>加载目录结构失败: ${error.message}
+                </div>
+            `;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDirectoryStructure();
+
+            // 绑定按钮事件
+            document.getElementById('expand-all').addEventListener('click', expandAll);
+            document.getElementById('collapse-all').addEventListener('click', collapseAll);
+            document.getElementById('go-up').addEventListener('click', goUp);
+        });
+    </script>
+
+</body>
+
+</html>
