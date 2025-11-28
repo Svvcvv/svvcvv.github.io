@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>蓝奏云直链解析</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { width: 100%; padding: 10px; border: none; border-radius: 4px; color: white; cursor: pointer; margin-bottom: 10px; }
+        .parse-btn { background: #4CAF50; }
+        .proxy-btn { background: #ff9800; }
+        #loading { display: none; text-align: center; margin: 10px 0; }
+        #result { display: none; margin-top: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        #result a { word-break: break-all; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>蓝奏云直链解析</h2>
+        <div class="form-group">
+            <label>分享链接:</label>
+            <input type="text" id="shareUrl" placeholder="https://www.lanzoui.com/xxx">
+        </div>
+        <div class="form-group">
+            <label>分享密码(可选):</label>
+            <input type="text" id="sharePwd" placeholder="密码">
+        </div>
+        <button class="parse-btn" onclick="parseLink(false)">解析直链</button>
+        <button class="proxy-btn" onclick="parseLink(true)">使用代理解析</button>
+        <div id="loading">加载中...</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            apiUrl: "https://www.hhlqilongzhu.cn/api/lanzouyun_jx.php",
+            proxyUrls: ["https://dl.butuan.cn/proxy.php?target=",
+                "https://api.allorigins.win/get?url=",
+                "https://corsproxy.io/?"],
+            timeout: 10000
+        };
+
+        function timeoutPromise(ms, promise) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => reject(new Error("超时")), ms);
+                promise.then(resolve, reject);
+            });
+        }
+
+        function parseLink(useProxy, proxyIdx = 0) {
+            const url = document.getElementById('shareUrl').value.trim();
+            const pwd = document.getElementById('sharePwd').value.trim();
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+
+            if (!url) { alert("请输入链接"); return; }
+
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            let reqUrl = `${CONFIG.apiUrl}?url=${encodeURIComponent(url)}${pwd ? '&pwd=' + encodeURIComponent(pwd) : ''}`;
+            if (useProxy) reqUrl = CONFIG.proxyUrls[proxyIdx % CONFIG.proxyUrls.length] + encodeURIComponent(reqUrl);
+
+            timeoutPromise(CONFIG.timeout, fetch(reqUrl, { mode: 'cors' }))
+                .then(res => {
+                    if (useProxy && proxyIdx === 1) return res.json().then(d => JSON.parse(d.contents));
+                    return res.json();
+                })
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.code === 200 || data.code === 0) {
+                        result.style.display = 'block';
+                        result.innerHTML = `<p>文件名: ${data.name}</p><p>直链: <a href="${data.downUrl}" target="_blank">${data.downUrl}</a></p>`;
+                    } else throw new Error(data.msg || "解析失败");
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    result.style.display = 'block';
+                    result.innerHTML = `<p style="color:red;">${err.message}</p>${useProxy && proxyIdx < 1 ? '<p>重试中...</p>' : ''}`;
+                    if (useProxy && proxyIdx < CONFIG.proxyUrls.length - 1) setTimeout(() => parseLink(true, proxyIdx + 1), 500);
+                });
+        }
+    </script>
+</body>
+</html>
