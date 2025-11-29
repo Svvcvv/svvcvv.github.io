@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自编程序包下载 | v4.03.04纪念版 (EOL)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            height: 100%;
+            position: relative;
+        }
+
+        /* 背景粒子容器 */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* 高斯模糊背景 */
+        .blur-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            filter: blur(15px);
+            z-index: -2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a:hover::after {
+            width: 80%;
+        }
+
+        /* 英雄区域 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            padding-top: 80px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hero h1 {
+            color: #fff;
+            /* 纯色文字更清晰 */
+            background: none;
+            -webkit-text-fill-color: #fff;
+            text-shadow: none;
+            -webkit-text-stroke: 1px transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        .hero .tagline {
+            font-size: 1.6rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .eol-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            position: relative;
+            z-index: 1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* 卡片组件 - 修复：卡片背景改为模糊效果 */
+        .card {
+            /* 移除白色背景，改为完全透明 */
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            /* 增强模糊效果 */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            color: white;
+            /* 文字颜色改为白色，提高对比度 */
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            /* 悬停时增加透明度 */
+        }
+
+        .card h2 {
+            color: #ffffff;
+            /* 标题颜色改为白色 */
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2rem;
+            position: relative;
+            padding-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+        }
+
+        .card h2 i {
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card h3 {
+            color: #ffffff;
+            /* 小标题颜色改为白色 */
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 功能网格 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(248, 249, 250, 0.1));
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        .feature-card:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-left-color: #ff6b6b;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(248, 249, 250, 0.15));
+        }
+
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: #ffffff;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card p {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+
+        /* 表格样式 - 修复：表格动画效果 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        table th,
+        table td {
+            padding: 18px 25px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        table th {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.8), rgba(63, 55, 201, 0.8));
+            color: white;
+            font-weight: 600;
+            position: relative;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        table th::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* 修复：表格行hover动画效果 */
+        table tr {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        table tr::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+
+        table tr:hover::before {
+            left: 100%;
+        }
+
+        table tr:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(8px) scale(1.01);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        table tr td {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 警告框 */
+        .alert {
+            background: linear-gradient(135deg, rgba(255, 248, 248, 0.2), rgba(255, 235, 235, 0.2));
+            border-left: 5px solid var(--warning);
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(247, 37, 133, 0.15);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(247, 37, 133, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .alert h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .alert ul {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+
+        /* 下载区域 */
+        .download-section {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 60px;
+            border-radius: 25px;
+            text-align: center;
+            margin: 50px 0;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .download-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+
+        .download-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
+        }
+
+        .download-section h2 {
+            margin-bottom: 25px;
+            font-size: 2.8rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .download-section p {
+            font-size: 1.3rem;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff8e53);
+            color: white;
+            padding: 25px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            animation: glow 3s ease-in-out infinite alternate;
+            vertical-align: middle;
+            /* 关键：垂直居中对齐 */
+            margin: 20px 15px 0 0;
+            /* 调整右边距作为间距 */
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+            }
+
+            to {
+                box-shadow: 0 20px 50px rgba(255, 107, 107, 0.6), 0 0 30px rgba(255, 107, 107, 0.3);
+            }
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(255, 107, 107, 0.6);
+            animation: none;
+        }
+
+        .download-btn i {
+            margin-right: 15px;
+            font-size: 1.8rem;
+        }
+
+        .password {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 20px 35px;
+            border-radius: 15px;
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            vertical-align: middle;
+            /* 与按钮垂直居中对齐 */
+            margin: 20px 0 0 0;
+        }
+
+        /* 更新列表 */
+        .update-list {
+            margin: 25px 0;
+            padding-left: 25px;
+        }
+
+        .update-list li {
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border-left: 5px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            opacity: 0.9;
+        }
+
+        .update-list li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent);
+            transition: width 0.4s ease;
+        }
+
+        .update-list li:hover::before {
+            width: 100%;
+        }
+
+        .update-list li:hover {
+            transform: translateX(10px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-left-color: #ff6b6b;
+        }
+
+        /* 滚动进度条 */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            z-index: 9999;
+            transition: width 0.1s ease;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.4);
+        }
+
+        /* 回到顶部按钮 - 修复：增强视觉效果 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .back-to-top::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), transparent);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-10px) scale(1.1);
+            box-shadow: 0 25px 50px rgba(255, 107, 107, 0.6);
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3) translateY(20px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.1) translateY(-10px);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 加载动画 */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.8s ease;
+        }
+
+        .loader-content {
+            text-align: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid white;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            /* 去掉原有的margin-bottom: 25px */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.1);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .hero .tagline {
+                font-size: 1.3rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                color: white;
+                font-size: 1.8rem;
+                cursor: pointer;
+            }
+
+            .download-section {
+                padding: 40px 20px;
+            }
+
+            .download-btn {
+                padding: 20px 35px;
+                font-size: 1.3rem;
+            }
+
+            .back-to-top {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+
+        /* 隐藏类 - 修复：卡片显现速度 */
+        .hidden {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 文字动画 */
+        .text-animate {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-animate span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: textSlideUp 0.6s ease-out forwards;
+        }
+
+        @keyframes textSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 浮动动画 */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .float-delay-1 {
+            animation-delay: 0.5s;
+        }
+
+        .float-delay-2 {
+            animation-delay: 1s;
+        }
+
+        /* 代码样式 */
+        code {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            color: #ffffff;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 加载动画 -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <h2>正在加载中...</h2>
+        </div>
+    </div>
+
+    <!-- 滚动进度条 -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- 回到顶部按钮 -->
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- 高斯模糊背景 -->
+    <div class="blur-background"></div>
+
+    <!-- 粒子背景容器 -->
+    <div id="particles-container"></div>
+
+    <!-- 导航栏 -->
+    <nav id="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <i class="fas fa-cogs"></i>
+                <span>自编程序包</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">功能特色</a>
+                <a href="#guide">使用指南</a>
+                <a href="#download">立即下载</a>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <!-- 英雄区域 -->
+        <section class="hero">
+            <div class="hero-content float">
+                <h1 class="text-animate">
+                    <span>自</span><span>编</span><span>程</span><span>序</span><span>包</span>
+                    <span>v4.03.04</span><span>纪念版</span>
+                </h1>
+                <p class="tagline">一站式工具箱 | 特别纪念版</p>
+                
+                <div class="eol-badge">
+                    <i class="fas fa-flag"></i> EOL - 正式停止维护纪念版
+                </div>
+                <p style="font-size: 1.2rem; line-height: 1.8; position: relative; z-index: 1; opacity: 0.9;">
+                    集成50+实用工具，涵盖游戏、学习、文件处理、编程辅助等多个领域<br>
+                    目前最后一个官方版本，源码将向首个联系的社区成员公开
+                </p>
+            </div>
+        </section>
+
+        <!-- 特别更新内容 -->
+        <section class="card hidden">
+            <h2><i class="fas fa-sync-alt"></i> 特别更新内容</h2>
+            <ul class="update-list">
+                <li>安装包默认安装至Appdata目录</li>
+                <li>自动将程序添加到系统环境变量</li>
+                <li>支持通过<code>cxb</code>命令直接运行程序</li>
+                <li>保留最新版全部功能并增加纪念标识</li>
+                <li>修复了一些bug</li>
+            </ul>
+        </section>
+            <!-- 下载区域 -->
+        <section class="download-section hidden" id="download">
+            <h2>下载程序包 v4.03.04 纪念版</h2>
+            <p>已知最后一个官方版本，EOL纪念版</p>
+            <a href="https://rooteater.lanzouw.com/iLcym3ce771a" class="download-btn" target="_blank">
+                <i class="fas fa-download"></i> 立即下载
+            </a>
+            <div class="password">
+                <i class="fas fa-key"></i> 下载密码：<strong>0000</strong>
+            </div>
+            <a href="down.html" class="download-btn" target="_blank">
+                <i class="fas fa-external-link-square"></i> 所有版本
+            </a>
+        </section>
+
+        <!-- 介绍部分 -->
+        <section class="card hidden" id="about">
+            <h2><i class="fas fa-info-circle"></i> 这是什么？</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; opacity: 0.9;">
+                这是一个一站式工具箱，集合了50多个实用小工具，涵盖游戏、学习工具、文件处理、编程辅助、数学计算等多个领域。
+                所有工具都通过一个简洁的菜单界面统一管理，无需单独安装。
+            </p>
+            <p style="font-size: 1.1rem; line-height: 1.8; margin-top: 20px; opacity: 0.9;">
+                本版本为纪念版，因下载托管被墙推出，标志着程序包正式EOL（End Of Life），原作者不再维护，
+                源码将向首个联系的社区成员公开。
+            </p>
+        </section>
+
+        <!-- 核心功能 -->
+        <section class="card hidden" id="features">
+            <h2><i class="fas fa-star"></i> 核心功能</h2>
+            <div class="feature-grid">
+                <div class="feature-card float">
+                    <h3><i class="fas fa-gamepad"></i> 游戏工具</h3>
+                    <p>Agame系列、2048、弹珠游戏、AI五子棋等</p>
+                </div>
+                <div class="feature-card float float-delay-1">
+                    <h3><i class="fas fa-book"></i> 学习工具</h3>
+                    <p>打字练习器、随机汉字生成器等</p>
+                </div>
+                <div class="feature-card float float-delay-2">
+                    <h3><i class="fas fa-calculator"></i> 数学工具</h3>
+                    <p>高精度计算器、质数验证器、进制转换器等</p>
+                </div>
+                <div class="feature-card float">
+                    <h3><i class="fas fa-file-alt"></i> 文件工具</h3>
+                    <p>大文件测试、哈希计算、加密器等</p>
+                </div>
+                <div class="feature-card float float-delay-1">
+                    <h3><i class="fas fa-lightbulb"></i> 创意工具</h3>
+                    <p>金字塔生成器、点阵字转换器等</p>
+                </div>
+                <div class="feature-card float float-delay-2">
+                    <h3><i class="fas fa-code"></i> 编程辅助</h3>
+                    <p>代码生成器、调试工具、开发辅助等</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分类专区 -->
+        <section class="card hidden">
+            <h2><i class="fas fa-th-large"></i> 三大分类专区</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3><i class="fas fa-tools"></i> 通用程序区</h3>
+                    <p>30+个常用工具（计算器/文本编辑器等）</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-share-alt"></i> 自助投稿区</h3>
+                    <p>~10个用户分享的程序（如人生模拟器）</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-paperclip"></i> 附件区</h3>
+                    <p>大型程序（如60MB的商业游戏，需下载）</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 使用指南 -->
+        <section class="card hidden" id="guide">
+            <h2><i class="fas fa-user-guide"></i> 使用指南</h2>
+
+            <h3 style="margin-bottom: 15px;">首次使用</h3>
+            <p>打开程序后可能需要激活（仅首次），根据屏幕提示输入密钥（或使用万能密钥），激活成功后永久有效。</p>
+
+            <h3 style="margin-top: 25px; margin-bottom: 15px;">主界面操作</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>按键</th>
+                        <th>功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>W/S</code></td>
+                        <td>上下移动选择器（高亮条）</td>
+                    </tr>
+                    <tr>
+                        <td><code>A/D</code></td>
+                        <td>向左/右切换分区</td>
+                    </tr>
+                    <tr>
+                        <td><code>Q/E</code></td>
+                        <td>向上/下翻页（内容过多时）</td>
+                    </tr>
+                    <tr>
+                        <td><code>O</code></td>
+                        <td>启动当前选中的程序</td>
+                    </tr>
+                    <tr>
+                        <td><code>L</code></td>
+                        <td>在附件区删除已下载程序</td>
+                    </tr>
+                    <tr>
+                        <td><code>F</code></td>
+                        <td>进入设置菜单（调整行宽、页高等）</td>
+                    </tr>
+                    <tr>
+                        <td><code>I</code></td>
+                        <td>打开news.txt查看最新信息</td>
+                    </tr>
+                    <tr>
+                        <td><code>V</code></td>
+                        <td>打开浏览器访问在线工具</td>
+                    </tr>
+                    <tr>
+                        <td><code>P</code></td>
+                        <td>彩蛋功能（播放音视频+打开HA.exe）</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 style="margin-top: 25px; margin-bottom: 15px;">附件下载说明</h3>
+            <p>在附件区选中未下载的程序 → 按O → 自动下载安装（需网络）。下载完成后会验证运行状态，失败则自动删除文件。</p>
+        </section>
+
+        <!-- 特色功能 -->
+        <section class="card hidden">
+            <h2><i class="fas fa-rocket"></i> 特色功能</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>附加程序下载</h3>
+                    <p>一键下载安装大型程序，自动校验完整性</p>
+                </div>
+                <div class="feature-card">
+                    <h3>个性化设置</h3>
+                    <p>调整界面行宽、每页项目数、更新频率等</p>
+                </div>
+                <div class="feature-card">
+                    <h3>智能更新</h3>
+                    <p>自动检测新版本，一键升级安装包</p>
+                </div>
+                <div class="feature-card">
+                    <h3>轻量便携</h3>
+                    <p>无系统残留，集成在sources文件夹</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 适用场景 -->
+        <section class="card hidden">
+            <h2><i class="fas fa-users"></i> 适用场景</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>场景</th>
+                        <th>推荐工具</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>学习编程</td>
+                        <td>进制转换器/质数验证/文件加密等</td>
+                    </tr>
+                    <tr>
+                        <td>办公效率</td>
+                        <td>表格制作/日期计算/文本编辑器等</td>
+                    </tr>
+                    <tr>
+                        <td>娱乐放松</td>
+                        <td>Agame/2048/人生重开模拟器等</td>
+                    </tr>
+                    <tr>
+                        <td>硬件测试</td>
+                        <td>大文件写入/多线程质数计算等</td>
+                    </tr>
+                    <tr>
+                        <td>创意创作</td>
+                        <td>金字塔生成器/汉字点阵转换等</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 注意事项 -->
+        <section class="alert hidden">
+            <h3><i class="fas fa-exclamation-triangle"></i> 注意事项</h3>
+            <ul>
+                <li>需要安装VC++运行库</li>
+                <li>无法启动时可在设置中运行"修复兼容"</li>
+                <li>附件区大型程序下载卡住请重启程序</li>
+                <li>兼容Windows系统，建议Win10及以上版本</li>
+                <li>彩蛋功能P键会播放音视频（请调整音量）</li>
+                <li>请勿删除data和sources目录</li>
+            </ul>
+        </section>
+
+
+        <!-- 总结 -->
+        <section class="card hidden">
+            <h2><i class="fas fa-check-circle"></i> 总结</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; opacity: 0.9;">
+                这个程序包就像一个数字瑞士军刀，无论是学生、程序员、办公族还是普通用户，都能找到实用工具。
+                通过简洁的键盘操作即可快速调用各种功能，免去了寻找和安装零散软件的麻烦，
+                特别适合需要多种小工具的日常使用场景。
+            </p>
+        </section>
+
+
+    </div>
+
+    <script>
+        // 初始化GSAP插件
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 粒子系统
+        class ParticleSystem {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ alpha: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                document.getElementById('particles-container').appendChild(this.renderer.domElement);
+
+                this.particles = [];
+                this.createParticles();
+
+                this.animate();
+                this.handleResize();
+            }
+
+            createParticles() {
+                const geometry = new THREE.BufferGeometry();
+                const material = new THREE.PointsMaterial({
+                    color: 0xffffff,
+                    size: 0.08,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending
+                });
+
+                const positions = [];
+                for (let i = 0; i < 300; i++) {
+                    positions.push(
+                        (Math.random() - 0.5) * 30,
+                        (Math.random() - 0.5) * 30,
+                        (Math.random() - 0.5) * 30
+                    );
+                }
+
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                this.particleSystem = new THREE.Points(geometry, material);
+                this.scene.add(this.particleSystem);
+
+                this.camera.position.z = 15;
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                this.particleSystem.rotation.x += 0.0015;
+                this.particleSystem.rotation.y += 0.0025;
+
+                // 添加粒子浮动效果
+                const positions = this.particleSystem.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] += Math.sin(Date.now() * 0.001 + i) * 0.005;
+                }
+                this.particleSystem.geometry.attributes.position.needsUpdate = true;
+
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            handleResize() {
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            // 隐藏加载动画
+            setTimeout(() => {
+                gsap.to('#loader', {
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: "power3.out",
+                    onComplete: () => {
+                        document.getElementById('loader').style.display = 'none';
+                    }
+                });
+            }, 1500);
+
+            // 初始化粒子系统
+            new ParticleSystem();
+
+            // 文字逐字动画
+            const textElements = document.querySelectorAll('.text-animate');
+            textElements.forEach(element => {
+                const text = element.textContent;
+                element.innerHTML = '';
+                text.split('').forEach((char, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.style.animationDelay = `${index * 0.1}s`;
+                    element.appendChild(span);
+                });
+            });
+
+            // 滚动动画 - 修复：卡片显现速度，加快动画
+            gsap.utils.toArray('.hidden').forEach((element, index) => {
+                gsap.to(element, {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 0.6, // 加快动画速度
+                    ease: "power4.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%", // 更早触发动画
+                        end: "top 15%",
+                        toggleActions: "play none none reverse",
+                        scrub: false
+                    }
+                });
+            });
+
+            // 滚动进度条和回到顶部按钮 - 修复：回到顶部按钮功能
+            const backToTopBtn = document.getElementById('backToTop');
+            const scrollProgress = document.getElementById('scrollProgress');
+
+            function updateScrollUI() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.body.offsetHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+
+                // 更新滚动进度条
+                scrollProgress.style.width = scrollPercent + '%';
+
+                // 更新回到顶部按钮显示状态 - 修复：更早显示按钮
+                if (scrollTop > 150) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+
+                // 导航栏背景变化
+                const navbar = document.getElementById('navbar');
+                if (scrollTop > 50) {
+                    gsap.to(navbar, {
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        backdropFilter: 'blur(40px)',
+                        duration: 0.3
+                    });
+                } else {
+                    gsap.to(navbar, {
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        backdropFilter: 'blur(30px)',
+                        duration: 0.3
+                    });
+                }
+            }
+
+            // 修复：使用window作为滚动容器，添加被动事件监听器
+            window.addEventListener('scroll', updateScrollUI, { passive: true });
+
+            // 修复：回到顶部功能，使用原生JavaScript
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // 平滑滚动 - 修复导航链接
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        const offsetTop = targetElement.offsetTop - 80;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // 增强的卡片悬停动画
+            document.querySelectorAll('.card').forEach(card => {
+                let hoverTween;
+
+                card.addEventListener('mouseenter', () => {
+                    hoverTween = gsap.to(card, {
+                        y: -12,
+                        scale: 1.02,
+                        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.2)',
+                        duration: 0.4,
+                        ease: "back.out(1.7)"
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    if (hoverTween) {
+                        hoverTween.reverse();
+                    }
+                });
+            });
+
+            // 增强的按钮动画
+            const downloadBtn = document.querySelector('.download-btn');
+            let downloadTween;
+
+            downloadBtn.addEventListener('mouseenter', () => {
+                downloadTween = gsap.to(downloadBtn, {
+                    scale: 1.08,
+                    y: -5,
+                    duration: 0.3,
+                    ease: "back.out(1.7)"
+                });
+            });
+
+            downloadBtn.addEventListener('mouseleave', () => {
+                if (downloadTween) {
+                    downloadTween.reverse();
+                }
+            });
+
+            // 功能卡片交错动画
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach((card, index) => {
+                let cardTween;
+
+                card.addEventListener('mouseenter', () => {
+                    cardTween = gsap.to(card, {
+                        y: -8,
+                        scale: 1.03,
+                        duration: 0.4,
+                        ease: "back.out(1.7)"
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    if (cardTween) {
+                        cardTween.reverse();
+                    }
+                });
+            });
+
+            // 修复：表格行hover动画效果
+            document.querySelectorAll('table tr').forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    gsap.to(row, {
+                        x: 8,
+                        scale: 1.01,
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+                        duration: 0.3,
+                        ease: "back.out(1.7)"
+                    });
+                });
+
+                row.addEventListener('mouseleave', () => {
+                    gsap.to(row, {
+                        x: 0,
+                        scale: 1,
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        boxShadow: 'none',
+                        duration: 0.3,
+                        ease: "back.in(1.7)"
+                    });
+                });
+            });
+
+            // 添加页面可见性变化时的动画控制
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // 页面隐藏时暂停动画
+                    gsap.globalTimeline.pause();
+                } else {
+                    // 页面显示时恢复动画
+                    gsap.globalTimeline.resume();
+                    // 刷新滚动状态
+                    updateScrollUI();
+                }
+            });
+
+            // 初始调用一次，确保状态正确
+            updateScrollUI();
+        });
+    </script>
+</body>
+
+</html>
