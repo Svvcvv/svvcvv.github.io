@@ -79,7 +79,7 @@
 
         /* 页面容器 */
         .page-container {
-            max-width: 1200px;
+            max-width: 1400px; /* 增加最大宽度以支持更多列 */
             margin: 0 auto;
             padding-top: 2rem;
         }
@@ -104,12 +104,30 @@
             margin: 1rem auto 0;
         }
 
-        /* 网格布局 */
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+        /* 多列布局容器 */
+        .content-columns {
+            column-count: 1;
+            column-gap: 2rem;
             margin-bottom: 3rem;
+            orphans: 1;
+            widows: 1;
+        }
+
+        /* 响应式列数调整 - 修复列数问题 */
+        @media (min-width: 576px) {
+            .content-columns { column-count: 2; }
+        }
+
+        @media (min-width: 768px) {
+            .content-columns { column-count: 2; }
+        }
+
+        @media (min-width: 992px) {
+            .content-columns { column-count: 3; }
+        }
+
+        @media (min-width: 1200px) {
+            .content-columns { column-count: 4; }
         }
 
         /* 卡片组件 */
@@ -119,7 +137,10 @@
             box-shadow: var(--shadow-md);
             padding: 1.5rem;
             transition: var(--transition);
-            height: 100%;
+            margin-bottom: 2rem;
+            break-inside: avoid; /* 防止卡片在列中断开 */
+            display: inline-block;
+            width: 100%;
         }
 
         .category-card:hover {
@@ -127,10 +148,38 @@
             box-shadow: 0 8px 24px rgba(67, 97, 238, 0.15);
         }
 
-        .card-header {
+        /* 可折叠头部 */
+        .toggle-header {
             margin-bottom: 1.25rem;
             padding-bottom: 0.75rem;
             border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-header:hover {
+            color: var(--primary-light);
+        }
+
+        .toggle-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        /* 修复三角形方向：未展开时向下，展开时向上 */
+        .toggle-header:not(.active) .toggle-icon {
+            transform: rotate(180deg); /* 未展开：向下 ▼ */
+        }
+
+        .toggle-header.active .toggle-icon {
+            transform: rotate(0deg); /* 展开：向上 ▲ */
         }
 
         .card-title {
@@ -150,9 +199,21 @@
             border-radius: 2px;
         }
 
+        /* 折叠内容 */
+        .collapse-content {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .collapse-content.active {
+            max-height: 2000px; /* 足够容纳所有内容 */
+        }
+
         /* 链接列表 */
         .link-list {
             list-style: none;
+            padding-top: 0.5rem;
         }
 
         .link-item {
@@ -252,9 +313,9 @@
                 padding: 1rem 0.5rem;
             }
 
-            .content-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
+            .content-columns {
+                column-count: 1;
+                column-gap: 1.5rem;
             }
 
             .link-item a {
@@ -276,186 +337,198 @@
     <div class="page-container">
         <h1 class="page-title">银河奶牛放置插件和网址合集</h1>
 
-        <!-- 内容网格 -->
-        <div class="content-grid">
+        <!-- 多列布局容器 -->
+        <div class="content-columns">
             <!-- 实用子分类 -->
             <div class="category-card">
-                <div class="card-header">
+                <div class="toggle-header active">
                     <h2 class="card-title">实用插件</h2>
+                    <span class="toggle-icon">▼</span>
                 </div>
-                <ul class="link-list">
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/494467-mwitools" target="_blank">MWITOOLS</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/499963-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B-%E9%A3%9F%E7%94%A8%E5%B7%A5%E5%85%B7"
-                            target="_blank">食用工具</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/536205" target="_blank">康康运气</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/531872-mwi-ultimate-enhancement-tracker-v3-7-7"
-                            target="_blank">强化统计</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/530217-mwi-price-history-viewer-modified-%E9%93%B6%E6%B2%B3%E7%89%9B%E7%89%9B%E5%95%86%E5%9F%8E%E4%B8%AD%E7%89%A9%E5%93%81%E4%BB%B7%E6%A0%BC%E8%B5%B0%E5%8A%A8%E5%B0%8F%E5%8A%A9%E6%89%8B"
-                            target="_blank">金融助手</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://update.greasyfork.org.cn/scripts/530757/MWIAlchemyCalc.user.js"
-                            target="_blank">炼金收益</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/537282-mwi-equipment-diff"
-                            target="_blank">装备差异比较</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/532170-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B%E6%94%BE%E7%BD%AE-%E8%BE%85%E5%8A%A9%E5%A2%9E%E5%BC%BA"
-                            target="_blank">材料需求计算器</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/534895-real-profit-calculator"
-                            target="_blank">模拟器buff修复</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535671-ranged-way-idle"
-                            target="_blank">任务和库存优化</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535371-mwi-qqshow" target="_blank">QQ秀修复</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://update.greasyfork.org.cn/scripts/528870/MWI%E6%88%BF%E5%B1%8B%E5%8D%87%E7%BA%A7%E6%9D%90%E6%96%99%E8%AE%A1%E7%AE%97%E5%99%A8.user.js"
-                            target="_blank">房屋升级计算器</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/539918-mwi-dungeon-timer"
-                            target="_blank">地牢时间</a>
-                    </li>
-                </ul>
+                <div class="collapse-content active">
+                    <ul class="link-list">
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/494467-mwitools" target="_blank">MWITOOLS</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/499963-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B-%E9%A3%9F%E7%94%A8%E5%B7%A5%E5%85%B7"
+                                target="_blank">食用工具</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/536205" target="_blank">康康运气</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/531872-mwi-ultimate-enhancement-tracker-v3-7-7"
+                                target="_blank">强化统计</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/530217-mwi-price-history-viewer-modified-%E9%93%B6%E6%B2%B3%E7%89%9B%E7%89%9B%E5%95%86%E5%9F%8E%E4%B8%AD%E7%89%A9%E5%93%81%E4%BB%B7%E6%A0%BC%E8%B5%B0%E5%8A%A8%E5%B0%8F%E5%8A%A9%E6%89%8B"
+                                target="_blank">金融助手</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://update.greasyfork.org.cn/scripts/530757/MWIAlchemyCalc.user.js"
+                                target="_blank">炼金收益</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/537282-mwi-equipment-diff"
+                                target="_blank">装备差异比较</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/532170-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B%E6%94%BE%E7%BD%AE-%E8%BE%85%E5%8A%A9%E5%A2%9E%E5%BC%BA"
+                                target="_blank">材料需求计算器</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/534895-real-profit-calculator"
+                                target="_blank">模拟器buff修复</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535671-ranged-way-idle"
+                                target="_blank">任务和库存优化</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535371-mwi-qqshow" target="_blank">QQ秀修复</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://update.greasyfork.org.cn/scripts/528870/MWI%E6%88%BF%E5%B1%8B%E5%8D%87%E7%BA%A7%E6%9D%90%E6%96%99%E8%AE%A1%E7%AE%97%E5%99%A8.user.js"
+                                target="_blank">房屋升级计算器</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/539918-mwi-dungeon-timer"
+                                target="_blank">地牢时间</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <!-- 美化插件 -->
             <div class="category-card">
-                <div class="card-header">
+                <div class="toggle-header active">
                     <h2 class="card-title">美化插件</h2>
+                    <span class="toggle-icon">▼</span>
                 </div>
-                <ul class="link-list">
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535422-mwi-hit-tracker-canvas"
-                            target="_blank">攻击特效</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/537441-milkywayidle-%E5%85%AC%E5%B1%8F%E8%81%8A%E5%A4%A9%E5%85%A8%E5%B1%8F"
-                            target="_blank">公屏聊天全屏</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535467-egg-hit-tracker"
-                            target="_blank">鸡蛋攻击特效</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535795-%E7%89%9B%E7%89%9B%E8%81%8A%E5%A4%A9%E5%A2%9E%E5%BC%BA%E6%8F%92%E4%BB%B6"
-                            target="_blank">聊天增强</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/536463-%E7%89%9B%E7%89%9Bui%E5%A2%9E%E5%BC%BA%E6%8F%92%E4%BB%B6"
-                            target="_blank">ui增强</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/534023-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B-%E6%80%AA%E7%89%A9%E6%8D%A2%E7%9A%AE-%E6%88%98%E8%B4%A5cg"
-                            target="_blank">怪物换皮</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535360-mwi-hbuilderx-green-color"
-                            target="_blank">绿色配色</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/535131-mwi-vscode-dark-color"
-                            target="_blank">黑色配色</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/536109-mwi-danmaku" target="_blank">战斗聊天弹幕</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/scripts/538533" target="_blank">怪物娘化</a>
-                    </li>
-                </ul>
+                <div class="collapse-content active">
+                    <ul class="link-list">
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535422-mwi-hit-tracker-canvas"
+                                target="_blank">攻击特效</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/537441-milkywayidle-%E5%85%AC%E5%B1%8F%E8%81%8A%E5%A4%A9%E5%85%A8%E5%B1%8F"
+                                target="_blank">公屏聊天全屏</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535467-egg-hit-tracker"
+                                target="_blank">鸡蛋攻击特效</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535795-%E7%89%9B%E7%89%9B%E8%81%8A%E5%A4%A9%E5%A2%9E%E5%BC%BA%E6%8F%92%E4%BB%B6"
+                                target="_blank">聊天增强</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/536463-%E7%89%9B%E7%89%9Bui%E5%A2%9E%E5%BC%BA%E6%8F%92%E4%BB%B6"
+                                target="_blank">ui增强</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/534023-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B-%E6%80%AA%E7%89%A9%E6%8D%A2%E7%9A%AE-%E6%88%98%E8%B4%A5cg"
+                                target="_blank">怪物换皮</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535360-mwi-hbuilderx-green-color"
+                                target="_blank">绿色配色</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/535131-mwi-vscode-dark-color"
+                                target="_blank">黑色配色</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/536109-mwi-danmaku" target="_blank">战斗聊天弹幕</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/scripts/538533" target="_blank">怪物娘化</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <!-- 便捷插件 -->
             <div class="category-card">
-                <div class="card-header">
+                <div class="toggle-header active">
                     <h2 class="card-title">便捷插件</h2>
+                    <span class="toggle-icon">▼</span>
                 </div>
-                <ul class="link-list">
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/530646-mwi-%E5%A5%BD%E5%8F%8B%E5%8A%A9%E6%89%8B"
-                            target="_blank">好友助手</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/536234-%E7%89%9B%E7%89%9B%E6%88%98%E6%96%97%E5%8A%A9%E6%89%8B"
-                            target="_blank">战力排行</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/533627-%E9%93%B6%E6%B2%B3%E7%89%9B%E7%89%9B-1"
-                            target="_blank">快捷+1</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/531682-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B-%E4%BB%93%E5%BA%93%E7%89%A9%E5%93%81%E6%94%B6%E8%97%8F%E5%92%8C%E5%BF%AB%E9%80%9F%E5%88%87%E6%8D%A2%E8%A7%92%E8%89%B2"
-                            target="_blank">仓库物品收藏和快速切换角色</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/zh-CN/scripts/531374-mwi-qol-profile-on-avatar"
-                            target="_blank">点击头像查看个人资料</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://greasyfork.org.cn/en/scripts/539693-milky-way-idle-simple-market"
-                            target="_blank">市场界面浏览库存数量</a>
-                    </li>
-                </ul>
+                <div class="collapse-content active">
+                    <ul class="link-list">
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/530646-mwi-%E5%A5%BD%E5%8F%8B%E5%8A%A9%E6%89%8B"
+                                target="_blank">好友助手</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/536234-%E7%89%9B%E7%89%9B%E6%88%98%E6%96%97%E5%8A%A9%E6%89%8B"
+                                target="_blank">战力排行</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/533627-%E9%93%B6%E6%B2%B3%E7%89%9B%E7%89%9B-1"
+                                target="_blank">快捷+1</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/531682-%E9%93%B6%E6%B2%B3%E5%A5%B6%E7%89%9B-%E4%BB%93%E5%BA%93%E7%89%A9%E5%93%81%E6%94%B6%E8%97%8F%E5%92%8C%E5%BF%AB%E9%80%9F%E5%88%87%E6%8D%A2%E8%A7%92%E8%89%B2"
+                                target="_blank">仓库物品收藏和快速切换角色</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/zh-CN/scripts/531374-mwi-qol-profile-on-avatar"
+                                target="_blank">点击头像查看个人资料</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://greasyfork.org.cn/en/scripts/539693-milky-way-idle-simple-market"
+                                target="_blank">市场界面浏览库存数量</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <!-- 网址分类 -->
             <div class="category-card">
-                <div class="card-header">
+                <div class="toggle-header active">
                     <h2 class="card-title">实用网址</h2>
+                    <span class="toggle-icon">▼</span>
                 </div>
-                <ul class="link-list">
-                    <li class="link-item">
-                        <a href="https://shykai.github.io/MWICombatSimulatorTest/dist/" target="_blank">战斗模拟器</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://bkn46.github.io/MWICombatSimulatorTest/dist/" target="_blank">bkn战斗模拟器改</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://milkonomy.pages.dev/#/dashboard" target="_blank">利润模拟器及强化模拟*</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://doh-nuts.github.io/Enhancelator/" target="_blank">强化模拟*</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://ozanzadeoglu.github.io/MWI-chest-sim/" target="_blank">地牢开箱模拟*</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://feishu.cn/docx/KG9ddER6Eo2uPoxJFkicsvbEnCe" target="_blank">牛牛手册</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://woodensail.github.io/MWIviewer/" target="_blank">物品长期走势</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://li-mwi-leaderboard.ngrok.io/" target="_blank">经验排行榜</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://rshock.github.io/MilkWayBulletin/" target="_blank">快报</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://discord.gg/2XKXWR6B/" target="_blank">官方discord</a>
-                    </li>
-                    <li class="link-item">
-                        <a href="https://niuniu.0xa2c2a.shop/party.html" target="_blank">国人组队情况</a>
-                    </li>
-                </ul>
+                <div class="collapse-content active">
+                    <ul class="link-list">
+                        <li class="link-item">
+                            <a href="https://shykai.github.io/MWICombatSimulatorTest/dist/" target="_blank">战斗模拟器</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://bkn46.github.io/MWICombatSimulatorTest/dist/" target="_blank">bkn战斗模拟器改</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://milkonomy.pages.dev/#/dashboard" target="_blank">利润模拟器及强化模拟*</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://doh-nuts.github.io/Enhancelator/" target="_blank">强化模拟*</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://ozanzadeoglu.github.io/MWI-chest-sim/" target="_blank">地牢开箱模拟*</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://feishu.cn/docx/KG9ddER6Eo2uPoxJFkicsvbEnCe" target="_blank">牛牛手册</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://woodensail.github.io/MWIviewer/" target="_blank">物品长期走势</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://li-mwi-leaderboard.ngrok.io/" target="_blank">经验排行榜</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://rshock.github.io/MilkWayBulletin/" target="_blank">快报</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://discord.gg/2XKXWR6B/" target="_blank">官方discord</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://niuniu.0xa2c2a.shop/party.html" target="_blank">国人组队情况</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -464,6 +537,57 @@
             <p>By 3edsa  修改自noonsleepbox的版本</p>
         </footer>
     </div>
+
+    <script>
+        // 获取所有折叠头部和内容
+        const toggleHeaders = document.querySelectorAll('.toggle-header');
+        const toggleContents = document.querySelectorAll('.collapse-content');
+        
+        // 初始化状态 - 确保active状态和内容显示一致
+        toggleHeaders.forEach((header, index) => {
+            const content = toggleContents[index];
+            const isActive = header.classList.contains('active');
+            
+            // 确保内容状态与头部一致
+            if (isActive) {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+            
+            // 确保箭头方向正确
+            const icon = header.querySelector('.toggle-icon');
+            if (icon) {
+                if (isActive) {
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            }
+        });
+        
+        // 为每个头部添加点击事件
+        toggleHeaders.forEach((header, index) => {
+            header.addEventListener('click', () => {
+                const content = toggleContents[index];
+                const isActive = header.classList.contains('active');
+                
+                // 同步切换头部和内容的active状态
+                header.classList.toggle('active');
+                content.classList.toggle('active');
+                
+                // 确保箭头方向与状态一致
+                const icon = header.querySelector('.toggle-icon');
+                if (icon) {
+                    if (!isActive) {
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
