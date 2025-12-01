@@ -2,10 +2,18 @@ import os
 import json
 import argparse
 
-def get_directory_structure(root_dir):
+def get_directory_structure(root_dir, excluded_dirs=None):
     """
-    递归获取目录结构
+    递归获取目录结构（排除指定目录）
+    
+    Args:
+        root_dir: 根目录路径
+        excluded_dirs: 要排除的目录名集合（默认排除.git、__pycache__等）
     """
+    # 默认排除的目录列表
+    if excluded_dirs is None:
+        excluded_dirs = {'.git', '__pycache__', 'node_modules', '.idea', '.vscode'}
+    
     structure = {
         'name': os.path.basename(root_dir),
         'type': 'directory',
@@ -13,23 +21,25 @@ def get_directory_structure(root_dir):
     }
     
     try:
-        # 获取目录中的所有条目
         entries = os.listdir(root_dir)
         
         for entry in entries:
             entry_path = os.path.join(root_dir, entry)
             
-            # 检查是否为目录
+            # 跳过排除的目录
+            if os.path.isdir(entry_path) and entry in excluded_dirs:
+                continue
+            
             if os.path.isdir(entry_path):
-                # 递归处理子目录
-                structure['children'].append(get_directory_structure(entry_path))
+                # 递归处理子目录（传递排除列表）
+                structure['children'].append(get_directory_structure(entry_path, excluded_dirs))
             else:
-                # 处理文件
+                # 处理文件（记录大小）
                 file_size = os.path.getsize(entry_path)
                 structure['children'].append({
                     'name': entry,
                     'type': 'file',
-                    'size': file_size  # 文件大小（字节）
+                    'size': file_size
                 })
                 
     except PermissionError:
@@ -40,18 +50,23 @@ def get_directory_structure(root_dir):
     return structure
 
 def main():
-    # 设置命令行参数
-    parser = argparse.ArgumentParser(description='将目录结构转换为JSON文件')
+    parser = argparse.ArgumentParser(description='将目录结构转换为JSON文件（支持排除指定目录）')
     parser.add_argument('--dir', type=str, default='.', help='要处理的目录路径，默认为当前目录')
     parser.add_argument('--output', type=str, default='directory_structure.json', help='输出的JSON文件名')
+    parser.add_argument('--exclude', type=str, nargs='+', help='额外要排除的目录名（例如：--exclude temp logs）')
     
     args = parser.parse_args()
     
-    # 获取目录结构
-    print(f"正在处理目录: {os.path.abspath(args.dir)}")
-    dir_structure = get_directory_structure(args.dir)
+    # 合并默认排除目录和用户指定的排除目录
+    excluded_dirs = {'.git', '__pycache__', 'node_modules', '.idea', '.vscode'}
+    if args.exclude:
+        excluded_dirs.update(args.exclude)
     
-    # 保存为JSON文件
+    print(f"正在处理目录: {os.path.abspath(args.dir)}")
+    print(f"排除的目录: {excluded_dirs}")
+    
+    dir_structure = get_directory_structure(args.dir, excluded_dirs)
+    
     with open(args.output, 'w', encoding='utf-8') as f:
         json.dump(dir_structure, f, ensure_ascii=False, indent=2)
         
