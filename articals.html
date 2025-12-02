@@ -174,6 +174,15 @@
         // 模拟博客数据
         const blogPosts = [
             {
+                title: "语录合集",
+                date: "2025年12月",
+                readTime: "3 min read",
+                category: "Comment",
+                image: "webs/articals/assets/yu.png",
+                excerpt: "长期更新",
+                link: "webs/articals/how-to-make-compliments.html"
+            },
+            {
                 title: "程序包最终纪念版发布",
                 date: "2025年11月",
                 readTime: "3 min read",
@@ -332,7 +341,7 @@
             nextBtn.classList.toggle('cursor-not-allowed', nextBtn.disabled);
         }
 
-        // 初始化分类筛选功能
+        // 初始化分类筛选功能（支持片段标识符）
         function initCategoryFilters() {
             const categoryButtons = document.querySelectorAll('.category-btn');
             
@@ -340,6 +349,8 @@
                 button.addEventListener('click', () => {
                     // 更新选中的分类
                     currentCategory = button.dataset.category;
+                    // 更新URL片段标识符
+                    location.hash = `#${currentCategory}`;
                     
                     // 重置到第一页
                     currentPage = 1;
@@ -380,11 +391,40 @@
             });
         }
 
+        function handleHashChange() {
+            const hash = location.hash.slice(1); // 移除#号
+            if (hash) {
+                // 使用decodeURIComponent解码URL片段
+                const decodedHash = decodeURIComponent(hash);
+                const targetButton = document.querySelector(`.category-btn[data-category="${decodedHash}"]`);
+                if (targetButton) {
+                    targetButton.click();
+                }
+            }
+        }
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
             initCategoryFilters();
             initPagination();
-            renderPosts(); // 初始渲染第一页
+            
+            // 监听URL片段变化事件
+            window.addEventListener('hashchange', handleHashChange);
+            
+            const initialHash = location.hash.slice(1);
+            if (initialHash) {
+                const decodedInitialHash = decodeURIComponent(initialHash);
+                const targetButton = document.querySelector(`.category-btn[data-category="${decodedInitialHash}"]`);
+                if (targetButton) {
+                    targetButton.click();
+                } else {
+                    // 如果片段无效，默认显示All分类
+                    renderPosts();
+                }
+            } else {
+                // 没有片段时默认显示All分类
+                renderPosts();
+            }
         });
     </script>
 </body>

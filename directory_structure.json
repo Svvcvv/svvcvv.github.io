@@ -20,7 +20,7 @@
     {
       "name": "articals.html",
       "type": "file",
-      "size": 18683
+      "size": 20389
     },
     {
       "name": "assets",
@@ -668,6 +668,11 @@
               "type": "directory",
               "children": [
                 {
+                  "name": "cnm.png",
+                  "type": "file",
+                  "size": 18364
+                },
+                {
                   "name": "error.jpg",
                   "type": "file",
                   "size": 157534
@@ -703,6 +708,11 @@
                   "size": 107392
                 },
                 {
+                  "name": "yu.png",
+                  "type": "file",
+                  "size": 10354
+                },
+                {
                   "name": "zcpt.gif",
                   "type": "file",
                   "size": 538606
@@ -717,7 +727,12 @@
             {
               "name": "cxb-last-release.html",
               "type": "file",
-              "size": 29199
+              "size": 29222
+            },
+            {
+              "name": "how-to-make-compliments.html",
+              "type": "file",
+              "size": 26023
             },
             {
               "name": "post1.html",
