@@ -418,6 +418,9 @@
         let messageIdCounter = 0;
         let confirmAction = null; // 用于存储需要确认的操作
         
+        // 公共聊天室固定Key
+        const PUBLIC_ROOM_KEY = 'pznzgg';
+        
         // API限制配置
         const API_LIMITS = {
             totalOperations: 500,  // 创建、更新操作总和限制
@@ -429,8 +432,17 @@
             // 加载本地存储数据
             loadLocalData();
             
-            // 生成默认聊天室的key
-            currentRoomKey = stringToHashKey(currentRoomName);
+            // 检查URL片段标识符
+            checkFragmentIdentifier();
+            
+            // 如果没有从片段标识符获取到key，则使用公共聊天室的固定key
+            if (!currentRoomKey) {
+                currentRoomKey = PUBLIC_ROOM_KEY;
+                currentRoomName = '公共聊天室';
+                // 设置默认标识符
+                window.location.hash = currentRoomKey;
+            }
+            
             document.getElementById('current-room-key').textContent = currentRoomKey;
             
             // 初始化UI
@@ -457,8 +469,57 @@
             }
         });
         
+        // 检查URL片段标识符
+        function checkFragmentIdentifier() {
+            const fragment = window.location.hash.substring(1);
+            if (fragment) {
+                // 尝试从片段标识符获取聊天室key
+                const rooms = JSON.parse(localStorage.getItem('chatRooms') || '[]');
+                const room = rooms.find(r => r.key === fragment);
+                
+                if (room) {
+                    // 如果找到对应的聊天室，切换到该聊天室
+                    currentRoomKey = fragment;
+                    currentRoomName = room.name;
+                } else {
+                    // 如果没有找到，使用标识符作为聊天室名称
+                    currentRoomKey = fragment;
+                    currentRoomName = fragment;
+                    
+                    // 添加到聊天室列表
+                    const newRoom = {
+                        name: currentRoomName,
+                        key: currentRoomKey
+                    };
+                    
+                    const rooms = JSON.parse(localStorage.getItem('chatRooms') || '[]');
+                    if (!rooms.some(r => r.key === currentRoomKey)) {
+                        rooms.push(newRoom);
+                        saveRoomsList(rooms);
+                        // 立即更新UI显示
+                        loadRoomsList();
+                        renderJoinedRoomsList(rooms);
+                    }
+                }
+            }
+        }
+        
+        // 监听片段标识符变化
+        window.addEventListener('hashchange', () => {
+            checkFragmentIdentifier();
+            document.getElementById('current-room-key').textContent = currentRoomKey;
+            document.getElementById('current-room-name').textContent = currentRoomName;
+            loadMessages(true); // 切换聊天室时显示动画
+            loadRoomsList(); // 更新列表选中状态
+        });
+        
         // 字符串哈希生成key（确保6位以上）
         function stringToHashKey(str) {
+            // 公共聊天室使用固定key
+            if (str === '公共聊天室') {
+                return PUBLIC_ROOM_KEY;
+            }
+            
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 const char = str.charCodeAt(i);
@@ -539,7 +600,7 @@
             if (!rooms.some(room => room.name === '公共聊天室')) {
                 rooms.unshift({
                     name: '公共聊天室',
-                    key: stringToHashKey('公共聊天室')
+                    key: PUBLIC_ROOM_KEY
                 });
                 saveRoomsList(rooms);
             }
@@ -635,6 +696,10 @@
         function switchRoom(key, name) {
             currentRoomKey = key;
             currentRoomName = name;
+            
+            // 更新URL片段标识符
+            window.location.hash = key;
+            
             document.getElementById('current-room-name').textContent = name;
             document.getElementById('current-room-key').textContent = key;
             loadMessages(true); // 切换聊天室时显示动画
@@ -1464,4 +1529,3 @@
     </script>
 </body>
 </html>
-    

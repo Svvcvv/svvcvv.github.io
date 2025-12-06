@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Articals - Rooteater</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	<script>
+		// Tailwind配置
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						primary: "#3B82F6",
+						secondary: "#64748B",
+						neutral: "#F8FAFC",
+						dark: "#1E293B",
+					},
+					// fontFamily: {
+					// 	sans: ["Inter", "SimSun", "system-ui", "宋体", "sans-serif"],
+					// 	serif: ["Merriweather", "SimSun", "宋体", "Georgia", "serif"],
+					// },
+					fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                    },
+				},
+			},
+		};
+	</script>
+	<style type="text/tailwindcss">
+		@layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .text-balance {
+          text-wrap: balance;
+        }
+        .article-prose p {
+          @apply my-6 text-lg text-gray-700 leading-relaxed;
+        }
+        .article-prose h2 {
+          @apply text-2xl font-bold mt-12 mb-6 text-gray-800;
+        }
+        .article-prose h3 {
+          @apply text-xl font-bold mt-10 mb-4 text-gray-800;
+        }
+        .article-prose blockquote {
+          @apply border-l-4 border-primary pl-4 italic my-8 text-gray-600;
+        }
+        .article-prose ul {
+          @apply list-disc pl-6 my-6 text-gray-700;
+        }
+        .article-prose li {
+          @apply my-2;
+        }
+      }
+    </style>
+	<style>
+		@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap");
+
+		/* 全局样式 */
+		body {
+			background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+			background-attachment: fixed;
+		}
+
+		body::before {
+			content: "";
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");
+			opacity: 0.3;
+			pointer-events: none;
+			z-index: -1;
+		}
+
+		/* 滚动条美化 */
+		::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.5);
+			backdrop-filter: blur(4px);
+			border-radius: 4px;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: rgba(59, 130, 246, 0.3);
+			border-radius: 4px;
+			transition: background 0.3s ease;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: rgba(59, 130, 246, 0.5);
+		}
+
+		/* 玻璃虚化卡片 */
+		.glass-card {
+			background: rgba(255, 255, 255, 0.7);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
+			border: 1px solid rgba(229, 231, 235, 0.5);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+		}
+
+		.glass-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+		}
+
+		/* 图片动画 */
+		.img-fade-in {
+			animation: imgFadeIn 0.8s ease-in-out;
+		}
+
+		.img-hover-zoom {
+			overflow: hidden;
+			border-radius: 0.5rem;
+		}
+
+		.img-hover-zoom img {
+			transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+		}
+
+		.img-hover-zoom:hover img {
+			transform: scale(1.03);
+		}
+
+		@keyframes imgFadeIn {
+			from {
+				opacity: 0;
+				transform: scale(0.95);
+			}
+
+			to {
+				opacity: 1;
+				transform: scale(1);
+			}
+		}
+
+		/* 滚动触发动画 */
+		.fade-in-element {
+			opacity: 0;
+			transform: translateY(20px);
+			transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+				transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+		}
+
+		.fade-in-element.active {
+			opacity: 1;
+			transform: translateY(0);
+		}
+
+		/* 打字机效果 - 修复版 */
+		.typing-container {
+			display: inline-block;
+			position: relative;
+		}
+
+		@keyframes typing {
+			from {
+				width: 0;
+			}
+
+			to {
+				width: 100%;
+			}
+		}
+
+		@keyframes blinkCaret {
+
+			from,
+			to {
+				border-color: transparent;
+			}
+
+			50% {
+				border-color: #3b82f6;
+			}
+		}
+
+		.typing-effect {
+			overflow: hidden;
+			border-right: 0.15em solid #3b82f6;
+			white-space: nowrap;
+			animation: typing 3.5s steps(40, end),
+				blinkCaret 0.75s step-end infinite;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+		/* 引用装饰 */
+		blockquote {
+			position: relative;
+		}
+
+		blockquote::before {
+			content: "“";
+			position: absolute;
+			top: -10px;
+			left: -20px;
+			font-size: 5rem;
+			color: rgba(59, 130, 246, 0.2);
+			font-family: Georgia, serif;
+			z-index: -1;
+			opacity: 0;
+			transition: opacity 0.5s ease;
+		}
+
+		blockquote.active::before {
+			opacity: 1;
+		}
+
+		/* 返回顶部按钮动画 */
+		#back-to-top {
+			transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+			background: linear-gradient(135deg, #3b82f6, #2563eb);
+		}
+
+		#back-to-top:hover {
+			transform: translateY(-3px) scale(1.05);
+			box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+		}
+
+		#back-to-top:active {
+			transform: translateY(1px);
+		}
+
+		/* 导航栏动画 */
+		#navbar {
+			transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+		}
+
+		/* 平滑滚动 */
+		html {
+			scroll-behavior: smooth;
+		}
+
+		.article-link {
+			display: inline-block;
+			padding: 0.6rem 1.2rem;
+			font-size: 0.875rem;
+			font-weight: 500;
+			color: #3b82f6;
+			background-color: #f8fafc;
+			border: 1px solid #e2e8f0;
+			border-radius: 0.5rem;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+			text-decoration: none;
+			white-space: nowrap;
+			transition: all 0.3s ease;
+		}
+
+		/* 交互增强 */
+		.article-link:hover {
+			background-color: #3b82f6;
+			color: white;
+			border-color: #4338ca;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			transform: translateY(2px);
+		}
+
+		/* 聚焦状态（无障碍） */
+		.article-link:focus {
+			outline: 2px solid #3b82f6;
+			outline-offset: 2px;
+		}
+
+		/* 音频播放器样式 */
+		.audio-player {
+			background: rgba(255, 255, 255, 0.9);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(229, 231, 235, 0.6);
+			border-radius: 12px;
+			padding: 16px;
+			margin: 20px 0;
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+			transition: all 0.3s ease;
+		}
+
+		.audio-player:hover {
+			box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+			transform: translateY(-2px);
+		}
+
+		.audio-controls {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.play-btn {
+			width: 48px;
+			height: 48px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #3b82f6, #2563eb);
+			color: white;
+			border: none;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+		}
+
+		.play-btn:hover {
+			transform: scale(1.05);
+			box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+		}
+
+		.play-btn:active {
+			transform: scale(0.95);
+		}
+
+		.audio-info {
+			flex: 1;
+		}
+
+		.audio-title {
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 4px;
+		}
+
+		.audio-duration {
+			color: #64748b;
+			font-size: 0.875rem;
+		}
+
+		.progress-container {
+			width: 100%;
+			height: 4px;
+			background: #e2e8f0;
+			border-radius: 2px;
+			margin: 12px 0;
+			cursor: pointer;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.progress-bar {
+			height: 100%;
+			background: linear-gradient(90deg, #3b82f6, #2563eb);
+			border-radius: 2px;
+			width: 0%;
+			transition: width 0.1s linear;
+		}
+
+		.time-display {
+			display: flex;
+			justify-content: space-between;
+			color: #64748b;
+			font-size: 0.75rem;
+		}
+
+		/* 隐藏原生音频控件 */
+		.hidden-audio {
+			display: none;
+		}
+
+		/* 文章目录样式 */
+		.toc {
+			max-height: 60vh;
+			overflow-y: auto;
+			scrollbar-width: thin;
+		}
+
+		.toc ul {
+			list-style: none;
+			padding-left: 0;
+		}
+
+		.toc li {
+			margin: 0.4rem 0;
+		}
+
+		.toc a {
+			color: #475569;
+			text-decoration: none;
+			transition: all 0.2s ease;
+			padding: 0.25rem 0.5rem;
+			display: block;
+			border-left: 2px solid transparent;
+			border-radius: 0 4px 4px 0;
+		}
+
+		.toc a:hover {
+			color: #3B82F6;
+			background-color: rgba(59, 130, 246, 0.05);
+			border-left-color: #93C5FD;
+		}
+
+		.toc a.active {
+			color: #3B82F6;
+			background-color: rgba(59, 130, 246, 0.1);
+			border-left-color: #3B82F6;
+			font-weight: 500;
+		}
+
+		.toc .toc-h2 {
+			font-weight: 500;
+		}
+
+		.toc .toc-h3 {
+			padding-left: 1rem;
+			font-size: 0.875rem;
+			color: #64748b;
+		}
+
+		.toc-empty {
+			color: #94a3b8;
+			font-style: italic;
+			padding: 0.5rem;
+		}
+	</style>
+</head>
+
+<body class="text-dark font-sans antialiased">
+	<!-- 导航栏（增强玻璃效果） -->
+	<header id="navbar"
+		class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/30 shadow-sm">
+		<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="flex justify-between items-center h-16">
+				<!-- Logo -->
+				<div class="flex items-center">
+					<a class="text-xl font-bold text-primary flex items-center gap-2 group" href="/">
+						<i class="fa fa-feather transition-transform duration-300 group-hover:rotate-12"></i>
+						<span>Rooteater</span>
+					</a>
+				</div>
+
+				<div class="flex flex-wrap items-center gap-1 md:gap-4">
+					<a href="/articals.html" class="article-link"> All the articals </a>
+				</div>
+
+				<!-- 移动端菜单按钮 -->
+				<button id="mobile-menu-button" class="md:hidden text-dark hover:text-primary">
+					<i class="fa fa-bars text-xl"></i>
+				</button>
+			</div>
+		</div>
+	</header>
+
+	<!-- 主要内容 -->
+	<main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+		<div class="flex flex-col lg:flex-row gap-8">
+			<!-- 文章内容区 -->
+			<article class="lg:w-2/3">
+				<!-- 文章标题和元数据 -->
+				<header class="mb-8 fade-in-element">
+					<div class="flex items-center text-sm text-secondary mb-4">
+						<span>2025年12月6日</span>
+						<span class="mx-2">•</span>
+						<span>Tech News</span>
+					</div>
+
+					<div class="typing-container">
+						<h1 class="text-4xl md:text-5xl font-bold mb-6 typing-effect">
+							论本站名字应该叫什么
+						</h1>
+					</div>
+				</header>
+
+				<!-- 音频播放器组件（注释保留）
+          <div class="audio-player fade-in-element">
+            <div class="audio-controls">
+              <button id="playBtn" class="play-btn">
+                <i class="fa fa-play" id="playIcon"></i>
+              </button>
+              <div class="audio-info">
+                <div class="audio-title">背景音乐 - 程序包最终纪念版</div>
+                <div class="audio-duration">zmczx.m4a</div>
+              </div>
+            </div>
+            <div class="progress-container" id="progressContainer">
+              <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="time-display">
+              <span id="currentTime">00:00</span>
+              <span id="totalTime">00:00</span>
+            </div>
+            隐藏的原生音频元素
+            <audio id="audioPlayer" class="hidden-audio" preload="auto">
+              <source src="assets/zmczx.m4a" type="audio/mpeg">
+              您的浏览器不支持音频播放。
+             -->
+
+				<!-- 文章封面图 -->
+				<div class="mb-10 fade-in-element img-hover-zoom">
+					<img src="assets/yu.png" alt="error图" class="w-1/4 h-auto rounded-lg shadow-md img-fade-in" />
+				</div>
+
+				<!-- 文章内容（为标题添加id，用于目录跳转） -->
+				<div class="article-prose max-w-none">
+					<h2 id="section-1" class="section-heading">为啥想改名</h2>
+					<p>众所周知，我们网站从今年1月份起就一直用着「Rooteater」这个名字，但说实话，
+						这个名字越用越觉得别扭——不仅读起来拗口，陌生的朋友看到还得琢磨半天怎么念，
+						甚至我自己对外介绍时都得反复解释，实在算不上一个好记又讨喜的名字。
+					</p>
+					<p>说起这个名字的由来，其实和早已离开我们的孟老师有关。当初为迎合同学，随口定下这个名字，
+						我们也就稀里糊涂用了下来，可如今孟老师早就不再教我们（同学们也不再关注这个网站），
+						这个带着过往印记的名字，也慢慢失去了原本的意义。
+						更要命的是，这个名字还容易让人联想到一些负面的东西，比如「吃根」这种不雅的谐音梗，
+						或者「root」这个词在某些语境下的负面联想——我个人有点在意这些，而且它实在不符合我的审美，总觉得
+						用着不太舒服。</p>
+					</p>
+					<p>也正因如此，我心里早就盘算着改个名字，可偏偏我这人最不擅长的就是取名——之前随手想的几个，
+						要么太普通没特色，要么中二得没脸看，AI取的也不好听，总之没一个能让人满意的。</p>
+					<blockquote class="fade-in-element">
+						所以我就想到了一个办法，
+						就是把我平时看到的好听的名字都记录下来，等到有一天我想好了就改掉，
+						所以这个页面就诞生了，记录我平时看到的好听的名字，
+						如果你有好的名字建议也可以在评论区留言，我会考虑的。
+						<span class="text-secondary block"> 以上是copilot给我续写的，但我不是很赞同</span>
+					</blockquote>
+
+					<div
+						class="fade-in-element bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg border-l-4 border-red-400 mb-4">
+						<div class="flex items-center">
+							<svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd"
+									d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+									clip-rule="evenodd"></path>
+							</svg>
+							<strong class="font-medium text-red-700">重要提醒</strong>
+						</div>
+						<p class="mt-1 text-sm">以下内容是豆包写的，不关我事，我就表达这么多</p>
+					</div>
+					<!-- 续写的「改啥」章节 -->
+					<h2 id="section-2" class="section-heading">改啥？</h2>
+					<p class="fade-in-element">既然决定改名，总得有个明确的方向，不然光靠瞎记，最后还是挑不出满意的。先说说我对新名字的几个小要求：</p>
+					<ul class="fade-in-element">
+						<li>易读易记：不管是口头说还是看文字，能让人一眼记住、一次念对，不搞生僻字和复杂组合；</li>
+						<li>有点温度：不用太商业化，也不用太硬核，能让人感受到一点轻松、亲切的感觉就好；</li>
+						<li>无负面联想：避开谐音梗翻车、有歧义的词汇，也不蹭没必要的热点；</li>
+						<li>贴合定位：我们的网站主要是分享日常学习和小思考，名字不用太宏大，贴合「轻量、真实」的调性就行。</li>
+					</ul>
+					<p class="fade-in-element">目前我随手记下来的备选名字大概有这些，还没最终敲定，先列出来当个参考：</p>
+					<div class="fade-in-element">
+						<h3>简约日常风</h3>
+						<p>青禾笔记、晚风小站、拾光集、方寸间、小星记</p>
+						<h3>趣味轻量风</h3>
+						<p>闲时碎念、字节小馆、敲敲记事本、慢煮时光</p>
+						<h3>偏中性实用风</h3>
+						<p>知微记录、轻栈、简叙、星芒小册</p>
+					</div>
+					<p class="fade-in-element">
+						当然，这些名字都还只是「初稿」，有的可能还是不够满意，有的总觉得差了点意思。如果你有更好的想法，比如觉得哪个备选名字可以优化，或者有全新的推荐，都可以在评论区告诉我——毕竟名字是给大家一起用的，多听听不同的意见，总能选出最合适的那一个。
+					</p>
+					<p class="fade-in-element">
+						最后也说句实在的，改名不是小事，我也不会一时脑热就定下来。这个页面会一直更新备选名单，等收集的建议够多、我自己也琢磨透了，会先公示候选名单，再最终确定新名字。</p>
+				</div>
+
+				<!-- 文章标签 -->
+				<div class="mt-12 pt-6 border-t border-gray-200 fade-in-element">
+					<div class="flex flex-wrap gap-2">
+						<span class="text-sm font-medium text-secondary">标签：</span>
+						<a href="/articals.html#Tech News"
+							class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors">#Tech News</a>
+					</div>
+				</div>
+			</article>
+
+			<!-- 侧边栏（添加目录卡片） -->
+			<aside class="lg:w-1/3 space-y-8">
+				<div class="sticky top-24 space-y-8">
+					<!-- 作者信息卡片 -->
+					<div class="glass-card p-6 rounded-xl">
+						<div class="flex items-center gap-4 mb-4">
+							<div>
+								<img src="assets/rty.png" alt="a"
+									class="w-16 h-16 object-cover shadow-md border-2 border-white" />
+								<h3 class="font-bold text-lg">改名</h3>
+								<p class="text-secondary text-sm">
+									想不出来
+								</p>
+							</div>
+						</div>
+						<p class="text-gray-600 text-xs mb-4">
+							好主意务必私信我
+						</p>
+					</div>
+					<!-- 文章目录卡片 -->
+					<div class="glass-card p-6 rounded-xl">
+						<h3 class="font-bold text-lg mb-4 flex items-center">
+							<i class="fa fa-list-ul text-primary mr-2"></i>文章目录
+						</h3>
+						<div class="toc" id="article-toc">
+							<div class="toc-empty">加载目录中...</div>
+						</div>
+					</div>
+
+
+				</div>
+
+
+				<!-- 推荐文章卡片（保留）
+        <div class="glass-card p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4">推荐阅读</h3>
+            <ul class="space-y-4">
+                <li>
+                    <a href="cxb-last-release.html" class="flex gap-3 group">
+                        <img src="assets/p3.png" alt="文章缩略图" class="w-16 h-12 rounded object-cover group-hover:scale-105 transition-transform">
+                        <div>
+                            <p class="text-sm font-medium group-hover:text-primary transition-colors">程序包最终纪念版发布</p>
+                            <p class="text-xs text-secondary">2025-11-28</p>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div> -->
+
+				<!-- 订阅卡片 -->
+				<div class="glass-card p-6 rounded-xl bg-primary/5">
+					<h3 class="font-bold text-lg mb-3">下载程序包PC</h3>
+					<p class="text-gray-600 text-sm mb-4">获取一堆小工具</p>
+					<div class="flex">
+						<a href="/down_cxb.html"
+							class="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">下载</a>
+					</div>
+				</div>
+			</aside>
+		</div>
+	</main>
+
+	<!-- 页脚 -->
+	<footer class="text-neutral-300 py-8 mt-20 backdrop-blur-sm">
+		<div class="max-w-6xl mx-auto px-4 text-center text-sm">
+			<p class="mb-2">蚊!帐! [○･｀Д´･ ○]--Rooteater</p>
+			<p class="text-neutral-500">© 2025 All Rights Reserved</p>
+		</div>
+	</footer>
+
+	<!-- 返回顶部按钮 -->
+	<button id="back-to-top"
+		class="fixed bottom-6 right-6 w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center opacity-0 invisible">
+		<i class="fa fa-arrow-up"></i>
+	</button>
+
+	<!-- JavaScript -->
+	<script>
+		// 移动端菜单切换（预留）
+		const mobileMenuButton = document.getElementById("mobile-menu-button");
+
+		if (mobileMenuButton) {
+			mobileMenuButton.addEventListener("click", () => {
+				// 可添加移动端菜单逻辑
+			});
+		}
+
+		// 滚动事件处理
+		const navbar = document.getElementById("navbar");
+		const backToTopButton = document.getElementById("back-to-top");
+
+		window.addEventListener("scroll", () => {
+			// 导航栏滚动效果
+			if (window.scrollY > 50) {
+				navbar.classList.add("shadow-md", "bg-white/90");
+				navbar.classList.remove("shadow-sm");
+			} else {
+				navbar.classList.remove("shadow-md", "bg-white/90");
+				navbar.classList.add("shadow-sm");
+			}
+
+			// 返回顶部按钮显示/隐藏
+			if (window.scrollY > 300) {
+				backToTopButton.classList.remove("opacity-0", "invisible");
+				backToTopButton.classList.add("opacity-100", "visible");
+			} else {
+				backToTopButton.classList.add("opacity-0", "invisible");
+				backToTopButton.classList.remove("opacity-100", "visible");
+			}
+
+			// 处理滚动动画
+			handleScrollAnimations();
+			// 处理目录高亮
+			updateActiveTocItem();
+		});
+
+		// 返回顶部功能
+		backToTopButton.addEventListener("click", () => {
+			window.scrollTo({
+				top: 0,
+				behavior: "smooth",
+			});
+		});
+
+		// 检测元素是否在视口内
+		function isInViewport(element) {
+			const rect = element.getBoundingClientRect();
+			return (
+				rect.top <=
+				(window.innerHeight || document.documentElement.clientHeight) *
+				0.9 && rect.bottom >= 0
+			);
+		}
+
+		// 处理滚动动画
+		function handleScrollAnimations() {
+			const fadeElements = document.querySelectorAll(".fade-in-element");
+			fadeElements.forEach((element) => {
+				if (isInViewport(element) && !element.classList.contains("active")) {
+					element.classList.add("active");
+				}
+			});
+		}
+
+		// 格式化时间为 MM:SS 格式（音频相关，保留）
+		function formatTime(seconds) {
+			const mins = Math.floor(seconds / 60);
+			const secs = Math.floor(seconds % 60);
+			return `${mins.toString().padStart(2, "0")}:${secs
+				.toString()
+				.padStart(2, "0")}`;
+		}
+
+		// 音频播放器功能（保留，注释清晰）
+		document.addEventListener("DOMContentLoaded", function () {
+			// 初始化文章目录
+			initArticleToc();
+
+			const audio = document.getElementById("audioPlayer");
+			if (audio) {
+				const playBtn = document.getElementById("playBtn");
+				const playIcon = document.getElementById("playIcon");
+				const progressBar = document.getElementById("progressBar");
+				const progressContainer = document.getElementById("progressContainer");
+				const currentTimeDisplay = document.getElementById("currentTime");
+				const totalTimeDisplay = document.getElementById("totalTime");
+
+				// 页面加载完成后尝试自动播放
+				audio.addEventListener("loadedmetadata", function () {
+					totalTimeDisplay.textContent = formatTime(audio.duration);
+					audio.play().then(() => {
+						playIcon.className = "fa fa-pause";
+					}).catch(error => {
+						console.log("自动播放失败:", error);
+					});
+				});
+
+				// 播放/暂停切换
+				playBtn?.addEventListener("click", function () {
+					if (audio.paused) {
+						audio.play().then(() => {
+							playIcon.className = "fa fa-pause";
+						}).catch(error => {
+							console.log("播放失败:", error);
+						});
+					} else {
+						audio.pause();
+						playIcon.className = "fa fa-play";
+					}
+				});
+
+				// 更新进度条
+				audio.addEventListener("timeupdate", function () {
+					if (!isNaN(audio.duration)) {
+						const progress = (audio.currentTime / audio.duration) * 100;
+						progressBar.style.width = progress + "%";
+						currentTimeDisplay.textContent = formatTime(audio.currentTime);
+					}
+				});
+
+				// 点击进度条跳转
+				progressContainer?.addEventListener("click", function (e) {
+					const rect = progressContainer.getBoundingClientRect();
+					const clickX = e.clientX - rect.left;
+					const width = rect.width;
+					if (!isNaN(audio.duration) && width > 0) {
+						const normalizedPosition = Math.max(0, Math.min(1, clickX / width));
+						audio.currentTime = normalizedPosition * audio.duration;
+						progressBar.style.width = normalizedPosition * 100 + "%";
+						currentTimeDisplay.textContent = formatTime(audio.currentTime);
+					}
+				});
+
+				// 播放结束重置
+				audio.addEventListener("ended", function () {
+					playIcon.className = "fa fa-play";
+					progressBar.style.width = "0%";
+					currentTimeDisplay.textContent = "00:00";
+				});
+
+				// 音频加载错误处理
+				audio.addEventListener("error", function () {
+					console.log("音频加载失败");
+					totalTimeDisplay.textContent = "00:00";
+				});
+			}
+
+			// 图片加载动画
+			const images = document.querySelectorAll("img");
+			images.forEach((img) => {
+				img.classList.add("opacity-0");
+				img.onload = function () {
+					img.classList.remove("opacity-0");
+					img.classList.add("img-fade-in");
+				};
+				if (img.complete) {
+					img.onload();
+				}
+			});
+
+			// 初始化滚动动画和目录
+			handleScrollAnimations();
+			updateActiveTocItem();
+
+			// 修复打字动画
+			const typingElements = document.querySelectorAll(".typing-effect");
+			typingElements.forEach((el) => {
+				el.style.width = "0";
+				setTimeout(() => {
+					el.style.width = "";
+				}, 100);
+			});
+		});
+
+		// 初始化文章目录（核心功能）
+		function initArticleToc() {
+			const tocContainer = document.getElementById("article-toc");
+			const headings = document.querySelectorAll(".section-heading"); // 所有带section-heading类的标题
+
+			// 清空加载提示
+			tocContainer.innerHTML = "";
+
+			if (headings.length === 0) {
+				tocContainer.innerHTML = '<div class="toc-empty">本文无章节标题</div>';
+				return;
+			}
+
+			// 创建目录列表
+			const tocList = document.createElement("ul");
+			tocContainer.appendChild(tocList);
+
+			// 遍历所有标题，生成目录项
+			headings.forEach((heading) => {
+				const headingId = heading.id;
+				const headingText = heading.textContent.trim();
+				const headingLevel = heading.tagName.toLowerCase(); // h2, h3
+
+				// 创建目录项
+				const tocItem = document.createElement("li");
+				const tocLink = document.createElement("a");
+
+				tocLink.href = `#${headingId}`;
+				tocLink.textContent = headingText;
+				tocLink.classList.add(`toc-${headingLevel}`); // 添加层级样式类
+
+				// 平滑滚动（覆盖默认锚点跳转）
+				tocLink.addEventListener("click", (e) => {
+					e.preventDefault();
+					document.getElementById(headingId).scrollIntoView({
+						behavior: "smooth",
+						block: "start"
+					});
+				});
+
+				tocItem.appendChild(tocLink);
+				tocList.appendChild(tocItem);
+			});
+		}
+
+		// 更新当前激活的目录项（滚动高亮）
+		function updateActiveTocItem() {
+			const headings = document.querySelectorAll(".section-heading");
+			const tocLinks = document.querySelectorAll("#article-toc a");
+
+			let currentActiveIndex = -1;
+
+			// 找到当前在视口中的标题
+			headings.forEach((heading, index) => {
+				const rect = heading.getBoundingClientRect();
+				// 标题顶部进入视口80%时激活
+				if (rect.top <= window.innerHeight * 0.8 && rect.bottom >= 0) {
+					currentActiveIndex = index;
+				}
+			});
+
+			// 更新目录高亮状态
+			tocLinks.forEach((link, index) => {
+				if (index === currentActiveIndex) {
+					link.classList.add("active");
+				} else {
+					link.classList.remove("active");
+				}
+			});
+		}
+	</script>
+</body>
+
+</html>

@@ -1,35 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Articals - Rooteater</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-      rel="stylesheet"
-    />
-    <script>
-      // Tailwind配置
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#3B82F6",
-              secondary: "#64748B",
-              neutral: "#F8FAFC",
-              dark: "#1E293B",
-            },
-            fontFamily: {
-              sans: ["Inter", "SimSun", "system-ui", "宋体", "sans-serif"],
-              serif: ["Merriweather", "SimSun", "宋体", "Georgia", "serif"],
-            },
-          },
-        },
-      };
-    </script>
-    <style type="text/tailwindcss">
-      @layer utilities {
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Articals - Rooteater</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+	<script>
+		// Tailwind配置
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						primary: "#3B82F6",
+						secondary: "#64748B",
+						neutral: "#F8FAFC",
+						dark: "#1E293B",
+					},
+					fontFamily: {
+						sans: ["Inter", "SimSun", "system-ui", "宋体", "sans-serif"],
+						serif: ["Merriweather", "SimSun", "宋体", "Georgia", "serif"],
+					},
+				},
+			},
+		};
+	</script>
+	<style type="text/tailwindcss">
+		@layer utilities {
         .content-auto {
           content-visibility: auto;
         }
@@ -56,503 +54,496 @@
         }
       }
     </style>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap");
+	<style>
+		@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap");
 
-      /* 全局样式 */
-      body {
-        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-        background-attachment: fixed;
-      }
+		/* 全局样式 */
+		body {
+			background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+			background-attachment: fixed;
+		}
 
-      body::before {
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");
-        opacity: 0.3;
-        pointer-events: none;
-        z-index: -1;
-      }
+		body::before {
+			content: "";
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");
+			opacity: 0.3;
+			pointer-events: none;
+			z-index: -1;
+		}
 
-      /* 滚动条美化 */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
+		/* 滚动条美化 */
+		::-webkit-scrollbar {
+			width: 8px;
+		}
 
-      ::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(4px);
-        border-radius: 4px;
-      }
+		::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.5);
+			backdrop-filter: blur(4px);
+			border-radius: 4px;
+		}
 
-      ::-webkit-scrollbar-thumb {
-        background: rgba(59, 130, 246, 0.3);
-        border-radius: 4px;
-        transition: background 0.3s ease;
-      }
+		::-webkit-scrollbar-thumb {
+			background: rgba(59, 130, 246, 0.3);
+			border-radius: 4px;
+			transition: background 0.3s ease;
+		}
 
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(59, 130, 246, 0.5);
-      }
+		::-webkit-scrollbar-thumb:hover {
+			background: rgba(59, 130, 246, 0.5);
+		}
 
-      /* 玻璃虚化卡片 */
-      .glass-card {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(229, 231, 235, 0.5);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
+		/* 玻璃虚化卡片 */
+		.glass-card {
+			background: rgba(255, 255, 255, 0.7);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
+			border: 1px solid rgba(229, 231, 235, 0.5);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+		}
 
-      .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-      }
+		.glass-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+		}
 
-      /* 图片动画 */
-      .img-fade-in {
-        animation: imgFadeIn 0.8s ease-in-out;
-      }
+		/* 图片动画 */
+		.img-fade-in {
+			animation: imgFadeIn 0.8s ease-in-out;
+		}
 
-      .img-hover-zoom {
-        overflow: hidden;
-        border-radius: 0.5rem;
-      }
+		.img-hover-zoom {
+			overflow: hidden;
+			border-radius: 0.5rem;
+		}
 
-      .img-hover-zoom img {
-        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      }
+		.img-hover-zoom img {
+			transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+		}
 
-      .img-hover-zoom:hover img {
-        transform: scale(1.03);
-      }
+		.img-hover-zoom:hover img {
+			transform: scale(1.03);
+		}
 
-      @keyframes imgFadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.95);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
+		@keyframes imgFadeIn {
+			from {
+				opacity: 0;
+				transform: scale(0.95);
+			}
 
-      /* 滚动触发动画 */
-      .fade-in-element {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-          transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-      }
+			to {
+				opacity: 1;
+				transform: scale(1);
+			}
+		}
 
-      .fade-in-element.active {
-        opacity: 1;
-        transform: translateY(0);
-      }
+		/* 滚动触发动画 */
+		.fade-in-element {
+			opacity: 0;
+			transform: translateY(20px);
+			transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+				transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+		}
 
-      /* 打字机效果 - 修复版 */
-      .typing-container {
-        display: inline-block;
-        position: relative;
-      }
+		.fade-in-element.active {
+			opacity: 1;
+			transform: translateY(0);
+		}
 
-      @keyframes typing {
-        from {
-          width: 0;
-        }
-        to {
-          width: 100%;
-        }
-      }
+		/* 打字机效果 - 修复版 */
+		.typing-container {
+			display: inline-block;
+			position: relative;
+		}
 
-      @keyframes blinkCaret {
-        from,
-        to {
-          border-color: transparent;
-        }
-        50% {
-          border-color: #3b82f6;
-        }
-      }
+		@keyframes typing {
+			from {
+				width: 0;
+			}
 
-      .typing-effect {
-        overflow: hidden;
-        border-right: 0.15em solid #3b82f6;
-        white-space: nowrap;
-        animation: typing 3.5s steps(40, end),
-          blinkCaret 0.75s step-end infinite;
-        display: inline-block;
-        vertical-align: middle;
-      }
+			to {
+				width: 100%;
+			}
+		}
 
-      /* 引用装饰 */
-      blockquote {
-        position: relative;
-      }
+		@keyframes blinkCaret {
 
-      blockquote::before {
-        content: '“';
-        position: absolute;
-        top: -10px;
-        left: -20px;
-        font-size: 5rem;
-        color: rgba(59, 130, 246, 0.2);
-        font-family: Georgia, serif;
-        z-index: -1;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-      }
+			from,
+			to {
+				border-color: transparent;
+			}
 
-      blockquote.active::before {
-        opacity: 1;
-      }
+			50% {
+				border-color: #3b82f6;
+			}
+		}
 
-      /* 返回顶部按钮动画 */
-      #back-to-top {
-        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-      }
+		.typing-effect {
+			overflow: hidden;
+			border-right: 0.15em solid #3b82f6;
+			white-space: nowrap;
+			animation: typing 3.5s steps(40, end),
+				blinkCaret 0.75s step-end infinite;
+			display: inline-block;
+			vertical-align: middle;
+		}
 
-      #back-to-top:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-      }
+		/* 引用装饰 */
+		blockquote {
+			position: relative;
+		}
 
-      #back-to-top:active {
-        transform: translateY(1px);
-      }
+		blockquote::before {
+			content: '“';
+			position: absolute;
+			top: -10px;
+			left: -20px;
+			font-size: 5rem;
+			color: rgba(59, 130, 246, 0.2);
+			font-family: Georgia, serif;
+			z-index: -1;
+			opacity: 0;
+			transition: opacity 0.5s ease;
+		}
 
-      /* 导航栏动画 */
-      #navbar {
-        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-      }
+		blockquote.active::before {
+			opacity: 1;
+		}
 
-      /* 平滑滚动 */
-      html {
-        scroll-behavior: smooth;
-      }
+		/* 返回顶部按钮动画 */
+		#back-to-top {
+			transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+			background: linear-gradient(135deg, #3b82f6, #2563eb);
+		}
 
-      .article-link {
-        display: inline-block;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #3b82f6;
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        text-decoration: none;
-        white-space: nowrap;
-        transition: all 0.3s ease;
-      }
+		#back-to-top:hover {
+			transform: translateY(-3px) scale(1.05);
+			box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+		}
 
-      /* 交互增强 */
-      .article-link:hover {
-        background-color: #3b82f6;
-        color: white;
-        border-color: #4338ca;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transform: translateY(2px);
-      }
+		#back-to-top:active {
+			transform: translateY(1px);
+		}
 
-      /* 聚焦状态（无障碍） */
-      .article-link:focus {
-        outline: 2px solid #3b82f6;
-        outline-offset: 2px;
-      }
+		/* 导航栏动画 */
+		#navbar {
+			transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+		}
 
-      /* 音频播放器样式 */
-      .audio-player {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(229, 231, 235, 0.6);
-        border-radius: 12px;
-        padding: 16px;
-        margin: 20px 0;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-      }
+		/* 平滑滚动 */
+		html {
+			scroll-behavior: smooth;
+		}
 
-      .audio-player:hover {
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-        transform: translateY(-2px);
-      }
+		.article-link {
+			display: inline-block;
+			padding: 0.6rem 1.2rem;
+			font-size: 0.875rem;
+			font-weight: 500;
+			color: #3b82f6;
+			background-color: #f8fafc;
+			border: 1px solid #e2e8f0;
+			border-radius: 0.5rem;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+			text-decoration: none;
+			white-space: nowrap;
+			transition: all 0.3s ease;
+		}
 
-      .audio-controls {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
+		/* 交互增强 */
+		.article-link:hover {
+			background-color: #3b82f6;
+			color: white;
+			border-color: #4338ca;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			transform: translateY(2px);
+		}
 
-      .play-btn {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-      }
+		/* 聚焦状态（无障碍） */
+		.article-link:focus {
+			outline: 2px solid #3b82f6;
+			outline-offset: 2px;
+		}
 
-      .play-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-      }
+		/* 音频播放器样式 */
+		.audio-player {
+			background: rgba(255, 255, 255, 0.9);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(229, 231, 235, 0.6);
+			border-radius: 12px;
+			padding: 16px;
+			margin: 20px 0;
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+			transition: all 0.3s ease;
+		}
 
-      .play-btn:active {
-        transform: scale(0.95);
-      }
+		.audio-player:hover {
+			box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+			transform: translateY(-2px);
+		}
 
-      .audio-info {
-        flex: 1;
-      }
+		.audio-controls {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
 
-      .audio-title {
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 4px;
-      }
+		.play-btn {
+			width: 48px;
+			height: 48px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #3b82f6, #2563eb);
+			color: white;
+			border: none;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+		}
 
-      .audio-duration {
-        color: #64748b;
-        font-size: 0.875rem;
-      }
+		.play-btn:hover {
+			transform: scale(1.05);
+			box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+		}
 
-      .progress-container {
-        width: 100%;
-        height: 4px;
-        background: #e2e8f0;
-        border-radius: 2px;
-        margin: 12px 0;
-        cursor: pointer;
-        overflow: hidden;
-        position: relative;
-      }
+		.play-btn:active {
+			transform: scale(0.95);
+		}
 
-      .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #3b82f6, #2563eb);
-        border-radius: 2px;
-        width: 0%;
-        transition: width 0.1s linear;
-      }
+		.audio-info {
+			flex: 1;
+		}
 
-      .time-display {
-        display: flex;
-        justify-content: space-between;
-        color: #64748b;
-        font-size: 0.75rem;
-      }
+		.audio-title {
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 4px;
+		}
 
-      /* 隐藏原生音频控件 */
-      .hidden-audio {
-        display: none;
-      }
-    </style>
-  </head>
-  <body class="text-dark font-sans antialiased">
-    <!-- 导航栏（增强玻璃效果） -->
-    <header
-      id="navbar"
-      class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/30 shadow-sm"
-    >
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <!-- Logo -->
-          <div class="flex items-center">
-            <a
-              class="text-xl font-bold text-primary flex items-center gap-2 group"
-              href="/"
-            >
-              <i
-                class="fa fa-feather transition-transform duration-300 group-hover:rotate-12"
-              ></i>
-              <span>Rooteater</span>
-            </a>
-          </div>
+		.audio-duration {
+			color: #64748b;
+			font-size: 0.875rem;
+		}
 
-          <div class="flex flex-wrap items-center gap-1 md:gap-4">
-            <a href="/articals.html" class="article-link"> All the articals </a>
-          </div>
+		.progress-container {
+			width: 100%;
+			height: 4px;
+			background: #e2e8f0;
+			border-radius: 2px;
+			margin: 12px 0;
+			cursor: pointer;
+			overflow: hidden;
+			position: relative;
+		}
 
-          <!-- 移动端菜单按钮 -->
-          <button
-            id="mobile-menu-button"
-            class="md:hidden text-dark hover:text-primary"
-          >
-            <i class="fa fa-bars text-xl"></i>
-          </button>
-        </div>
-      </div>
-    </header>
+		.progress-bar {
+			height: 100%;
+			background: linear-gradient(90deg, #3b82f6, #2563eb);
+			border-radius: 2px;
+			width: 0%;
+			transition: width 0.1s linear;
+		}
 
-    <!-- 主要内容 -->
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-      <div class="flex flex-col lg:flex-row gap-8">
-        <!-- 文章内容区 -->
-        <article class="lg:w-2/3">
-          <!-- 文章标题和元数据 -->
-          <header class="mb-8 fade-in-element">
-            <div class="flex items-center text-sm text-secondary mb-4">
-              <span>2025年11月28日</span>
-              <span class="mx-2">•</span>
-              <span>Tech News</span>
-            </div>
+		.time-display {
+			display: flex;
+			justify-content: space-between;
+			color: #64748b;
+			font-size: 0.75rem;
+		}
 
-            <!-- 修复打字动画：移除text-balance，添加容器 -->
-            <div class="typing-container">
-              <h1 class="text-4xl md:text-5xl font-bold mb-6 typing-effect">
-                程序包最终纪念版发布
-              </h1>
-            </div>
-          </header>
+		/* 隐藏原生音频控件 */
+		.hidden-audio {
+			display: none;
+		}
+	</style>
+</head>
 
-          <!-- 音频播放器组件 -->
-          <div class="audio-player fade-in-element">
-            <div class="audio-controls">
-              <button id="playBtn" class="play-btn">
-                <i class="fa fa-play" id="playIcon"></i>
-              </button>
-              <div class="audio-info">
-                <div class="audio-title">背景音乐 - 程序包最终纪念版</div>
-                <div class="audio-duration">zmczx.m4a</div>
-              </div>
-            </div>
-            <div class="progress-container" id="progressContainer">
-              <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <div class="time-display">
-              <span id="currentTime">00:00</span>
-              <span id="totalTime">00:00</span>
-            </div>
-            <!-- 隐藏的原生音频元素 -->
-            <audio id="audioPlayer" class="hidden-audio" preload="auto">
-              <source src="assets/zmczx.m4a" type="audio/mpeg">
-              您的浏览器不支持音频播放。
-            </audio>
-          </div>
+<body class="text-dark font-sans antialiased">
+	<!-- 导航栏（增强玻璃效果） -->
+	<header id="navbar"
+		class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/30 shadow-sm">
+		<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="flex justify-between items-center h-16">
+				<!-- Logo -->
+				<div class="flex items-center">
+					<a class="text-xl font-bold text-primary flex items-center gap-2 group" href="/">
+						<i class="fa fa-feather transition-transform duration-300 group-hover:rotate-12"></i>
+						<span>Rooteater</span>
+					</a>
+				</div>
 
-          <!-- 文章封面图 -->
-            <div class="mb-10 fade-in-element img-hover-zoom">
-                <img src="assets/p3.png" alt="error图" class="w-full h-auto rounded-lg shadow-md img-fade-in">
-            </div>
+				<div class="flex flex-wrap items-center gap-1 md:gap-4">
+					<a href="/articals.html" class="article-link"> All the articals </a>
+				</div>
 
-          <!-- 文章内容 -->
-          <div class="article-prose max-w-none">
-            <h2>引言</h2>
-            <p class="fade-in-element">
-              经过漫长的等待和无数次的迭代，我们终于迎来了程序包的最终纪念版发布！这是一个充满挑战和创新的旅程，我们在这个版本中修复了大部分已知问题，力求为大家带来最优质的体验。
-            </p>
-            <p class="fade-in-element">
-              在这个版本中，我们不仅修复了大量的bug，还引入了一个漂亮的纪念版标签。我们相信，这将是一个里程碑式的版本，它标志着程序包正式进入后期。
-            </p>
-            <blockquote class="fade-in-element">
-              “为什么你不看啊@705”
-            </blockquote>
-            <p>
-              是我们的热情和反馈让我不断前行。让我们一起期待未来这个程序能给大家带来更多惊喜！
-            </p>
+				<!-- 移动端菜单按钮 -->
+				<button id="mobile-menu-button" class="md:hidden text-dark hover:text-primary">
+					<i class="fa fa-bars text-xl"></i>
+				</button>
+			</div>
+		</div>
+	</header>
 
-            <h2 class="fade-in-element">过程</h2>
-            <blockquote class="fade-in-element">
-              “蓝奏云直链解析搞定了，只要搞一搞cxb本体，就能立马恢复下载功能，甚至速度比以前快几倍
-		 但因为我的傲娇，cxb的确不更新了，这个坑就在这里堆着吧
-		 不过...一旦有人催我，我会回来的 拜拜”
-              <span class="text-secondary block text-right"> ————news.txt</span>
-            </blockquote>
+	<!-- 主要内容 -->
+	<main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+		<div class="flex flex-col lg:flex-row gap-8">
+			<!-- 文章内容区 -->
+			<article class="lg:w-2/3">
+				<!-- 文章标题和元数据 -->
+				<header class="mb-8 fade-in-element">
+					<div class="flex items-center text-sm text-secondary mb-4">
+						<span>2025年11月28日</span>
+						<span class="mx-2">•</span>
+						<span>Tech News</span>
+					</div>
 
-            <p class="fade-in-element">
-              一周前，我们在新闻文件中发布了一个已知的严重问题：原先文件托管平台已被墙，导致程序包无法下载。
-              <img src="/assets/img/fraud.png" alt="error图" class="w-1/2 h-auto rounded-lg shadow-md img-fade-in">
-              这对我们来说是一个巨大的打击，因为我们一直以来都依赖这个平台来提供稳定的下载服务。
-              我们曾在努力寻找新的托管解决方案，并曾计划在未来几周内恢复下载功能。
-            </p>
+					<!-- 修复打字动画：移除text-balance，添加容器 -->
+					<div class="typing-container">
+						<h1 class="text-4xl md:text-5xl font-bold mb-6 typing-effect">
+							程序包最终纪念版发布
+						</h1>
+					</div>
+				</header>
 
-            <p class="fade-in-element">
-                现在，我们非常高兴地宣布，经过不懈的努力，我们已经成功解决了这个问题！
-                我们完成了蓝奏云直链解析功能(使用几个网上找的API,我们写了对应的py和C++发信端)，这不仅恢复了下载功能，还大幅提升了下载速度。
-                用户现在可以享受到比以往更快、更稳定的下载体验。
-            </p>
+				<!-- 音频播放器组件 -->
+				<div class="audio-player fade-in-element">
+					<div class="audio-controls">
+						<button id="playBtn" class="play-btn">
+							<i class="fa fa-play" id="playIcon"></i>
+						</button>
+						<div class="audio-info">
+							<div class="audio-title">背景音乐 - 程序包最终纪念版</div>
+							<div class="audio-duration">zmczx.m4a</div>
+						</div>
+					</div>
+					<div class="progress-container" id="progressContainer">
+						<div class="progress-bar" id="progressBar"></div>
+					</div>
+					<div class="time-display">
+						<span id="currentTime">00:00</span>
+						<span id="totalTime">00:00</span>
+					</div>
+					<!-- 隐藏的原生音频元素 -->
+					<audio id="audioPlayer" class="hidden-audio" preload="auto">
+						<source src="assets/zmczx.m4a" type="audio/mpeg">
+						您的浏览器不支持音频播放。
+					</audio>
+				</div>
 
-            <p class="fade-in-element">
-                但是因为一些问题，我们不能把这个功能进行实现在程序包中(主要是没人用)，
-                所以我们决定将这个功能放在下一个大版本中发布。
-            </p>
+				<!-- 文章封面图 -->
+				<div class="mb-10 fade-in-element img-hover-zoom">
+					<img src="assets/p3.png" alt="error图" class="w-full h-auto rounded-lg shadow-md img-fade-in">
+				</div>
 
-            <h2 class="fade-in-element">前瞻</h2>
+				<!-- 文章内容 -->
+				<div class="article-prose max-w-none">
+					<h2>引言</h2>
+					<p class="fade-in-element">
+						经过漫长的等待和无数次的迭代，我们终于迎来了程序包的最终纪念版发布！这是一个充满挑战和创新的旅程，我们在这个版本中修复了大部分已知问题，力求为大家带来最优质的体验。
+					</p>
+					<p class="fade-in-element">
+						在这个版本中，我们不仅修复了大量的bug，还引入了一个漂亮的纪念版标签。我们相信，这将是一个里程碑式的版本，它标志着程序包正式进入后期。
+					</p>
+					<blockquote class="fade-in-element">
+						“为什么你不看啊@705”
+					</blockquote>
+					<p>
+						是我们的热情和反馈让我不断前行。让我们一起期待未来这个程序能给大家带来更多惊喜！
+					</p>
 
-            <blockquote class="fade-in-element">
-              “最近在编的程序都是python，C++写得少了，cxb无了附加组件下载，但打包py太麻烦且太笨重了，都没加进程序包”
-              <span class="text-secondary block text-right"> ———— 1123 news.txt</span>
-            </blockquote>
+					<h2 class="fade-in-element">过程</h2>
+					<blockquote class="fade-in-element">
+						“蓝奏云直链解析搞定了，只要搞一搞cxb本体，就能立马恢复下载功能，甚至速度比以前快几倍
+						但因为我的傲娇，cxb的确不更新了，这个坑就在这里堆着吧
+						不过...一旦有人催我，我会回来的 拜拜”
+						<span class="text-secondary block text-right"> ————news.txt</span>
+					</blockquote>
 
-            <p class="fade-in-element">
-                但是因为一些问题，我们不能把这个功能进行实现在程序包中(主要是没人用)，
-                我们接下来的计划就是加入几个py程序
+					<p class="fade-in-element">
+						一周前，我们在新闻文件中发布了一个已知的严重问题：原先文件托管平台已被墙，导致程序包无法下载。
+						<img src="/assets/img/fraud.png" alt="error图"
+							class="w-1/2 h-auto rounded-lg shadow-md img-fade-in">
+						这对我们来说是一个巨大的打击，因为我们一直以来都依赖这个平台来提供稳定的下载服务。
+						我们曾在努力寻找新的托管解决方案，并曾计划在未来几周内恢复下载功能。
+					</p>
 
-            </p>
-            <div class="flex flex-col">
-                <img src="assets/p4.png" alt="error图" class="w-1/4 h-auto rounded-lg shadow-md img-fade-in mb-2">
-                <span class="text-secondary text-sm">如图所示，ascii上面的py程序都未加入程序包</span>
-            </div>
+					<p class="fade-in-element">
+						现在，我们非常高兴地宣布，经过不懈的努力，我们已经成功解决了这个问题！
+						我们完成了蓝奏云直链解析功能(使用几个网上找的API,我们写了对应的py和C++发信端)，这不仅恢复了下载功能，还大幅提升了下载速度。
+						用户现在可以享受到比以往更快、更稳定的下载体验。
+					</p>
 
-            <p class="fade-in-element">
-                当然，一切的前提都是有人用程序包，所以说它是最终版
-            </p>
-          </div>
+					<p class="fade-in-element">
+						但是因为一些问题，我们不能把这个功能进行实现在程序包中(主要是没人用)，
+						所以我们决定将这个功能放在下一个大版本中发布。
+					</p>
 
-          <!-- 文章标签 -->
-          <div class="mt-12 pt-6 border-t border-gray-200 fade-in-element">
-            <div class="flex flex-wrap gap-2">
-              <span class="text-sm font-medium text-secondary">标签：</span>
-              <a
-                href="/articals.html#Tech News"
-                class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
-                >#Tech News
-                <div id="Tech News"></div
-              ></a>
-            </div>
-          </div>
-        </article>
+					<h2 class="fade-in-element">前瞻</h2>
 
-        <!-- 侧边栏（玻璃虚化卡片） -->
-        <aside class="lg:w-1/3 space-y-8">
-          <!-- 作者信息卡片 -->
-          <div class="sticky top-24 glass-card p-6 rounded-xl">
-            <div class="flex items-center gap-4 mb-4">
-              <div>
-                <img
-                  src="assets/error.jpg"
-                  alt="a"
-                  class="w-16 h-16 object-cover shadow-md border-2 border-white"
-                />
-                <h3 class="font-bold text-lg">程序包最终纪念版发布</h3>
-                <p class="text-secondary text-sm">
-                  11/28 程序包最终纪念版轰轰隆隆地发布
-                </p>
-              </div>
-            </div>
-            <p class="text-gray-600 text-sm mb-4">What can I say...根本没人看</p>
-            <!-- <div class="flex gap-3">
+					<blockquote class="fade-in-element">
+						“最近在编的程序都是python，C++写得少了，cxb无了附加组件下载，但打包py太麻烦且太笨重了，都没加进程序包”
+						<span class="text-secondary block text-right"> ———— 1123 news.txt</span>
+					</blockquote>
+
+					<p class="fade-in-element">
+						但是因为一些问题，我们不能把这个功能进行实现在程序包中(主要是没人用)，
+						我们接下来的计划就是加入几个py程序
+
+					</p>
+					<div class="flex flex-col">
+						<img src="assets/p4.png" alt="error图"
+							class="w-1/4 h-auto rounded-lg shadow-md img-fade-in mb-2">
+						<span class="text-secondary text-sm">如图所示，ascii上面的py程序都未加入程序包</span>
+					</div>
+
+					<p class="fade-in-element">
+						当然，一切的前提都是有人用程序包，所以说它是最终版
+					</p>
+				</div>
+
+				<!-- 文章标签 -->
+				<div class="mt-12 pt-6 border-t border-gray-200 fade-in-element">
+					<div class="flex flex-wrap gap-2">
+						<span class="text-sm font-medium text-secondary">标签：</span>
+						<a href="/articals.html#Tech News"
+							class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors">#Tech
+							News
+							<div id="Tech News"></div>
+						</a>
+					</div>
+				</div>
+			</article>
+
+			<!-- 侧边栏（玻璃虚化卡片） -->
+			<aside class="lg:w-1/3 space-y-8">
+				<!-- 作者信息卡片 -->
+				<div class="sticky top-24 glass-card p-6 rounded-xl">
+					<div class="flex items-center gap-4 mb-4">
+						<div>
+							<img src="assets/error.jpg" alt="a"
+								class="w-16 h-16 object-cover shadow-md border-2 border-white" />
+							<h3 class="font-bold text-lg">程序包最终纪念版发布</h3>
+							<p class="text-secondary text-sm">
+								11/28 程序包最终纪念版轰轰隆隆地发布
+							</p>
+						</div>
+					</div>
+					<p class="text-gray-600 text-sm mb-4">What can I say...根本没人看</p>
+					<!-- <div class="flex gap-3">
                         <a href="#" class="text-primary hover:text-primary/80 transition-colors text-lg"><i class="fa fa-github"></i></a>
                         <a href="#" class="text-primary hover:text-primary/80 transition-colors text-lg"><i class="fa fa-twitter"></i></a>
                         <a href="#" class="text-primary hover:text-primary/80 transition-colors text-lg"><i class="fa fa-linkedin"></i></a>
                     </div> -->
-          </div>
+				</div>
 
-          <!-- 推荐文章卡片
+				<!-- 推荐文章卡片
                 <div class="glass-card p-6 rounded-xl">
                     <h3 class="font-bold text-lg mb-4">推荐阅读</h3>
                     <ul class="space-y-4">
@@ -568,226 +559,222 @@
                     </ul>
                 </div> -->
 
-          <!-- 订阅卡片 -->
-          <div class="glass-card p-6 rounded-xl bg-primary/5">
-            <h3 class="font-bold text-lg mb-3">下载程序包PC</h3>
-            <p class="text-gray-600 text-sm mb-4">获取一堆小工具</p>
-            <div class="flex">
-              <!-- <input type="email" placeholder="你的邮箱地址" class="flex-1 px-4 py-2 rounded-l-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"> -->
-              <a
-                href="/down_cxb.html"
-                class="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
-                >下载</a
-              >
-            </div>
-          </div>
-        </aside>
-      </div>
-    </main>
+				<!-- 订阅卡片 -->
+				<div class="glass-card p-6 rounded-xl bg-primary/5">
+					<h3 class="font-bold text-lg mb-3">下载程序包PC</h3>
+					<p class="text-gray-600 text-sm mb-4">获取一堆小工具</p>
+					<div class="flex">
+						<!-- <input type="email" placeholder="你的邮箱地址" class="flex-1 px-4 py-2 rounded-l-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"> -->
+						<a href="/down_cxb.html"
+							class="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">下载</a>
+					</div>
+				</div>
+			</aside>
+		</div>
+	</main>
 
-    <!-- 页脚 -->
-    <footer class="text-neutral-300 py-8 mt-20 backdrop-blur-sm">
-      <div class="max-w-6xl mx-auto px-4 text-center text-sm">
-        <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--Rooteater</p>
-        <p class="text-neutral-500">© 2025 All Rights Reserved</p>
-        <!-- <div class="flex justify-center gap-4 mt-4">
+	<!-- 页脚 -->
+	<footer class="text-neutral-300 py-8 mt-20 backdrop-blur-sm">
+		<div class="max-w-6xl mx-auto px-4 text-center text-sm">
+			<p class="mb-2">蚊!帐! [○･｀Д´･ ○]--Rooteater</p>
+			<p class="text-neutral-500">© 2025 All Rights Reserved</p>
+			<!-- <div class="flex justify-center gap-4 mt-4">
                 <a href="#" class="text-neutral-400 hover:text-white transition-colors"><i class="fa fa-github"></i></a>
                 <a href="#" class="text-neutral-400 hover:text-white transition-colors"><i class="fa fa-twitter"></i></a>
                 <a href="#" class="text-neutral-400 hover:text-white transition-colors"><i class="fa fa-linkedin"></i></a>
             </div> -->
-      </div>
-    </footer>
+		</div>
+	</footer>
 
-    <!-- 返回顶部按钮 -->
-    <button
-      id="back-to-top"
-      class="fixed bottom-6 right-6 w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center opacity-0 invisible"
-    >
-      <i class="fa fa-arrow-up"></i>
-    </button>
+	<!-- 返回顶部按钮 -->
+	<button id="back-to-top"
+		class="fixed bottom-6 right-6 w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center opacity-0 invisible">
+		<i class="fa fa-arrow-up"></i>
+	</button>
 
-    <!-- JavaScript -->
-    <script>
-      // 移动端菜单切换（预留）
-      const mobileMenuButton = document.getElementById("mobile-menu-button");
+	<!-- JavaScript -->
+	<script>
+		// 移动端菜单切换（预留）
+		const mobileMenuButton = document.getElementById("mobile-menu-button");
 
-      if (mobileMenuButton) {
-        mobileMenuButton.addEventListener("click", () => {
-          // 可添加移动端菜单逻辑
-        });
-      }
+		if (mobileMenuButton) {
+			mobileMenuButton.addEventListener("click", () => {
+				// 可添加移动端菜单逻辑
+			});
+		}
 
-      // 滚动事件处理
-      const navbar = document.getElementById("navbar");
-      const backToTopButton = document.getElementById("back-to-top");
+		// 滚动事件处理
+		const navbar = document.getElementById("navbar");
+		const backToTopButton = document.getElementById("back-to-top");
 
-      window.addEventListener("scroll", () => {
-        // 导航栏滚动效果
-        if (window.scrollY > 50) {
-          navbar.classList.add("shadow-md", "bg-white/90");
-          navbar.classList.remove("shadow-sm");
-        } else {
-          navbar.classList.remove("shadow-md", "bg-white/90");
-          navbar.classList.add("shadow-sm");
-        }
+		window.addEventListener("scroll", () => {
+			// 导航栏滚动效果
+			if (window.scrollY > 50) {
+				navbar.classList.add("shadow-md", "bg-white/90");
+				navbar.classList.remove("shadow-sm");
+			} else {
+				navbar.classList.remove("shadow-md", "bg-white/90");
+				navbar.classList.add("shadow-sm");
+			}
 
-        // 返回顶部按钮显示/隐藏
-        if (window.scrollY > 300) {
-          backToTopButton.classList.remove("opacity-0", "invisible");
-          backToTopButton.classList.add("opacity-100", "visible");
-        } else {
-          backToTopButton.classList.add("opacity-0", "invisible");
-          backToTopButton.classList.remove("opacity-100", "visible");
-        }
+			// 返回顶部按钮显示/隐藏
+			if (window.scrollY > 300) {
+				backToTopButton.classList.remove("opacity-0", "invisible");
+				backToTopButton.classList.add("opacity-100", "visible");
+			} else {
+				backToTopButton.classList.add("opacity-0", "invisible");
+				backToTopButton.classList.remove("opacity-100", "visible");
+			}
 
-        // 处理滚动动画
-        handleScrollAnimations();
-      });
+			// 处理滚动动画
+			handleScrollAnimations();
+		});
 
-      // 返回顶部功能
-      backToTopButton.addEventListener("click", () => {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      });
+		// 返回顶部功能
+		backToTopButton.addEventListener("click", () => {
+			window.scrollTo({
+				top: 0,
+				behavior: "smooth",
+			});
+		});
 
-      // 检测元素是否在视口内
-      function isInViewport(element) {
-        const rect = element.getBoundingClientRect();
-        return (
-          rect.top <=
-            (window.innerHeight || document.documentElement.clientHeight) *
-              0.9 && rect.bottom >= 0
-        );
-      }
+		// 检测元素是否在视口内
+		function isInViewport(element) {
+			const rect = element.getBoundingClientRect();
+			return (
+				rect.top <=
+				(window.innerHeight || document.documentElement.clientHeight) *
+				0.9 && rect.bottom >= 0
+			);
+		}
 
-      // 处理滚动动画
-      function handleScrollAnimations() {
-        const fadeElements = document.querySelectorAll(".fade-in-element");
-        fadeElements.forEach((element) => {
-          if (isInViewport(element) && !element.classList.contains("active")) {
-            element.classList.add("active");
-          }
-        });
-      }
+		// 处理滚动动画
+		function handleScrollAnimations() {
+			const fadeElements = document.querySelectorAll(".fade-in-element");
+			fadeElements.forEach((element) => {
+				if (isInViewport(element) && !element.classList.contains("active")) {
+					element.classList.add("active");
+				}
+			});
+		}
 
-      // 格式化时间为 MM:SS 格式
-      function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      }
+		// 格式化时间为 MM:SS 格式
+		function formatTime(seconds) {
+			const mins = Math.floor(seconds / 60);
+			const secs = Math.floor(seconds % 60);
+			return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+		}
 
-      // 音频播放器功能
-      document.addEventListener('DOMContentLoaded', function() {
-        const audio = document.getElementById('audioPlayer');
-        const playBtn = document.getElementById('playBtn');
-        const playIcon = document.getElementById('playIcon');
-        const progressBar = document.getElementById('progressBar');
-        const progressContainer = document.getElementById('progressContainer');
-        const currentTimeDisplay = document.getElementById('currentTime');
-        const totalTimeDisplay = document.getElementById('totalTime');
+		// 音频播放器功能
+		document.addEventListener('DOMContentLoaded', function () {
+			const audio = document.getElementById('audioPlayer');
+			const playBtn = document.getElementById('playBtn');
+			const playIcon = document.getElementById('playIcon');
+			const progressBar = document.getElementById('progressBar');
+			const progressContainer = document.getElementById('progressContainer');
+			const currentTimeDisplay = document.getElementById('currentTime');
+			const totalTimeDisplay = document.getElementById('totalTime');
 
-        // 页面加载完成后尝试自动播放
-        audio.addEventListener('loadedmetadata', function() {
-          totalTimeDisplay.textContent = formatTime(audio.duration);
-          
-          // 尝试自动播放
-          audio.play().then(function() {
-            playIcon.className = 'fa fa-pause';
-          }).catch(function(error) {
-            console.log('自动播放失败:', error);
-            // 自动播放失败时显示播放按钮
-            playIcon.className = 'fa fa-play';
-          });
-        });
+			// 页面加载完成后尝试自动播放
+			audio.addEventListener('loadedmetadata', function () {
+				totalTimeDisplay.textContent = formatTime(audio.duration);
 
-        // 播放/暂停切换
-        playBtn.addEventListener('click', function() {
-          if (audio.paused) {
-            audio.play().then(function() {
-              playIcon.className = 'fa fa-pause';
-            }).catch(function(error) {
-              console.log('播放失败:', error);
-            });
-          } else {
-            audio.pause();
-            playIcon.className = 'fa fa-play';
-          }
-        });
+				// 尝试自动播放
+				audio.play().then(function () {
+					playIcon.className = 'fa fa-pause';
+				}).catch(function (error) {
+					console.log('自动播放失败:', error);
+					// 自动播放失败时显示播放按钮
+					playIcon.className = 'fa fa-play';
+				});
+			});
 
-        // 更新进度条
-        audio.addEventListener('timeupdate', function() {
-          if (!isNaN(audio.duration)) {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = progress + '%';
-            currentTimeDisplay.textContent = formatTime(audio.currentTime);
-          }
-        });
+			// 播放/暂停切换
+			playBtn.addEventListener('click', function () {
+				if (audio.paused) {
+					audio.play().then(function () {
+						playIcon.className = 'fa fa-pause';
+					}).catch(function (error) {
+						console.log('播放失败:', error);
+					});
+				} else {
+					audio.pause();
+					playIcon.className = 'fa fa-play';
+				}
+			});
 
-        // 修复：点击进度条跳转功能
-        progressContainer.addEventListener('click', function(e) {
-          // 使用getBoundingClientRect获取更准确的位置信息
-          const rect = progressContainer.getBoundingClientRect();
-          const clickX = e.clientX - rect.left;
-          const width = rect.width;
-          
-          if (!isNaN(audio.duration) && width > 0) {
-            const clickPosition = clickX / width;
-            // 确保位置在0-1之间
-            const normalizedPosition = Math.max(0, Math.min(1, clickPosition));
-            const newTime = normalizedPosition * audio.duration;
-            
-            // 更新音频位置
-            audio.currentTime = newTime;
-            
-            // 立即更新进度条显示
-            progressBar.style.width = (normalizedPosition * 100) + '%';
-            currentTimeDisplay.textContent = formatTime(newTime);
-          }
-        });
+			// 更新进度条
+			audio.addEventListener('timeupdate', function () {
+				if (!isNaN(audio.duration)) {
+					const progress = (audio.currentTime / audio.duration) * 100;
+					progressBar.style.width = progress + '%';
+					currentTimeDisplay.textContent = formatTime(audio.currentTime);
+				}
+			});
 
-        // 播放结束时重置
-        audio.addEventListener('ended', function() {
-          playIcon.className = 'fa fa-play';
-          progressBar.style.width = '0%';
-          currentTimeDisplay.textContent = '00:00';
-        });
+			// 修复：点击进度条跳转功能
+			progressContainer.addEventListener('click', function (e) {
+				// 使用getBoundingClientRect获取更准确的位置信息
+				const rect = progressContainer.getBoundingClientRect();
+				const clickX = e.clientX - rect.left;
+				const width = rect.width;
 
-        // 音频加载错误处理
-        audio.addEventListener('error', function() {
-          console.log('音频加载失败');
-          totalTimeDisplay.textContent = '00:00';
-        });
+				if (!isNaN(audio.duration) && width > 0) {
+					const clickPosition = clickX / width;
+					// 确保位置在0-1之间
+					const normalizedPosition = Math.max(0, Math.min(1, clickPosition));
+					const newTime = normalizedPosition * audio.duration;
 
-        // 初始加载和滚动时触发
-        // 图片加载动画
-        const images = document.querySelectorAll("img");
-        images.forEach((img) => {
-          img.classList.add("opacity-0");
-          img.onload = function () {
-            img.classList.remove("opacity-0");
-            img.classList.add("img-fade-in");
-          };
-          // 如果图片已经缓存，手动触发onload
-          if (img.complete) {
-            img.onload();
-          }
-        });
+					// 更新音频位置
+					audio.currentTime = newTime;
 
-        // 初始化滚动动画
-        handleScrollAnimations();
+					// 立即更新进度条显示
+					progressBar.style.width = (normalizedPosition * 100) + '%';
+					currentTimeDisplay.textContent = formatTime(newTime);
+				}
+			});
 
-        // 修复打字动画：确保元素有合适的初始宽度
-        const typingElements = document.querySelectorAll(".typing-effect");
-        typingElements.forEach((el) => {
-          el.style.width = "0";
-          setTimeout(() => {
-            el.style.width = "";
-          }, 100);
-        });
-      });
-    </script>
-  </body>
+			// 播放结束时重置
+			audio.addEventListener('ended', function () {
+				playIcon.className = 'fa fa-play';
+				progressBar.style.width = '0%';
+				currentTimeDisplay.textContent = '00:00';
+			});
+
+			// 音频加载错误处理
+			audio.addEventListener('error', function () {
+				console.log('音频加载失败');
+				totalTimeDisplay.textContent = '00:00';
+			});
+
+			// 初始加载和滚动时触发
+			// 图片加载动画
+			const images = document.querySelectorAll("img");
+			images.forEach((img) => {
+				img.classList.add("opacity-0");
+				img.onload = function () {
+					img.classList.remove("opacity-0");
+					img.classList.add("img-fade-in");
+				};
+				// 如果图片已经缓存，手动触发onload
+				if (img.complete) {
+					img.onload();
+				}
+			});
+
+			// 初始化滚动动画
+			handleScrollAnimations();
+
+			// 修复打字动画：确保元素有合适的初始宽度
+			const typingElements = document.querySelectorAll(".typing-effect");
+			typingElements.forEach((el) => {
+				el.style.width = "0";
+				setTimeout(() => {
+					el.style.width = "";
+				}, 100);
+			});
+		});
+	</script>
+</body>
+
 </html>
