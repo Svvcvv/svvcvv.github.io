@@ -64,6 +64,41 @@
             background-color: #2980b9;
         }
 
+        /* 迭代按钮样式 */
+        .iter-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .iter-btn:hover {
+            background-color: #27ae60;
+        }
+
+        /* 加载状态样式 */
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* 图片容器样式优化 */
         .image-container {
             max-width: 100%;
@@ -80,6 +115,14 @@
             object-fit: contain; /* 保持图片比例并完全显示在容器内 */
             display: none;
             border-radius: 4px;
+        }
+
+        /* 进度提示 */
+        .progress-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            height: 20px;
         }
     </style>
 </head>
@@ -99,8 +142,11 @@
                 <button id="enc" class="normal_button" style="background-color: #4f1787;color:#fff;">混淆</button>
                 <button id="dec" class="normal_button" style="background-color: #eb3678;color:#fff;">解混淆</button>
                 <button id="re" class="normal_button" style="background-color: #fb773c;color:#fff;">还原</button>
+                <button id="iterBtn" class="normal_button iter-btn">色散测试</button>
                 <button id="downloadBtn" class="normal_button download-btn">下载图片</button>
             </div>
+            <!-- 进度提示文本 -->
+            <div class="progress-text" id="progressText"></div>
             <div>&ZeroWidthSpace;</div>
             <!-- 新增图片容器 -->
             <div class="image-container">
@@ -187,62 +233,157 @@
     </script>
     <script>
         const img = document.getElementById("display-img")
+        const progressText = document.getElementById("progressText")
+        let originalImageSrc = null // 保存原始图片地址
+        
         function setsrc(src) {
-            URL.revokeObjectURL(img.src)
+            if (img.src && img.src !== src) {
+                URL.revokeObjectURL(img.src)
+            }
             img.src = src
             img.style.display = "inline-block"
         }
+
+        // 保存原始图片
+        function saveOriginalImage() {
+            if (ipt.files.length > 0 && !originalImageSrc) {
+                originalImageSrc = URL.createObjectURL(ipt.files[0])
+            }
+        }
+
         function encrypt(img) {
-            const cvs = document.createElement("canvas")
-            const width = cvs.width = img.width
-            const height = cvs.height = img.height
-            const ctx = cvs.getContext("2d")
-            ctx.drawImage(img, 0, 0)
-            const imgdata = ctx.getImageData(0, 0, width, height)
-            const imgdata2 = new ImageData(width, height)
-            const curve = gilbert2d(width, height)
-            const offset = Math.round((Math.sqrt(5) - 1) / 2 * width * height)
-            for (let i = 0; i < width * height; i++) {
-                const old_pos = curve[i]
-                const new_pos = curve[(i + offset) % (width * height)]
-                const old_p = 4 * (old_pos[0] + old_pos[1] * width)
-                const new_p = 4 * (new_pos[0] + new_pos[1] * width)
-                imgdata2.data.set(imgdata.data.slice(old_p, old_p + 4), new_p)
-            }
-            ctx.putImageData(imgdata2, 0, 0)
-            ctx.putImageData(imgdata2, 0, 0)
-            cvs.toBlob(b => {
-                setsrc(URL.createObjectURL(b))
-            }, "image/jpeg", 0.95)
+            return new Promise((resolve) => {
+                const cvs = document.createElement("canvas")
+                const width = cvs.width = img.width
+                const height = cvs.height = img.height
+                const ctx = cvs.getContext("2d")
+                ctx.drawImage(img, 0, 0)
+                const imgdata = ctx.getImageData(0, 0, width, height)
+                const imgdata2 = new ImageData(width, height)
+                const curve = gilbert2d(width, height)
+                const offset = Math.round((Math.sqrt(5) - 1) / 2 * width * height)
+                for (let i = 0; i < width * height; i++) {
+                    const old_pos = curve[i]
+                    const new_pos = curve[(i + offset) % (width * height)]
+                    const old_p = 4 * (old_pos[0] + old_pos[1] * width)
+                    const new_p = 4 * (new_pos[0] + new_pos[1] * width)
+                    imgdata2.data.set(imgdata.data.slice(old_p, old_p + 4), new_p)
+                }
+                ctx.putImageData(imgdata2, 0, 0)
+                cvs.toBlob(b => {
+                    const newSrc = URL.createObjectURL(b)
+                    setsrc(newSrc)
+                    resolve(newSrc)
+                }, "image/jpeg", 0.95)
+            })
         }
+
         function decrypt(img) {
-            const cvs = document.createElement("canvas")
-            const width = cvs.width = img.width
-            const height = cvs.height = img.height
-            const ctx = cvs.getContext("2d")
-            ctx.drawImage(img, 0, 0)
-            const imgdata = ctx.getImageData(0, 0, width, height)
-            const imgdata2 = new ImageData(width, height)
-            const curve = gilbert2d(width, height)
-            const offset = Math.round((Math.sqrt(5) - 1) / 2 * width * height)
-            for (let i = 0; i < width * height; i++) {
-                const old_pos = curve[i]
-                const new_pos = curve[(i + offset) % (width * height)]
-                const old_p = 4 * (old_pos[0] + old_pos[1] * width)
-                const new_p = 4 * (new_pos[0] + new_pos[1] * width)
-                imgdata2.data.set(imgdata.data.slice(new_p, new_p + 4), old_p)
-            }
-            ctx.putImageData(imgdata2, 0, 0)
-            cvs.toBlob(b => {
-                setsrc(URL.createObjectURL(b))
-            }, "image/jpeg", 0.95)
+            return new Promise((resolve) => {
+                const cvs = document.createElement("canvas")
+                const width = cvs.width = img.width
+                const height = cvs.height = img.height
+                const ctx = cvs.getContext("2d")
+                ctx.drawImage(img, 0, 0)
+                const imgdata = ctx.getImageData(0, 0, width, height)
+                const imgdata2 = new ImageData(width, height)
+                const curve = gilbert2d(width, height)
+                const offset = Math.round((Math.sqrt(5) - 1) / 2 * width * height)
+                for (let i = 0; i < width * height; i++) {
+                    const old_pos = curve[i]
+                    const new_pos = curve[(i + offset) % (width * height)]
+                    const old_p = 4 * (old_pos[0] + old_pos[1] * width)
+                    const new_p = 4 * (new_pos[0] + new_pos[1] * width)
+                    imgdata2.data.set(imgdata.data.slice(new_p, new_p + 4), old_p)
+                }
+                ctx.putImageData(imgdata2, 0, 0)
+                cvs.toBlob(b => {
+                    const newSrc = URL.createObjectURL(b)
+                    setsrc(newSrc)
+                    resolve(newSrc)
+                }, "image/jpeg", 0.95)
+            })
         }
+
+        async function iterateProcess() {
+            if (!img.src) {
+                alert("请先选择图片")
+                return
+            }
+
+            const iterBtn = document.getElementById("iterBtn")
+            const allButtons = document.querySelectorAll(".normal_button")
+            const num = 15 // 迭代次数
+            // 禁用所有按钮
+            allButtons.forEach(btn => {
+                btn.classList.add("loading")
+                btn.disabled = true
+            })
+
+            try {
+                // 保存原始图片
+                saveOriginalImage()
+                
+                // 混淆5次
+                progressText.textContent =  `迭代进度：混淆中 (1/${num})`
+                for (let i = 0; i < num; i++) {
+                    await new Promise(resolve => {
+                        img.style.display = "none"
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(async () => {
+                                await encrypt(img)
+                                progressText.textContent = `迭代进度：混淆中 (${i+1}/${num})`
+                                resolve()
+                            })
+                        })
+                    })
+                }
+
+                // 反混淆5次
+                progressText.textContent =  `迭代进度：反混淆中 (1/${num})`
+                for (let i = 0; i < num; i++) {
+                    await new Promise(resolve => {
+                        img.style.display = "none"
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(async () => {
+                                await decrypt(img)
+                                progressText.textContent = `迭代进度：反混淆中 (${i+1}/${num})`
+                                resolve()
+                            })
+                        })
+                    })
+                }
+
+                progressText.textContent = "迭代进度：完成！"
+                
+                // 3秒后清空进度提示
+                setTimeout(() => {
+                    progressText.textContent = ""
+                }, 3000)
+
+            } catch (error) {
+                console.error("迭代过程出错：", error)
+                progressText.textContent = "迭代失败！"
+                alert("迭代过程出错，请重试")
+            } finally {
+                // 启用所有按钮
+                setTimeout(() => {
+                    allButtons.forEach(btn => {
+                        btn.classList.remove("loading")
+                        btn.disabled = false
+                    })
+                }, 500)
+            }
+        }
+
         const ipt = document.getElementById("ipt")
         ipt.onchange = () => {
             if (ipt.files.length > 0) {
-                setsrc(URL.createObjectURL(ipt.files[0]))
+                originalImageSrc = URL.createObjectURL(ipt.files[0])
+                setsrc(originalImageSrc)
             }
         }
+
         const btn_enc = document.getElementById("enc")
         btn_enc.onclick = () => {
             if (img.src) {
@@ -254,6 +395,7 @@
                 })
             }
         }
+
         const btn_dec = document.getElementById("dec")
         btn_dec.onclick = () => {
             if (img.src) {
@@ -265,12 +407,18 @@
                 })
             }
         }
+
         const btn_restore = document.getElementById("re")
         btn_restore.onclick = () => {
             if (ipt.files.length > 0) {
-                setsrc(URL.createObjectURL(ipt.files[0]))
+                originalImageSrc = URL.createObjectURL(ipt.files[0])
+                setsrc(originalImageSrc)
             }
         }
+
+        // 迭代按钮点击事件
+        const iterBtn = document.getElementById("iterBtn")
+        iterBtn.addEventListener("click", iterateProcess)
         
         // 下载按钮功能
         const downloadBtn = document.getElementById("downloadBtn");

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/icons/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192"  href="assets/icons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
@@ -21,7 +22,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
+
     <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
@@ -46,7 +47,7 @@
             }
         }
     </script>
-    
+
     <style type="text/tailwindcss">
         @layer utilities {
             .content-auto {
@@ -76,7 +77,7 @@
         }
     </style>
     <style>
-     nav a {
+        nav a {
             font-family: 'Cascadia Code', Arial, sans-serif;
             font-size: 15px;
             color: #2c3e50;
@@ -88,6 +89,7 @@
         }
     </style>
 </head>
+
 <body class="font-inter bg-neutral-50 text-neutral-800 min-h-screen">
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
@@ -98,129 +100,135 @@
             </div>
             <div class="flex flex-wrap items-center gap-1 md:gap-3">
                 <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
-                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="down.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
                 <a href="vid.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Video</a>
-                <a href="SCMN.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
+                <a href="SCMN.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
                 <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
-                <a href="articals.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
+                <a href="articals.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        <!-- 页面标题 -->
-        <div class="text-center mb-10 md:mb-16">
-            <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-neutral-900 mb-3">Video Player</h1>
-            <p class="text-neutral-600 max-w-2xl mx-auto text-sm md:text-base">
-                A modern video player with advanced controls and features for seamless playback experience.
-            </p>
-        </div>
-
-        <!-- 通知栏 -->
-        <div class="bg-blue-50 border-l-4 border-primary p-4 md:p-5 rounded mb-8 text-sm md:text-base">
-            <div class="flex items-start gap-3">
-                <i class="fa fa-info-circle text-primary mt-0.5"></i>
-                <div>
-                    <p class="font-medium text-neutral-800 mb-1">Video Player Information</p>
-                    <ul class="list-disc pl-5 space-y-1 text-neutral-700">
-                        <li>Supports multiple video formats including MP4, WebM, and OGG</li>
-                        <li>Keyboard shortcuts: Space (play/pause), F (fullscreen), M (mute)</li>
-                        <li>Double-click on video to toggle fullscreen mode</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="player-container bg-white rounded-xl overflow-hidden video-shadow card-hover">
+    <main class="w-5/6 mx-auto px-6 py-8 md:py-12">
+        <div class="player-container bg-white rounded-xl overflow-hidden video-shadow card-hover mb-10">
             <!-- Video Title and Info -->
-            <div class="p-6 border-b border-neutral-200">
-                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-2 text-neutral-900" id="video-title">Video Player</h1>
+            <div class="p-4 border-b border-neutral-200">
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] mb-2 text-neutral-900" id="video-title">Video
+                    Player</h1>
                 <div class="flex flex-wrap items-center text-sm text-neutral-600 gap-4">
                     <span id="video-duration" class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 00:00</span>
-                    <span id="video-resolution" class="flex items-center"><i class="fa fa-television mr-1"></i> 1080p</span>
-                    <span id="video-status" class="flex items-center"><i class="fa fa-circle text-neutral-400 mr-1"></i> Not playing</span>
+                    <span id="video-resolution" class="flex items-center"><i class="fa fa-television mr-1"></i>
+                        1080p</span>
+                    <span id="video-status" class="flex items-center"><i class="fa fa-circle text-neutral-400 mr-1"></i>
+                        Not playing</span>
+                    <span id="fragment-info" class="flex items-center"><i class="fa fa-link mr-1"></i> <span
+                            class="text-primary cursor-pointer hover:underline" onclick="copyCurrentUrl()">Copy current
+                            URL</span></span>
                 </div>
             </div>
-            
+
             <!-- Video Playback Area -->
             <div class="relative bg-black aspect-video w-full overflow-hidden group" id="video-container">
                 <video id="main-video" class="w-full h-full object-contain" poster="" muted>
                     <source src="" type="video/mp4" data-quality="1080p">
                     <p class="text-white p-4">Your browser does not support HTML5 video playback.</p>
                 </video>
-                
+
                 <!-- Loading Indicator -->
-                <div id="loading-indicator" class="absolute inset-0 flex items-center justify-center bg-black/50 hidden">
+                <div id="loading-indicator"
+                    class="absolute inset-0 flex items-center justify-center bg-black/50 hidden">
                     <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                 </div>
-                
+
                 <!-- Big Play/Pause Button (Center) -->
-                <button id="big-play-button" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-primary/80 text-white flex items-center justify-center text-4xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-primary">
+                <button id="big-play-button"
+                    class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-primary/80 text-white flex items-center justify-center text-4xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-primary">
                     <i class="fa fa-play"></i>
                 </button>
-                
+
                 <!-- Top Control Bar -->
-                <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div
+                    class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div class="flex space-x-2">
-                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover" title="Play/Pause" id="top-play-pause">
+                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover"
+                            title="Play/Pause" id="top-play-pause">
                             <i class="fa fa-play"></i>
                         </button>
-                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover" title="Rewind 10s">
+                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover"
+                            title="Rewind 10s">
                             <i class="fa fa-step-backward"></i>
                         </button>
-                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover" title="Forward 10s">
+                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover"
+                            title="Forward 10s">
                             <i class="fa fa-step-forward"></i>
                         </button>
                     </div>
                     <div class="flex space-x-2">
-                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover" title="Quality Settings" id="quality-selector">
+                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover"
+                            title="Quality Settings" id="quality-selector">
                             <i class="fa fa-cog"></i>
                         </button>
-                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover" title="Fullscreen" id="fullscreen-button">
+                        <button class="video-control p-2 rounded-full bg-black/50 text-white control-hover"
+                            title="Fullscreen" id="fullscreen-button">
                             <i class="fa fa-expand"></i>
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Bottom Control Bar -->
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <!-- Progress Bar (移除了小球) -->
+                <div
+                    class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <!-- Progress Bar -->
                     <div class="relative h-1 bg-white/30 rounded-full mb-4 cursor-pointer" id="progress-container">
-                        <div id="progress-bar" class="absolute top-0 left-0 h-full bg-primary rounded-full" style="width: 0%"></div>
-                        <div id="buffer-bar" class="absolute top-0 left-0 h-full bg-white/50 rounded-full" style="width: 0%"></div>
-                        <input type="range" id="progress-slider" min="0" max="100" step="0.1" value="0" class="absolute top-0 left-0 h-full w-full opacity-0 cursor-pointer">
+                        <div id="progress-bar" class="absolute top-0 left-0 h-full bg-primary rounded-full"
+                            style="width: 0%"></div>
+                        <div id="buffer-bar" class="absolute top-0 left-0 h-full bg-white/50 rounded-full"
+                            style="width: 0%"></div>
+                        <input type="range" id="progress-slider" min="0" max="100" step="0.1" value="0"
+                            class="absolute top-0 left-0 h-full w-full opacity-0 cursor-pointer">
                     </div>
-                    
+
                     <!-- Control Buttons and Time -->
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-4">
-                            <button class="video-control text-white control-hover" title="Play/Pause" id="bottom-play-pause">
+                            <button class="video-control text-white control-hover" title="Play/Pause"
+                                id="bottom-play-pause">
                                 <i class="fa fa-play text-xl"></i>
                             </button>
-                            
+
                             <!-- Volume Control -->
                             <div class="flex items-center space-x-2 group/volume">
                                 <button class="video-control text-white control-hover" title="Mute" id="mute-button">
                                     <i class="fa fa-volume-up text-xl"></i>
                                 </button>
-                                <input type="range" id="volume-slider" min="0" max="100" step="1" value="100" class="w-24 h-1 bg-white/30 rounded-full appearance-none cursor-pointer opacity-0 group-hover/volume:opacity-100 transition-opacity">
+                                <input type="range" id="volume-slider" min="0" max="100" step="1" value="100"
+                                    class="w-24 h-1 bg-white/30 rounded-full appearance-none cursor-pointer opacity-0 group-hover/volume:opacity-100 transition-opacity">
                             </div>
-                            
+
                             <!-- Playback Speed -->
                             <div class="relative group/speed">
-                                <button class="video-control text-white control-hover flex items-center" title="Playback Speed" id="speed-button">
+                                <button class="video-control text-white control-hover flex items-center"
+                                    title="Playback Speed" id="speed-button">
                                     <i class="fa fa-tachometer text-xl mr-1"></i>
                                     <span>1.0x</span>
                                 </button>
-                                <div class="absolute bottom-full left-0 mb-2 bg-black/90 text-white rounded-lg shadow-lg p-2 hidden group-hover/speed:block w-24 z-10">
-                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer" data-speed="0.5">0.5x</div>
-                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer" data-speed="1.0">1.0x</div>
-                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer" data-speed="1.5">1.5x</div>
-                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer" data-speed="2.0">2.0x</div>
+                                <div
+                                    class="absolute bottom-full left-0 mb-2 bg-black/90 text-white rounded-lg shadow-lg p-2 hidden group-hover/speed:block w-24 z-10">
+                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer"
+                                        data-speed="0.5">0.5x</div>
+                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer"
+                                        data-speed="1.0">1.0x</div>
+                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer"
+                                        data-speed="1.5">1.5x</div>
+                                    <div class="speed-option py-1 px-2 hover:bg-primary/80 rounded cursor-pointer"
+                                        data-speed="2.0">2.0x</div>
                                 </div>
                             </div>
-                            
+
                             <!-- Time Display -->
                             <div class="text-white font-medium">
                                 <span id="current-time">00:00</span>
@@ -228,9 +236,10 @@
                                 <span id="total-time">00:00</span>
                             </div>
                         </div>
-                        
+
                         <div class="flex items-center space-x-3">
-                            <button class="video-control text-white control-hover" title="Picture in Picture" id="pip-button">
+                            <button class="video-control text-white control-hover" title="Picture in Picture"
+                                id="pip-button">
                                 <i class="fa fa-clone text-xl"></i>
                             </button>
                             <button class="video-control text-white control-hover" title="Subtitles" id="cc-button">
@@ -240,17 +249,17 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Audio Player -->
-            <div class="p-6 border-t border-neutral-200">
+            <!-- <div class="p-6 border-t border-neutral-200">
                 <h3 class="text-lg font-semibold mb-3 text-neutral-800">Audio Playback</h3>
                 <div class="audio-player bg-neutral-100 rounded-lg p-4">
                     <audio controls id="audio-player" class="w-full" src="https://file.uhsea.com/2504/403bcb366d7623ed75e6337556d300d8AH.mp3">
                         Your browser does not support audio playback.
                     </audio>
                 </div>
-            </div>
-            
+            </div> -->
+
             <!-- Video List -->
             <div class="p-6 border-t border-neutral-200">
                 <h3 class="text-lg font-semibold mb-4 text-neutral-800">Video Library</h3>
@@ -258,11 +267,33 @@
                     <!-- Video items will be generated dynamically from JavaScript -->
                 </div>
             </div>
+
+        </div>
+        <div class="bg-blue-50 border-l-4 border-primary p-4 md:p-5 rounded mb-8 text-sm md:text-base">
+            <div class="flex items-start gap-3">
+                <i class="fa fa-info-circle text-primary mt-0.5"></i>
+                <div>
+                    <p class="font-medium text-neutral-800 mb-1">Video Player Information</p>
+                    <ul class="list-disc pl-5 space-y-1 text-neutral-700">
+                        <li>Supports multiple video formats including MP4, WebM, and OGG</li>
+                        <li>Keyboard shortcuts: Space (play/pause), F (fullscreen), M (mute)</li>
+                        <li>Double-click on video to toggle fullscreen mode</li>
+                        <li>URL fragment support: Use #video=1 to directly open specific videos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- 页面标题 -->
+        <div class="text-center">
+            <p class="text-neutral-600 max-w-2xl mx-auto text-sm md:text-base">
+                A modern video player with advanced controls and features for seamless playback experience.
+            </p>
+            <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-neutral-900">Video Player</h1>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-neutral-800 text-neutral-300 py-6 mt-20">
+    <footer class="bg-neutral-800 text-neutral-300 py-6">
         <div class="max-w-6xl mx-auto px-4 text-center text-sm">
             <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--Rooteater</p>
             <p class="text-neutral-500">© 2025 All Rights Reserved</p>
@@ -272,6 +303,14 @@
     <script>
         // 视频数据只包含必要信息，不包含时长和缩略图路径
         const videoData = [
+
+            {
+                id: 3,
+                title: "攻打秘法要塞",
+                quality: "720p",
+                file: "vid/mwi.mp4",
+                description: "12月4日群刷"
+            },
             {
                 id: 1,
                 title: "Nature Documentary: Animal Wonders",
@@ -313,17 +352,19 @@
         const videoStatus = document.getElementById('video-status');
         const loadingIndicator = document.getElementById('loading-indicator');
         const videoLibrary = document.getElementById('video-library');
-        
+        const fragmentInfo = document.getElementById('fragment-info');
+
         // Initial State
         let isMuted = false;
         let lastVolume = 100;
         let isFullscreen = false;
-        
+        let currentVideoId = null;
+
         // 生成缩略图路径：将视频文件路径的扩展名改为.png
         function getThumbnailPath(videoPath) {
             return videoPath.replace(/\.[^/.]+$/, ".png");
         }
-        
+
         // 检查缩略图是否存在
         function checkThumbnailExists(thumbnailPath) {
             return new Promise((resolve) => {
@@ -333,11 +374,11 @@
                 img.onerror = () => resolve(false);
             });
         }
-        
+
         // Initialize video library
         async function initializeVideoLibrary() {
             videoLibrary.innerHTML = '';
-            
+
             for (const video of videoData) {
                 // 获取缩略图路径
                 const thumbnailPath = getThumbnailPath(video.file);
@@ -345,13 +386,14 @@
                 const thumbnailExists = await checkThumbnailExists(thumbnailPath);
                 // 如果缩略图不存在，使用默认图片
                 const finalThumbnail = thumbnailExists ? thumbnailPath : 'https://picsum.photos/400/225?blur=2';
-                
+
                 const videoItem = document.createElement('div');
                 videoItem.className = 'video-item bg-neutral-100 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row card-hover';
                 videoItem.dataset.video = video.file;
                 videoItem.dataset.title = video.title;
                 videoItem.dataset.quality = video.quality;
-                
+                videoItem.dataset.id = video.id;
+
                 videoItem.innerHTML = `
                     <div class="w-full md:w-32 h-40 md:h-24 bg-black flex-shrink-0 relative">
                         <img src="${finalThumbnail}" alt="${video.title} thumbnail" class="w-full h-full object-cover">
@@ -363,31 +405,36 @@
                         <p class="text-xs text-neutral-600 mt-2">${video.quality} • <span class="video-duration-placeholder">--:--</span></p>
                     </div>
                 `;
-                
+
                 // 预加载视频获取时长
                 const tempVideo = document.createElement('video');
                 tempVideo.src = video.file;
-                tempVideo.onloadedmetadata = function() {
+                tempVideo.onloadedmetadata = function () {
                     const duration = formatTime(this.duration);
                     // 更新视频项中的时长显示
                     const durationElements = videoItem.querySelectorAll('.video-duration-placeholder');
                     durationElements.forEach(el => el.textContent = duration);
                 };
-                
+
                 videoItem.addEventListener('click', () => {
-                    switchVideo(video.file, video.title, video.quality);
+                    switchVideo(video.id);
                 });
-                
+
                 videoLibrary.appendChild(videoItem);
             }
-            
-            // 自动播放第一个视频
-            if (videoData.length > 0) {
-                const firstVideo = videoData[0];
-                switchVideo(firstVideo.file, firstVideo.title, firstVideo.quality, true);
+
+            // 检查URL片段标识符，如果有则加载指定视频，否则加载第一个视频
+            const videoIdFromUrl = getVideoIdFromUrl();
+            if (videoIdFromUrl) {
+                switchVideo(videoIdFromUrl, true);
+            } else {
+                // 自动播放第一个视频
+                if (videoData.length > 0) {
+                    switchVideo(videoData[0].id, true);
+                }
             }
         }
-        
+
         // Format time (seconds -> MM:SS)
         function formatTime(seconds) {
             if (isNaN(seconds)) return '00:00';
@@ -395,16 +442,16 @@
             seconds = Math.floor(seconds % 60);
             return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
-        
+
         // Update progress bar
         function updateProgress() {
             if (isNaN(video.duration)) return;
-            
+
             const percent = (video.currentTime / video.duration) * 100;
             progressBar.style.width = `${percent}%`;
             progressSlider.value = percent;
             currentTimeDisplay.textContent = formatTime(video.currentTime);
-            
+
             // Update buffer progress
             if (video.buffered.length > 0) {
                 const bufferedEnd = video.buffered.end(video.buffered.length - 1);
@@ -412,13 +459,13 @@
                 bufferBar.style.width = `${bufferedPercent}%`;
             }
         }
-        
+
         // Update total time display
         function updateTotalTime() {
             totalTimeDisplay.textContent = formatTime(video.duration);
             videoDuration.innerHTML = `<i class="fa fa-clock-o mr-1"></i> ${formatTime(video.duration)}`;
         }
-        
+
         // Toggle play/pause
         function togglePlay() {
             if (video.paused || video.ended) {
@@ -437,17 +484,17 @@
                 videoStatus.innerHTML = '<i class="fa fa-circle text-yellow-500 mr-1"></i> Paused';
             }
         }
-        
+
         // Update play/pause icons
         function updatePlayPauseIcons(isPlaying) {
             const playIcon = '<i class="fa fa-play"></i>';
             const pauseIcon = '<i class="fa fa-pause"></i>';
-            
+
             bigPlayButton.innerHTML = isPlaying ? pauseIcon : playIcon;
             topPlayPause.innerHTML = isPlaying ? pauseIcon : playIcon;
             bottomPlayPause.innerHTML = isPlaying ? `<i class="fa fa-pause text-xl"></i>` : `<i class="fa fa-play text-xl"></i>`;
         }
-        
+
         // Seek to position
         function seekToProgress(e) {
             const rect = progressContainer.getBoundingClientRect();
@@ -455,11 +502,11 @@
             const time = pos * video.duration;
             video.currentTime = time;
         }
-        
+
         // Set volume
         function setVolume() {
             video.volume = volumeSlider.value / 100;
-            
+
             // Update volume icon
             if (video.volume === 0) {
                 muteButton.innerHTML = '<i class="fa fa-volume-off text-xl"></i>';
@@ -472,7 +519,7 @@
                 isMuted = false;
             }
         }
-        
+
         // Toggle mute
         function toggleMute() {
             if (isMuted) {
@@ -480,7 +527,7 @@
                 video.volume = lastVolume / 100;
                 volumeSlider.value = lastVolume;
                 isMuted = false;
-                
+
                 // Update volume icon
                 if (lastVolume < 50) {
                     muteButton.innerHTML = '<i class="fa fa-volume-down text-xl"></i>';
@@ -496,17 +543,17 @@
                 muteButton.innerHTML = '<i class="fa fa-volume-off text-xl"></i>';
             }
         }
-        
+
         // Set playback speed
         function setPlaybackSpeed(speed) {
             video.playbackRate = speed;
             speedButton.innerHTML = `<i class="fa fa-tachometer text-xl mr-1"></i><span>${speed}x</span>`;
         }
-        
+
         // Toggle fullscreen
         function toggleFullscreen() {
             const container = document.getElementById('video-container');
-            
+
             if (!document.fullscreenElement) {
                 container.requestFullscreen().catch(err => {
                     console.error(`Fullscreen request error: ${err.message}`);
@@ -519,7 +566,7 @@
                 isFullscreen = false;
             }
         }
-        
+
         // Toggle picture in picture
         function togglePictureInPicture() {
             if (document.pictureInPictureElement) {
@@ -528,37 +575,50 @@
                 video.requestPictureInPicture();
             }
         }
-        
-        // Switch video
-        async function switchVideo(videoUrl, title, quality, autoplay = false) {
+
+        // Switch video by ID
+        async function switchVideo(videoId, autoplay = false) {
+            // Find video by ID
+            const videoInfo = videoData.find(v => v.id === videoId);
+            if (!videoInfo) {
+                console.error(`Video with ID ${videoId} not found`);
+                return;
+            }
+
             // Show loading state
             loadingIndicator.classList.remove('hidden');
-            
+
             // Pause current video
             video.pause();
             updatePlayPauseIcons(false);
-            
+
             // 获取并设置缩略图作为视频封面
-            const thumbnailPath = getThumbnailPath(videoUrl);
+            const thumbnailPath = getThumbnailPath(videoInfo.file);
             const thumbnailExists = await checkThumbnailExists(thumbnailPath);
             video.poster = thumbnailExists ? thumbnailPath : 'https://picsum.photos/1280/720?blur=2';
-            
+
             // Update video source
             const source = video.querySelector('source');
-            source.src = videoUrl;
-            source.dataset.quality = quality;
+            source.src = videoInfo.file;
+            source.dataset.quality = videoInfo.quality;
             video.load();
-            
+
             // Update video info
-            videoTitle.textContent = title;
-            videoResolution.innerHTML = `<i class="fa fa-television mr-1"></i> ${quality}`;
+            videoTitle.textContent = videoInfo.title;
+            videoResolution.innerHTML = `<i class="fa fa-television mr-1"></i> ${videoInfo.quality}`;
             videoStatus.innerHTML = '<i class="fa fa-circle text-neutral-400 mr-1"></i> Loading';
-            
+
+            // Store current video ID
+            currentVideoId = videoId;
+
+            // Update URL fragment
+            updateUrlFragment(videoId);
+
             // 视频加载完成后更新时长并可能自动播放
-            video.onloadedmetadata = function() {
+            video.onloadedmetadata = function () {
                 updateTotalTime();
                 loadingIndicator.classList.add('hidden');
-                
+
                 if (autoplay) {
                     video.play()
                         .then(() => {
@@ -575,15 +635,15 @@
                     videoStatus.innerHTML = '<i class="fa fa-circle text-neutral-400 mr-1"></i> Ready';
                 }
             };
-            
+
             // 处理加载错误
-            video.onerror = function() {
+            video.onerror = function () {
                 loadingIndicator.classList.add('hidden');
                 videoStatus.innerHTML = '<i class="fa fa-circle text-red-500 mr-1"></i> Error';
                 alert('Failed to load video. Please try again.');
             };
         }
-        
+
         // 导航栏滚动效果
         window.addEventListener('scroll', () => {
             const nav = document.querySelector('nav');
@@ -595,7 +655,63 @@
                 nav.classList.add('shadow-sm');
             }
         });
-        
+
+        // -------------------------- Fragment Identifier Functions --------------------------
+
+        // Get video ID from URL fragment
+        function getVideoIdFromUrl() {
+            const hash = window.location.hash;
+            if (!hash) return null;
+
+            // 支持多种格式：#video=1, #v=1, #1
+            const videoMatch = hash.match(/video=(\d+)/) || hash.match(/v=(\d+)/) || hash.match(/#(\d+)/);
+            if (videoMatch && videoMatch[1]) {
+                const videoId = parseInt(videoMatch[1]);
+                // 检查视频ID是否存在
+                if (videoData.some(v => v.id === videoId)) {
+                    return videoId;
+                }
+            }
+            return null;
+        }
+
+        // Update URL fragment with current video ID
+        function updateUrlFragment(videoId) {
+            const newHash = `#video=${videoId}`;
+
+            // Only update if hash is different
+            if (window.location.hash !== newHash) {
+                // Use replaceState to avoid adding to history
+                window.history.replaceState(null, null, newHash);
+            }
+        }
+
+        // Copy current URL to clipboard
+        function copyCurrentUrl() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    // Show success message
+                    const originalText = fragmentInfo.innerHTML;
+                    fragmentInfo.innerHTML = '<i class="fa fa-check mr-1"></i> Copied!';
+
+                    setTimeout(() => {
+                        fragmentInfo.innerHTML = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy URL: ', err);
+                    alert('Failed to copy URL. Please try again.');
+                });
+        }
+
+        // Handle hash change event
+        window.addEventListener('hashchange', () => {
+            const videoId = getVideoIdFromUrl();
+            if (videoId && videoId !== currentVideoId) {
+                switchVideo(videoId);
+            }
+        });
+
         // Event Listeners
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('progress', updateProgress);
@@ -617,43 +733,43 @@
         video.addEventListener('canplay', () => {
             loadingIndicator.classList.add('hidden');
         });
-        
+
         bigPlayButton.addEventListener('click', togglePlay);
         topPlayPause.addEventListener('click', togglePlay);
         bottomPlayPause.addEventListener('click', togglePlay);
-        
+
         progressSlider.addEventListener('input', () => {
             const time = (progressSlider.value / 100) * video.duration;
             video.currentTime = time;
         });
-        
+
         progressContainer.addEventListener('click', seekToProgress);
-        
+
         volumeSlider.addEventListener('input', setVolume);
         muteButton.addEventListener('click', toggleMute);
-        
+
         speedOptions.forEach(option => {
             option.addEventListener('click', () => {
                 setPlaybackSpeed(parseFloat(option.dataset.speed));
             });
         });
-        
+
         fullscreenButton.addEventListener('click', toggleFullscreen);
         pipButton.addEventListener('click', togglePictureInPicture);
         ccButton.addEventListener('click', () => {
             alert('Subtitle functionality coming soon');
         });
-        
+
         qualitySelector.addEventListener('click', () => {
             alert('Quality switching functionality coming soon');
         });
-        
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             // Only respond to shortcuts when video container is focused
-            if (document.activeElement === video || 
+            if (document.activeElement === video ||
                 document.getElementById('video-container').contains(document.activeElement)) {
-                switch(e.key) {
+                switch (e.key) {
                     case ' ': // Space - Play/Pause
                     case 'k': // k key - Play/Pause
                         e.preventDefault();
@@ -685,13 +801,19 @@
                         volumeSlider.value = Math.max(0, parseInt(volumeSlider.value) - 5);
                         setVolume();
                         break;
+                    case 'c': // c key - Copy URL
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            copyCurrentUrl();
+                        }
+                        break;
                 }
             }
         });
-        
+
         // Double click for fullscreen
         video.addEventListener('dblclick', toggleFullscreen);
-        
+
         // Fullscreen change listener
         document.addEventListener('fullscreenchange', () => {
             if (document.fullscreenElement) {
@@ -702,9 +824,10 @@
                 isFullscreen = false;
             }
         });
-        
+
         // Initialize video library on page load
         document.addEventListener('DOMContentLoaded', initializeVideoLibrary);
     </script>
 </body>
+
 </html>
