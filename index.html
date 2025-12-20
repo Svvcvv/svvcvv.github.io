@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/icons/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192"  href="assets/icons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
@@ -21,7 +22,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
+
     <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
@@ -47,7 +48,7 @@
             }
         }
     </script>
-    
+
     <style type="text/tailwindcss">
         @layer utilities {
             .content-auto {
@@ -70,10 +71,40 @@
             .control-hover {
                 @apply transition-all duration-300 hover:bg-primary/90 hover:scale-105;
             }
+            .game-btn {
+                @apply transition-all duration-200 hover:scale-105 active:scale-95;
+            }
+            .click-animation {
+                animation: clickEffect 0.3s ease-out;
+            }
+            @keyframes clickEffect {
+                0% { transform: scale(1); }
+                50% { transform: scale(0.95); }
+                100% { transform: scale(1); }
+            }
+            .floating-number {
+                position: absolute;
+                pointer-events: none;
+                font-size: 14px;
+                font-weight: bold;
+                animation: floatUp 1s ease-out forwards;
+            }
+            @keyframes floatUp {
+                0% { opacity: 1; transform: translateY(0); }
+                100% { opacity: 0; transform: translateY(-30px); }
+            }
+            .pulse-animation {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
         }
     </style>
     <style>
-     nav a {
+        nav a {
             font-family: 'Cascadia Code', Arial, sans-serif;
             font-size: 15px;
             color: #2c3e50;
@@ -82,6 +113,74 @@
             border-radius: 4px;
             transition: all 0.3s ease;
             margin: 0 10px;
+        }
+
+        .game-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .game-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+
+        .achievement-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-popup.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .game-float-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 998;
+            display: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-float-button:hover {
+            transform: scale(1.1);
+        }
+
+        .float-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -95,35 +194,37 @@
             </div>
             <div class="flex flex-wrap items-center gap-1 md:gap-3">
                 <a href="index.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Home</a>
-                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="down.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
                 <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
-                <a href="SCMN.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
+                <a href="SCMN.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
                 <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
-                <a href="articals.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
+                <a href="articals.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content - 调整为与第二个页面相同的最大宽度 -->
+    <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
 
-        <!-- 主要内容区域 - 移除max-w-3xl限制，使其使用main容器的max-w-6xl宽度 -->
         <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover p-6 md:p-8 mx-auto">
             <!-- 计时器面板 -->
             <div class="timer-panel bg-neutral-50 p-6 rounded-lg mb-8">
-                <input type="text" id="timeValue" value="0s" readonly 
+                <input type="text" id="timeValue" value="0s" readonly
                     class="text-center text-[clamp(1.5rem,3vw,2rem)] py-4 border-2 border-primary rounded-lg w-full max-w-xs mx-auto bg-white font-semibold text-neutral-800">
-                
+
                 <div class="flex flex-wrap justify-center gap-4 mt-6">
-                    <button onclick="startTimer()" 
+                    <button onclick="startTimer()"
                         class="bg-primary text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
                         <i class="fa fa-play"></i> Start
                     </button>
-                    <button onclick="stopTimer()" 
+                    <button onclick="stopTimer()"
                         class="bg-neutral-700 text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
                         <i class="fa fa-pause"></i> Pause
                     </button>
-                    <button onclick="resetTimer()" 
+                    <button onclick="resetTimer()"
                         class="bg-secondary text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
                         <i class="fa fa-refresh"></i> Restart
                     </button>
@@ -136,26 +237,104 @@
             </div>
 
             <!-- 日期时间显示 -->
-            <div id="datetime" class="text-neutral-600 text-center mb-6 py-2 border-b border-t border-neutral-200"></div>
-            
-            <!-- 图片 - 现在会随容器宽度自适应，达到更宽的显示效果 -->
-            <div class="rounded-lg overflow-hidden mb-6 shadow-sm">
-                <img src="https://tu.ltyuanfang.cn/api/fengjing.php" alt="Beautiful landscape image" class="w-full h-auto object-cover">
+            <div id="datetime" class="text-neutral-600 text-center mb-6 py-2 border-b border-t border-neutral-200">
             </div>
-            
+
+            <!-- 图片 -->
+            <div class="rounded-lg overflow-hidden mb-6 shadow-sm">
+                <img src="https://tu.ltyuanfang.cn/api/fengjing.php" alt="Beautiful landscape image"
+                    class="w-full h-auto object-cover">
+            </div>
+
         </div>
     </main>
+
+    <!-- 彩蛋游戏覆盖层 -->
+    <div class="game-overlay" id="gameOverlay"></div>
+
+    <!-- 彩蛋游戏容器 -->
+    <div class="game-container bg-white rounded-2xl shadow-2xl p-6" id="gameContainer">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-primary">🎮 Mouse Click Game</h3>
+            <button onclick="closeGame()" class="text-neutral-500 hover:text-neutral-800">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="text-center mb-6">
+            <div class="text-3xl font-bold text-neutral-800 mb-2" id="gameScore">0</div>
+            <div class="text-sm text-neutral-500">Click Score</div>
+        </div>
+
+        <!-- 主要点击区域 -->
+        <div class="relative mb-6">
+            <div id="clickTarget"
+                class="w-32 h-32 bg-gradient-to-br from-primary to-primary/80 rounded-full mx-auto flex items-center justify-center text-white text-4xl cursor-pointer game-btn"
+                onclick="handleClick(event)">
+                <i class="fa fa-mouse-pointer"></i>
+            </div>
+            <div class="text-center mt-3 text-sm text-neutral-600">Click and get score</div>
+        </div>
+
+        <!-- 升级系统 -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <button onclick="buyUpgrade('autoClicker')" id="autoClickerBtn"
+                class="bg-secondary/10 text-secondary py-3 px-4 rounded-lg game-btn">
+                <div class="font-medium">Auto Clicker</div>
+                <div class="text-xs">Level: <span id="autoClickerLevel">0</span> | Price: <span
+                        id="autoClickerPrice">10</span></div>
+            </button>
+            <button onclick="buyUpgrade('clickMultiplier')" id="clickMultiplierBtn"
+                class="bg-green-50 text-green-600 py-3 px-4 rounded-lg game-btn">
+                <div class="font-medium">Click Multiplier</div>
+                <div class="text-xs">Level: <span id="clickMultiplierLevel">0</span> | Price: <span
+                        id="clickMultiplierPrice">25</span></div>
+            </button>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="text-sm text-neutral-500 grid grid-cols-2 gap-2">
+            <div>Auto Clicker: <span id="autoClickRate">0</span>/秒</div>
+            <div>Click Multiplier: <span id="currentMultiplier">1</span>x</div>
+        </div>
+
+        <!-- 离线收益显示 -->
+        <div class="mt-4 text-xs text-neutral-500 text-center" id="offlineEarnings" style="display: none;">
+            Offline Earnings: <span class="text-green-600 font-medium">+0</span>
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div class="achievement-popup bg-white rounded-lg shadow-lg p-4 flex items-center gap-3" id="achievementPopup">
+        <div class="bg-primary/10 p-2 rounded-full">
+            <i class="fa fa-trophy text-primary"></i>
+        </div>
+        <div>
+            <div class="font-medium" id="achievementTitle">Message</div>
+            <div class="text-sm text-neutral-600" id="achievementDesc">New Achievement!</div>
+        </div>
+    </div>
+
+    <!-- 游戏悬浮球 -->
+    <div class="game-float-button" id="gameFloatButton" onclick="showGame()">
+        <div
+            class="w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center text-white text-xl pulse-animation">
+            <i class="fa fa-gamepad"></i>
+        </div>
+        <div class="float-badge" id="floatBadge">0</div>
+    </div>
 
     <footer class="bg-neutral-800 text-neutral-300 py-6 mt-20">
         <div class="max-w-6xl mx-auto px-4 text-center text-sm">
             <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--Rooteater</p>
-            <a href = "https://67f1f3e17229500008d81184--rooteater.netlify.app/">A snapshot of the website taken on April 6, 2025 ↗</a>
+            <a href="https://67f1f3e17229500008d81184--rooteater.netlify.app/">A snapshot of the website taken on April
+                6, 2025 ↗</a>
             <p class="text-neutral-500">© 2025 All Rights Reserved</p>
         </div>
     </footer>
 
     <script>
-        // 计时器逻辑保持不变
+        // 计时器逻辑
         let second = 0;
         let clock;
 
@@ -184,7 +363,7 @@
         setInterval(updateTime, 1000);
         window.onload = updateTime;
 
-        // 导航栏滚动效果 - 与视频播放器一致
+        // 导航栏滚动效果
         window.addEventListener('scroll', () => {
             const nav = document.querySelector('nav');
             if (window.scrollY > 50) {
@@ -195,6 +374,328 @@
                 nav.classList.add('shadow-sm');
             }
         });
+
+        // 彩蛋游戏逻辑 - 带本地存储和悬浮球
+        let gameScore = 0;
+        let autoClickerLevel = 0;
+        let clickMultiplierLevel = 0;
+        let autoClickInterval = null;
+        let clickCount = 0;
+        let easterEggClicks = 0;
+        let achievements = {
+            firstClick: false,
+            tenClicks: false,
+            hundredClicks: false,
+            autoClicker: false,
+            multiplier: false
+        };
+        let lastActiveTime = Date.now();
+        let gameInitialized = false;
+
+        // 检查本地存储数据
+        function loadGameData() {
+            const savedData = localStorage.getItem('rooteaterGameData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    gameScore = data.score || 0;
+                    autoClickerLevel = data.autoClickerLevel || 0;
+                    clickMultiplierLevel = data.clickMultiplierLevel || 0;
+                    achievements = data.achievements || achievements;
+                    lastActiveTime = data.lastActiveTime || Date.now();
+                    gameInitialized = data.gameInitialized || false;
+
+                    // 计算离线收益
+                    calculateOfflineEarnings();
+                } catch (e) {
+                    console.error('Failed to load game data:', e);
+                }
+            }
+        }
+
+        // 保存游戏数据到本地存储
+        function saveGameData() {
+            const data = {
+                score: gameScore,
+                autoClickerLevel: autoClickerLevel,
+                clickMultiplierLevel: clickMultiplierLevel,
+                achievements: achievements,
+                lastActiveTime: Date.now(),
+                gameInitialized: gameInitialized
+            };
+            localStorage.setItem('rooteaterGameData', JSON.stringify(data));
+        }
+
+        // 计算离线收益
+        function calculateOfflineEarnings() {
+            if (autoClickerLevel > 0) {
+                const now = Date.now();
+                const timeDiff = now - lastActiveTime;
+                const secondsOffline = Math.floor(timeDiff / 1000);
+                const offlineEarnings = autoClickerLevel * secondsOffline;
+
+                if (offlineEarnings > 0) {
+                    gameScore += offlineEarnings;
+                    document.getElementById('offlineEarnings').style.display = 'block';
+                    document.getElementById('offlineEarnings').innerHTML =
+                        `Offline Earnings: <span class="text-green-600 font-medium">+${offlineEarnings}</span>`;
+
+                    // 显示离线收益成就
+                    if (offlineEarnings > 0 && !achievements.offlineEarnings) {
+                        showAchievement('Millionaire', `Get ${offlineEarnings} for offline time`);
+                        achievements.offlineEarnings = true;
+                    }
+                }
+            }
+        }
+
+        // 页面加载时加载游戏数据
+        window.addEventListener('load', function () {
+            loadGameData();
+            updateGameUI();
+
+            // 如果游戏已经初始化，显示悬浮球
+            if (gameInitialized) {
+                showFloatButton();
+            }
+
+            // 定期保存游戏数据
+            setInterval(saveGameData, 10000); // 每10秒保存一次
+        });
+
+        // 隐藏的彩蛋触发机制 - 点击计时器区域10次
+        document.querySelector('.timer-panel').addEventListener('click', function () {
+            easterEggClicks++;
+            if (easterEggClicks === 10) {
+                gameInitialized = true;
+                saveGameData();
+                showGame();
+                showFloatButton();
+                easterEggClicks = 0; // 重置计数
+            }
+        });
+
+        function showGame() {
+            document.getElementById('gameOverlay').style.display = 'block';
+            document.getElementById('gameContainer').style.display = 'block';
+            startAutoClicker();
+            updateGameUI();
+        }
+
+        function closeGame() {
+            document.getElementById('gameOverlay').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            stopAutoClicker();
+            saveGameData();
+        }
+
+        function showFloatButton() {
+            const floatButton = document.getElementById('gameFloatButton');
+            floatButton.style.display = 'block';
+            updateFloatBadge();
+        }
+
+        function updateFloatBadge() {
+            const badge = document.getElementById('floatBadge');
+            if (autoClickerLevel > 0) {
+                badge.textContent = autoClickerLevel;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function handleClick(event) {
+            const target = event.currentTarget;
+            target.classList.add('click-animation');
+
+            const baseScore = 1;
+            const multiplier = 1 + clickMultiplierLevel * 0.5;
+            const scoreGain = Math.floor(baseScore * multiplier);
+
+            gameScore += scoreGain;
+            updateGameUI();
+            saveGameData();
+
+            // 创建浮动数字效果
+            createFloatingNumber(event.clientX, event.clientY, '+' + scoreGain);
+
+            // 检查成就
+            checkAchievements();
+
+            setTimeout(() => {
+                target.classList.remove('click-animation');
+            }, 300);
+        }
+
+        function createFloatingNumber(x, y, text) {
+            const number = document.createElement('div');
+            number.className = 'floating-number text-green-500';
+            number.textContent = text;
+            number.style.left = x + 'px';
+            number.style.top = y + 'px';
+            document.body.appendChild(number);
+
+            setTimeout(() => {
+                document.body.removeChild(number);
+            }, 1000);
+        }
+
+        function buyUpgrade(type) {
+            let cost = 0;
+
+            if (type === 'autoClicker') {
+                cost = 10 * Math.pow(2, autoClickerLevel);
+                if (gameScore >= cost) {
+                    gameScore -= cost;
+                    autoClickerLevel++;
+                    stopAutoClicker();
+                    startAutoClicker();
+                    updateFloatBadge();
+
+                    if (!achievements.autoClicker) {
+                        showAchievement('Auto Click Master', 'Purchased the first auto clicker');
+                        achievements.autoClicker = true;
+                    }
+                }
+            } else if (type === 'clickMultiplier') {
+                cost = 25 * Math.pow(2, clickMultiplierLevel);
+                if (gameScore >= cost) {
+                    gameScore -= cost;
+                    clickMultiplierLevel++;
+
+                    if (!achievements.multiplier) {
+                        showAchievement('Multiplier expert', 'Purchased the first click multiplier');
+                        achievements.multiplier = true;
+                    }
+                }
+            }
+
+            updateGameUI();
+            saveGameData();
+        }
+
+        function startAutoClicker() {
+            if (autoClickerLevel > 0) {
+                stopAutoClicker();
+                autoClickInterval = setInterval(() => {
+                    gameScore += autoClickerLevel;
+                    updateGameUI();
+                    checkAchievements();
+                    saveGameData();
+                }, 1000);
+            }
+        }
+
+        function stopAutoClicker() {
+            if (autoClickInterval) {
+                clearInterval(autoClickInterval);
+                autoClickInterval = null;
+            }
+        }
+
+        function updateGameUI() {
+            document.getElementById('gameScore').textContent = gameScore.toLocaleString();
+            document.getElementById('autoClickerLevel').textContent = autoClickerLevel;
+            document.getElementById('clickMultiplierLevel').textContent = clickMultiplierLevel;
+            document.getElementById('autoClickerPrice').textContent = 10 * Math.pow(2, autoClickerLevel);
+            document.getElementById('clickMultiplierPrice').textContent = 25 * Math.pow(2, clickMultiplierLevel);
+            document.getElementById('autoClickRate').textContent = autoClickerLevel;
+            document.getElementById('currentMultiplier').textContent = (1 + clickMultiplierLevel * 0.5).toFixed(1);
+            updateFloatBadge();
+
+            // 更新按钮状态
+            const autoBtn = document.getElementById('autoClickerBtn');
+            const multiBtn = document.getElementById('clickMultiplierBtn');
+
+            const autoCost = 10 * Math.pow(2, autoClickerLevel);
+            const multiCost = 25 * Math.pow(2, clickMultiplierLevel);
+
+            if (gameScore >= autoCost) {
+                autoBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                autoBtn.classList.add('hover:bg-secondary/20');
+            } else {
+                autoBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                autoBtn.classList.remove('hover:bg-secondary/20');
+            }
+
+            if (gameScore >= multiCost) {
+                multiBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                multiBtn.classList.add('hover:bg-green-100');
+            } else {
+                multiBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                multiBtn.classList.remove('hover:bg-green-100');
+            }
+        }
+
+        function checkAchievements() {
+            if (gameScore >= 1 && !achievements.firstClick) {
+                showAchievement('First Attempt', 'Completed your first click');
+                achievements.firstClick = true;
+                saveGameData();
+            }
+
+            if (gameScore >= 10 && !achievements.tenClicks) {
+                showAchievement('Click Novice', 'Reached 10 total clicks');
+                achievements.tenClicks = true;
+                saveGameData();
+            }
+
+            if (gameScore >= 100 && !achievements.hundredClicks) {
+                showAchievement('Click Expert', 'Reached 100 total clicks');
+                achievements.hundredClicks = true;
+                saveGameData();
+            }
+
+            // New achievement: Thousand Clicks
+            if (gameScore >= 1000 && !achievements.thousandClicks) {
+                showAchievement('Click Master', 'Reached 1000 total clicks');
+                achievements.thousandClicks = true;
+                saveGameData();
+            }
+
+            // New achievement: Auto-clicker Level 5
+            if (autoClickerLevel >= 5 && !achievements.autoClicker5) {
+                showAchievement('Automation Expert', 'Auto-clicker reached Level 5');
+                achievements.autoClicker5 = true;
+                saveGameData();
+            }
+        }
+
+        function showAchievement(title, description) {
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementDesc').textContent = description;
+
+            popup.classList.add('show');
+
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        // 键盘快捷键 - ESC关闭游戏
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && document.getElementById('gameContainer').style.display === 'block') {
+                closeGame();
+            }
+        });
+
+        // 点击外部关闭游戏
+        document.getElementById('gameOverlay').addEventListener('click', function (event) {
+            if (event.target === this) {
+                closeGame();
+            }
+        });
+
+        // 页面关闭时保存游戏数据
+        window.addEventListener('beforeunload', function () {
+            saveGameData();
+        });
+
+        // 初始加载游戏数据
+        loadGameData();
     </script>
 </body>
+
 </html>
