@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta name="description" content="事件综合报告说明书" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - RTE</title>
+
+    <!-- 图标资源 -->
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/icons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/icons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/icons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/icons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/icons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/icons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/icons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
+
+    <!-- 外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#f59e0b',
+                        neutral: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                        code: ['Cascadia Code', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1);
+            }
+            .btn-pop {
+                transition: all 0.2s ease;
+            }
+            .btn-pop:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            }
+            .control-hover {
+                @apply transition-all duration-300 hover:bg-primary/90 hover:scale-105;
+            }
+            .game-btn {
+                @apply transition-all duration-200 hover:scale-105 active:scale-95;
+            }
+            .click-animation {
+                animation: clickEffect 0.3s ease-out;
+            }
+            @keyframes clickEffect {
+                0% { transform: scale(1); }
+                50% { transform: scale(0.95); }
+                100% { transform: scale(1); }
+            }
+            .floating-number {
+                position: absolute;
+                pointer-events: none;
+                font-size: 14px;
+                font-weight: bold;
+                animation: floatUp 1s ease-out forwards;
+            }
+            @keyframes floatUp {
+                0% { opacity: 1; transform: translateY(0); }
+                100% { opacity: 0; transform: translateY(-30px); }
+            }
+            .pulse-animation {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        }
+    </style>
+
+    <style>
+        nav a {
+            font-family: 'Cascadia Code', Arial, sans-serif;
+            font-size: 15px;
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .mobile-menu.open {
+            max-height: 300px;
+        }
+    </style>
+</head>
+
+<!-- 核心修改：给body添加 flex flex-col，强制占满视口高度 -->
+<body class="font-inter bg-neutral-50 text-neutral-800 min-h-screen flex flex-col">
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <i class="fa fa-file text-primary text-xl"></i>
+                <span class="font-semibold text-lg">Documents</span>
+            </div>
+            <button id="menuToggle" class="md:hidden text-neutral-700">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+            <div class="hidden md:flex flex-wrap items-center gap-1 md:gap-3">
+                <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
+                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
+                <a href="doc.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Documents</a>
+                <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
+                <a href="articals.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
+            </div>
+        </div>
+        <div id="mobileMenu" class="mobile-menu md:hidden mt-4 px-2">
+            <div class="flex flex-col gap-2">
+                <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
+                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
+                <a href="doc.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Documents</a>
+                <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
+                <a href="articals.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow');
+                nav.classList.remove('shadow-sm');
+            } else {
+                nav.classList.remove('shadow');
+                nav.classList.add('shadow-sm');
+            }
+        });
+    </script>
+
+    <!-- 核心修改：给main添加 flex-grow，自动填充剩余高度 -->
+    <main class="max-w-6xl mx-auto px-4 py-8 md:py-12 flex-grow">
+        <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover p-6 md:p-8 mx-auto max-w-2xl">
+            <h1 class="text-2xl font-bold text-neutral-800 mb-4">SCMN文章事件综合报告说明书</h1>
+            <p class="text-neutral-700 mb-6">写于2025年五月份</p>
+            <a href="SCMN.html" class="inline-block bg-primary text-white px-6 py-3 rounded-full btn-pop flex items-center gap-2">
+                <i class="fa fa-eye"></i> 查看详情
+            </a>
+        </div>
+    </main>
+
+    <footer class="bg-neutral-800 text-neutral-300 py-6">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm">
+            <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--RTE</p>
+            <p class="text-neutral-500 mt-2">© 2025 All Rights Reserved</p>
+        </div>
+    </footer>
+</body>
+
+</html>

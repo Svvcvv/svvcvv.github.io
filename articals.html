@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Articals - Rooteater</title>
+    <title>Articals - RTE</title>
     <link rel="apple-touch-icon" sizes="57x57" href="assets/icons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="assets/icons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="assets/icons/apple-icon-72x72.png">
@@ -83,26 +83,73 @@
             transition: all 0.3s ease;
             margin: 0 10px;
         }
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .mobile-menu.open {
+            max-height: 300px;
+        }
     </style>
 </head>
 
 <body class="font-inter bg-neutral-50 text-neutral-800 min-h-screen">
-    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
+        <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
         <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-shrink-0">
                 <i class="fa fa-book text-primary text-xl"></i>
                 <span class="font-semibold text-lg">Articals</span>
             </div>
-            <div class="flex flex-wrap items-center gap-1 md:gap-3">
+
+            <!-- 移动端汉堡按钮 -->
+            <button id="menuToggle" class="md:hidden text-neutral-700">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+
+            <!-- 桌面端导航菜单 -->
+            <div class="hidden md:flex flex-wrap items-center gap-1 md:gap-3">
                 <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
-                <a href="down.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="down.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
                 <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
-                <a href="SCMN.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
+                <a href="doc.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
                 <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
-                <a href="articals.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Articals</a>
+                <a href="articals.html"
+                    class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Articals</a>
+            </div>
+        </div>
+
+        <!-- 移动端折叠菜单 -->
+        <div id="mobileMenu" class="mobile-menu md:hidden mt-4 px-2">
+            <div class="flex flex-col gap-2">
+                <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
+                <a href="down.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
+                <a href="vid.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Video</a>
+                <a href="doc.html"
+                    class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Documents</a>
+                <a href="webs.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Web</a>
+                <a href="articals.html"
+                    class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Articals</a>
             </div>
         </div>
     </nav>
+    <script>
+        // 移动端汉堡按钮切换菜单
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+            // 切换汉堡/关闭图标
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
 
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
@@ -145,7 +192,7 @@
 
     <footer class="bg-neutral-800 text-neutral-300 py-6 mt-20">
         <div class="max-w-6xl mx-auto px-4 text-center text-sm">
-            <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--Rooteater</p>
+            <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--RTE</p>
             <p class="text-neutral-500">© 2025 All Rights Reserved</p>
         </div>
     </footer>
