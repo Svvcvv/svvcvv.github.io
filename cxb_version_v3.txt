@@ -18,4 +18,8 @@ type:lanzou
 
 url:https://pan.vma.cc/pan/down.php/b01b32d1b8b5d9aff39f6e1e084a6139.exe
 password:
-type:白云（不稳定）
+type:白云（不稳定但快速）
+
+url:http://file.uhsea.com/2603/740c57b943fe3357b9f1dd8b93111f44MH.exe
+password:
+type:uhsea
