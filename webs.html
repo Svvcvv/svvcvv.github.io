@@ -53,6 +53,7 @@
         }
     </script>
 
+    <link href="\assets\css\main.css" rel="stylesheet">
     <!-- 自定义工具类（与第一个文件完全一致） -->
     <style type="text/tailwindcss">
         @layer utilities {
@@ -114,45 +115,30 @@
         }
     </style>
 
-    <!-- 基础样式（与第一个文件保持一致） -->
-    <style>
-        nav a {
-            font-family: 'Cascadia Code', Arial, sans-serif;
-            font-size: 15px;
-            color: #2c3e50;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            margin: 0 10px;
-        }
 
-        .mobile-menu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out;
-        }
-
-        .mobile-menu.open {
-            max-height: 300px;
-        }
-    </style>
 </head>
-
-<!-- 与第一个文件一致的body布局 -->
 
 <body class="font-inter bg-neutral-50 text-neutral-800 min-h-screen flex flex-col">
     <!-- 导航栏（完全复用第一个文件的样式，仅调整选中项） -->
+
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm py-4 px-4 md:px-6 transition-all duration-300">
-        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 flex-shrink-0">
                 <i class="fa fa-wrench text-primary text-xl"></i>
                 <span class="font-semibold text-lg">Tools</span>
             </div>
-            <button id="menuToggle" class="md:hidden text-neutral-700">
-                <i class="fa fa-bars text-xl"></i>
-            </button>
-            <div class="hidden md:flex flex-wrap items-center gap-1 md:gap-3">
+
+            <div class="flex items-center gap-3 md:hidden">
+                <button id="themeToggleMobile"
+                    class="p-2 rounded-full text-neutral-700 hover:bg-neutral-100 transition-colors">
+                    <i class="fa fa-adjust"></i>
+                </button>
+                <button id="menuToggle" class="p-1 text-neutral-700">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+
+            <div class="hidden md:flex items-center gap-1 md:gap-3">
                 <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
                 <a href="down.html"
                     class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Download</a>
@@ -162,8 +148,13 @@
                 <a href="webs.html" class="px-3 py-2 text-sm rounded bg-primary/10 text-primary font-medium">Web</a>
                 <a href="articals.html"
                     class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Articals</a>
+                <button id="themeToggle" class="px-3 py-2 text-sm rounded-full hover:bg-neutral-100 transition-colors">
+                    <i class="fa fa-adjust"></i>
+                </button>
             </div>
         </div>
+
+        <!-- 移动端折叠菜单（保留不变） -->
         <div id="mobileMenu" class="mobile-menu md:hidden mt-4 px-2">
             <div class="flex flex-col gap-2">
                 <a href="index.html" class="px-3 py-2 text-sm rounded hover:bg-neutral-100 transition-colors">Home</a>
@@ -199,6 +190,43 @@
             } else {
                 nav.classList.remove('shadow');
                 nav.classList.add('shadow-sm');
+            }
+        });
+
+        // 风格切换逻辑
+        const themeToggle = document.getElementById('themeToggle');
+        const themeToggleMobile = document.getElementById('themeToggleMobile');
+        const body = document.body;
+
+        function applyTheme(theme) {
+            if (theme === 'Dark') {
+                body.classList.add('Dark-theme');
+                themeToggle.innerHTML = '<i class="fa fa-adjust"></i>';
+                themeToggleMobile.innerHTML = '<i class="fa fa-adjust"></i>';
+                localStorage.setItem('site-theme', 'Dark');
+            } else {
+                body.classList.remove('Dark-theme');
+                themeToggle.innerHTML = '<i class="fa fa-adjust"></i>';
+                themeToggleMobile.innerHTML = '<i class="fa fa-adjust"></i>';
+                localStorage.setItem('site-theme', 'original');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.classList.contains('Dark-theme') ? 'Dark' : 'original';
+            applyTheme(currentTheme === 'Dark' ? 'original' : 'Dark');
+        });
+
+        themeToggleMobile.addEventListener('click', () => {
+            const currentTheme = body.classList.contains('Dark-theme') ? 'Dark' : 'original';
+            applyTheme(currentTheme === 'Dark' ? 'original' : 'Dark');
+        });
+
+        // 页面加载时恢复保存的主题
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('site-theme');
+            if (savedTheme === 'Dark') {
+                applyTheme('Dark');
             }
         });
     </script>
@@ -548,7 +576,6 @@
         </div>
     </main>
 
-    <!-- 与第一个文件完全一致的页脚 -->
     <footer class="bg-neutral-800 text-neutral-300 py-6">
         <div class="max-w-6xl mx-auto px-4 text-center text-sm">
             <p class="mb-2">蚊!帐! [○･｀Д´･ ○]--RTE</p>
