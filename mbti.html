@@ -129,7 +129,7 @@
                         <i class="fa fa-question-circle mr-2"></i>帮助
                     </button>
                     <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors" id="theme-toggle">
-                        <i class="fa fa-moon-o mr-2"></i>暗色模式
+                        <i class="fa fa-moon mr-2"></i>暗色模式
                     </button>
                 </div>
             </div>
@@ -212,19 +212,19 @@
                         <h4 class="text-lg font-semibold text-gray-800 mb-3">测试建议</h4>
                         <ul class="space-y-2 text-gray-600">
                             <li class="flex items-start">
-                                <i class="fa fa-lightbulb-o text-yellow-500 mt-1 mr-3"></i>
+                                <i class="fa fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
                                 <span>请根据你的真实感受选择，没有正确或错误的答案</span>
                             </li>
                             <li class="flex items-start">
-                                <i class="fa fa-lightbulb-o text-yellow-500 mt-1 mr-3"></i>
+                                <i class="fa fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
                                 <span>选择最能代表你通常行为方式的选项</span>
                             </li>
                             <li class="flex items-start">
-                                <i class="fa fa-lightbulb-o text-yellow-500 mt-1 mr-3"></i>
+                                <i class="fa fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
                                 <span>不要过度思考，相信你的第一反应</span>
                             </li>
                             <li class="flex items-start">
-                                <i class="fa fa-lightbulb-o text-yellow-500 mt-1 mr-3"></i>
+                                <i class="fa fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
                                 <span>每个问题都很重要，请认真回答</span>
                             </li>
                         </ul>
@@ -423,7 +423,7 @@
                             <!-- 情景描述 -->
                             <div class="bg-blue-50 rounded-lg p-4 mb-6">
                                 <div class="flex items-start space-x-3">
-                                    <i class="fa fa-lightbulb-o text-blue-500 mt-1"></i>
+                                    <i class="fa fa-lightbulb text-blue-500 mt-1"></i>
                                     <div>
                                         <h4 class="font-medium text-blue-700 mb-2">情景思考</h4>
                                         <p id="scenario-text" class="text-sm text-blue-600">想象一下你在一个热闹的派对上，周围有很多陌生人...</p>
@@ -2724,11 +2724,11 @@
             if (document.body.classList.contains('dark-mode')) {
                 document.body.classList.add('bg-gray-900', 'text-white');
                 document.body.classList.remove('bg-gray-50', 'text-gray-800');
-                themeToggle.innerHTML = '<i class="fa fa-sun-o mr-2"></i>亮色模式';
+                themeToggle.innerHTML = '<i class="fa fa-sun mr-2"></i>亮色模式';
             } else {
                 document.body.classList.remove('bg-gray-900', 'text-white');
                 document.body.classList.add('bg-gray-50', 'text-gray-800');
-                themeToggle.innerHTML = '<i class="fa fa-moon-o mr-2"></i>暗色模式';
+                themeToggle.innerHTML = '<i class="fa fa-moon mr-2"></i>暗色模式';
             }
         }
 

@@ -179,7 +179,7 @@
                 <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] mb-2 text-neutral-900" id="video-title">Video
                     Player</h1>
                 <div class="flex flex-wrap items-center text-sm text-neutral-600 gap-4">
-                    <span id="video-duration" class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 00:00</span>
+                    <span id="video-duration" class="flex items-center"><i class="fa fa-clock mr-1"></i> 00:00</span>
                     <span id="video-resolution" class="flex items-center"><i class="fa fa-television mr-1"></i>
                         1080p</span>
                     <span id="video-status" class="flex items-center"><i class="fa fa-circle text-neutral-400 mr-1"></i>
@@ -510,7 +510,7 @@
         // Update total time display
         function updateTotalTime() {
             totalTimeDisplay.textContent = formatTime(video.duration);
-            videoDuration.innerHTML = `<i class="fa fa-clock-o mr-1"></i> ${formatTime(video.duration)}`;
+            videoDuration.innerHTML = `<i class="fa fa-clock mr-1"></i> ${formatTime(video.duration)}`;
         }
 
         // Toggle play/pause

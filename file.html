@@ -241,17 +241,17 @@
                 // 根据文件扩展名设置不同图标
                 const ext = item.name.split('.').pop().toLowerCase();
                 if (['html', 'css', 'js', 'php', 'py', 'java', 'cpp', 'c', 'cs', 'rb', 'go', 'json'].includes(ext)) {
-                    icon.className = 'fa fa-file-code-o text-secondary mr-2';
+                    icon.className = 'fa fa-file-code text-secondary mr-2';
                 } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(ext)) {
-                    icon.className = 'fa fa-file-image-o text-purple-500 mr-2';
+                    icon.className = 'fa fa-file-image text-purple-500 mr-2';
                 } else if (['pdf'].includes(ext)) {
-                    icon.className = 'fa fa-file-pdf-o text-red-500 mr-2';
+                    icon.className = 'fa fa-file-pdf text-red-500 mr-2';
                 } else if (['doc', 'docx'].includes(ext)) {
-                    icon.className = 'fa fa-file-word-o text-blue-500 mr-2';
+                    icon.className = 'fa fa-file-word text-blue-500 mr-2';
                 } else if (['xls', 'xlsx'].includes(ext)) {
-                    icon.className = 'fa fa-file-excel-o text-green-500 mr-2';
+                    icon.className = 'fa fa-file-excel text-green-500 mr-2';
                 } else {
-                    icon.className = 'fa fa-file-o text-gray-500 mr-2';
+                    icon.className = 'fa fa-file text-gray-500 mr-2';
                 }
             }
             node.appendChild(icon);
