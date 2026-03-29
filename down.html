@@ -133,19 +133,6 @@
             </div>
         </div>
     </nav>
-    <script>
-        // 移动端汉堡按钮切换菜单
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        menuToggle.addEventListener('click', () => {
-            mobileMenu.classList.toggle('open');
-            // 切换汉堡/关闭图标
-            const icon = menuToggle.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        });
-    </script>
 
     <!-- 主内容区 -->
     <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
@@ -158,34 +145,70 @@
         </div>
 
         <!-- 通知栏 -->
-        <div class="bg-blue-50 border-l-4 border-primary p-4 md:p-5 rounded mb-8 text-sm md:text-base">
+        <div class="bg-blue-50 border-l-4 border-primary p-4 md:p-5 rounded mb-8 text-sm md:text-base overflow-hidden">
             <div class="flex items-start gap-3">
-                <i class="fa fa-info-circle text-primary mt-0.5"></i>
-                <div>
-                    <p class="font-medium text-neutral-800 mb-1">Important Notices</p>
-                    <ul class="list-disc pl-5 space-y-1 text-neutral-700">
+                <i class="fa fa-info-circle text-primary mt-0.5 shrink-0"></i>
+                <div class="flex-1 min-w-0 break-words">
+                    <!-- 折叠开关 -->
+                    <div class="flex justify-between items-center cursor-pointer font-medium text-neutral-800 mb-1 gap-2"
+                        onclick="toggleNotice()">
+                        <span class="min-w-0">Important Notices</span>
+                        <i id="noticeIcon"
+                            class="fa fa-chevron-down text-primary transition-transform duration-300 ease-out shrink-0"></i>
+                    </div>
+
+                    <ul id="noticeContent"
+                        class="list-disc pl-5 space-y-1 text-neutral-700 overflow-hidden transition-all duration-300 ease-out max-h-[600px] break-words">
                         <li>Our website's downloads will switch to Woozooo after March 15, 2025 --- 2025.3.8</li>
                         <li>Any version below 4.01.03 will no longer receive direct updates --- 2025.4.12</li>
-                        <li>The direct link file hosting platform of CXB is suspected to be invalid.Users are advised
-                            to manually install it instead --- 2025.8.16</li>
+                        <li>The direct link file hosting platform of CXB is suspected to be invalid.Users are advised to
+                            manually install it instead --- 2025.8.16</li>
                         <li>It seems that the direct link file hosting platform is always blocked by some antivirus
-                            software.
-                            Please make sure to turn off the antivirus software --- 2025.8.18</li>
+                            software. Please make sure to turn off the antivirus software --- 2025.8.18</li>
                         <li>It seems that the direct link file hosting platform is blocked by the Anti Telecom Network
-                            Fraud Center.
-                            I messed up--- 2025.11.23
-                            <img src="/assets/img/fraud.png" width=240>
+                            Fraud Center. I messed up--- 2025.11.23
+                            <img src="/assets/img/fraud.png" class="max-w-full h-auto mt-1">
                         </li>
-                        <li>Direct link analysis is done. I can immediately restore the download function, 
-                            and the speed is even several times faster than before ,but I don't want to. --- 2025.11.28</li>
-                        <li>When I update next time(maybe 5 years later), the version should be called "CXB-Oxygen", "CXB-Neon", "CXB-Hyper". It may be recoded with C# or QT. --- 2026.2.28</li>
+                        <li>Direct link analysis is done. I can immediately restore the download function, and the speed
+                            is even several times faster than before ,but I don't want to. --- 2025.11.28</li>
+                        <li>When I update next time(maybe 5 years later), the version should be called "CXB-Oxygen",
+                            "CXB-Neon", "CXB-Hyper". It may be recoded with C# or QT. --- 2026.2.28</li>
                     </ul>
                 </div>
             </div>
         </div>
 
+        <script>
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('open');
+                // 切换汉堡/关闭图标
+                const icon = menuToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+
+            const content = document.getElementById('noticeContent');
+            const icon = document.getElementById('noticeIcon');
+            let isOpen = true;
+
+            function toggleNotice() {
+                isOpen = !isOpen;
+
+                if (isOpen) {
+                    content.style.maxHeight = "600px";
+                    icon.style.transform = "rotate(0deg)";
+                } else {
+                    content.style.maxHeight = "0px";
+                    icon.style.transform = "rotate(-180deg)";
+                }
+            }
+        </script>
+
         <!-- 下载图标导航 -->
-        <div class="flex justify-center gap-6 md:gap-10 mb-12">
+        <div class="flex justify-center gap-6 md:gap-10 mb-12 flex-wrap">
 
             <div class="flex flex-col items-center gap-2 transition-all hover:scale-105 cursor-pointer">
 
@@ -218,21 +241,26 @@
 
         <!-- 自编程序包区域 -->
         <section id="section1" class="mb-16">
-            <div class="flex items-center gap-2 mb-6">
-                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                    <i class="fa fa-code"></i>
+            <div class="flex gap-2 mb-6">
+                <div
+                    class="aspect-square rounded-full bg-primary/10 border border-primary/20 shadow-sm flex items-center justify-center text-primary">
+                    <i class="fa fa-code fa-fw text-2xl"></i> <!-- 可调整 text-2xl 改变图标大小 -->
                 </div>
-                <h2 class="text-2xl font-bold text-neutral-800">
-                    <span class="text-3xl font-extrabold text-primary-600">CXB</span>
-                    <span class="text-3xl text-neutral-500 mx-2">/</span>
-                    <span class="text-3xl font-extrabold text-primary-600">SCK</span>
-                    <span class="text-3xl text-neutral-400 mx-2">——</span>
+                <h2 class="flex flex-wrap items-center gap-2 text-2xl font-bold text-neutral-800 leading-tight position: relative">
+                    <i
+                        class="fa fa-bolt absolute inset-0 z-[-1] text-6xl text-primary/20 flex items-center justify-center"></i>
+
+                    <span class="text-3xl font-extrabold text-primary-600 text-shadow-sm">CXB</span>
+                    <span class="text-3xl text-primary/40">/</span>
+                    <span class="text-3xl font-extrabold text-primary-600 text-shadow-sm">SCK</span>
+                    <i class="fa fa-angle-double-right text-3xl text-primary/50"></i>
                     <span class="text-xl font-semibold">Self-written Program Pack</span>
-                    <span class="text-sm text-neutral-400 mx-2"> aka. </span>
+                    <span class="text-sm text-neutral-400"> aka. </span>
                     <span class="text-xl font-semibold">Self Code Kit</span>
-                    <span class="text-base font-normal text-neutral-500 ml-2">（自编 · 程序包）</span>
+                    <span class="text-sm font-normal text-neutral-500">（自编 · 程序包）</span>
                 </h2>
             </div>
+
 
             <!-- 一周年庆典按钮 -->
             <div class="text-center mb-10">
