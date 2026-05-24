@@ -1,11 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>在线聊天室</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -92,6 +92,10 @@
                 <h1 class="text-xl font-bold">在线聊天室</h1>
             </div>
             <div class="flex items-center space-x-4">
+                <div id="mode-indicator" class="hidden md:flex items-center space-x-1 text-sm bg-primary-700 px-3 py-1 rounded-full cursor-pointer hover:bg-primary-600 transition-colors">
+                    <i class="fa fa-refresh"></i>
+                    <span id="mode-text">常规模式</span>
+                </div>
                 <div class="hidden md:flex items-center space-x-1 text-sm bg-primary-700 px-3 py-1 rounded-full">
                     <i class="fa fa-refresh"></i>
                     <span id="request-counter">剩余操作: --</span>
@@ -174,17 +178,20 @@
                             <span id="send-notice" class="text-xs text-amber-600 hidden pulse-effect">
                                 <i class="fa fa-info-circle mr-1"></i>发送可能耗时5-10秒
                             </span>
+                            <span id="webrtc-status" class="text-xs text-green-600 hidden">
+                                <i class="fa fa-check-circle mr-1"></i>点对点连接已建立
+                            </span>
                         </div>
                     </div>
                     
                     <!-- 格式按钮 -->
                     <div class="flex flex-wrap gap-2 mb-2">
                         <button id="insert-image-btn" class="format-btn border border-gray-300 text-gray-700">
-                            <i class="fa fa-picture-o"></i>插入图片
+                            <i class="fa fa-picture-o"></i><span id="image-btn-text">插入图片</span>
                         </button>
                         <button id="insert-link-btn" class="format-btn border border-gray-300 text-gray-700">
-                            <i class="fa fa-link"></i>插入链接
-                        </button>
+                            <i class="fa fa-link"></i>插入链接</button>
+                        <input type="file" id="file-input" class="hidden">
                     </div>
                     
                     <div class="flex space-x-2">
@@ -319,6 +326,60 @@
         </div>
     </div>
 
+    <!-- WebRTC连接模态框 -->
+    <div id="webrtc-connect-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-95 opacity-0" id="webrtc-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">WebRTC点对点连接</h3>
+                <button id="close-webrtc-modal-btn" class="text-gray-500 hover:text-gray-700 p-1 btn-effect">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="flex gap-4 mb-6">
+                <button id="initiate-connect-btn" class="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-primary-700 transition-colors btn-effect">
+                    <i class="fa fa-plus-circle mr-2"></i>发起连接
+                </button>
+                <button id="join-connect-btn" class="flex-1 bg-secondary text-white py-3 rounded-lg hover:bg-secondary-700 transition-colors btn-effect">
+                    <i class="fa fa-sign-in mr-2"></i>加入连接
+                </button>
+            </div>
+            
+            <div id="initiate-section" class="hidden mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">你的连接码</label>
+                <div class="flex">
+                    <input 
+                        type="text" 
+                        id="initiate-key" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-l-md bg-gray-100 focus:outline-none font-mono text-2xl text-center tracking-widest"
+                        readonly
+                    >
+                    <button id="copy-initiate-key-btn" class="bg-gray-200 hover:bg-gray-300 px-3 rounded-r-md border border-l-0 border-gray-300 btn-effect">
+                        <i class="fa fa-copy"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">将此连接码分享给对方，对方输入即可加入点对点聊天</p>
+                <div class="mt-4 text-center text-sm text-gray-600">
+                    <i class="fa fa-spinner fa-spin mr-2"></i>等待对方加入...
+                </div>
+            </div>
+            
+            <div id="join-section" class="hidden mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">对方的连接码</label>
+                <input 
+                    type="text" 
+                    id="join-key" 
+                    placeholder="输入6位连接码" 
+                    maxlength="6"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-mono text-2xl text-center tracking-widest uppercase"
+                >
+                <button id="confirm-join-btn" class="w-full mt-4 bg-primary text-white py-2 rounded-md hover:bg-primary-700 transition-colors btn-effect">
+                    确认加入
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 操作确认模态框 -->
     <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-95 opacity-0" id="confirm-modal-content">
@@ -358,6 +419,19 @@
                     placeholder="输入你的用户名" 
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 >
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">聊天模式</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="chat-mode" value="normal" checked class="mode-radio">
+                        <span>常规模式</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="chat-mode" value="webrtc" class="mode-radio">
+                        <span>WebRTC模式</span>
+                    </label>
+                </div>
             </div>
             <div class="mb-4">
                 <label for="refresh-interval" class="block text-sm font-medium text-gray-700 mb-1">自动刷新间隔 (秒)</label>
@@ -425,6 +499,24 @@
         const API_LIMITS = {
             totalOperations: 500,  // 创建、更新操作总和限制
             read: 1000000000       // 读取不受限制
+        };
+
+        // WebRTC相关变量
+        let currentMode = 'normal'; // 'normal' or 'webrtc'
+        let peerConnection = null;
+        let dataChannel = null;
+        let signalingTimer = null;
+        let signalingKey = null;
+        let fileBuffer = null;
+        let receivedSize = 0;
+        let currentFileInfo = null;
+        const CHUNK_SIZE = 64000; // 分块大小
+        // ICE服务器配置，使用公共STUN服务器
+        const ICE_CONFIG = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
         };
         
         // 初始化
@@ -549,6 +641,16 @@
                 refreshInterval = parseInt(savedInterval);
             }
             document.getElementById('refresh-interval').value = refreshInterval;
+
+            // 加载模式
+            const savedMode = localStorage.getItem('chatMode');
+            if (savedMode) {
+                currentMode = savedMode;
+                document.querySelectorAll('.mode-radio').forEach(radio => {
+                    radio.checked = radio.value === currentMode;
+                });
+                updateModeUI();
+            }
             
             // 初始化请求计数
             const today = new Date().toISOString().split('T')[0];
@@ -827,6 +929,12 @@
         
         // 插入图片到消息输入框
         function insertImage() {
+            if (currentMode === 'webrtc') {
+                // WebRTC模式下，直接选择本地文件
+                document.getElementById('file-input').click();
+                return;
+            }
+            
             const url = document.getElementById('image-url').value.trim();
             const description = document.getElementById('image-description').value.trim() || '图片';
             
@@ -901,7 +1009,7 @@
             const imgRegex = /\[img=([^\]]+)\](.*?)\[\/img\]/g;
             parsedContent = parsedContent.replace(imgRegex, (match, url, altText) => {
                 // 简单验证URL是否合法
-                if (url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
+                if (url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp|webp)$/i) || url.startsWith('blob:')) {
                     return `<img src="${url}" alt="${altText || '图片'}" class="message-image">`;
                 }
                 return `<span class="text-red-500">[无效图片链接]</span>`;
@@ -911,10 +1019,10 @@
             const linkRegex = /\[link=([^\]]+)\](.*?)\[\/link\]/g;
             parsedContent = parsedContent.replace(linkRegex, (match, url, text) => {
                 // 简单验证URL是否合法
-                if (url.match(/^https?:\/\/.+/i)) {
+                if (url.match(/^https?:\/\/.+/i) || url.startsWith('blob:')) {
                     // 根据消息方向使用不同的链接样式
                     const linkClass = isOutgoing ? 'message-link message-link-outgoing' : 'message-link message-link-incoming';
-                    return `<a href="${url}" target="_blank" class="${linkClass}">${text || url}</a>`;
+                    return `<a href="${url}" target="_blank" download class="${linkClass}">${text || url}</a>`;
                 }
                 return `<span class="text-red-500">[无效链接]</span>`;
             });
@@ -927,7 +1035,7 @@
         
         // 加载消息
         async function loadMessages(showAnimation = true) {
-            if (!currentRoomKey) return;
+            if (currentMode !== 'normal' || !currentRoomKey) return;
             
             // 显示加载状态
             const messagesContainer = document.querySelector('#messages-container > div');
@@ -966,16 +1074,42 @@
         // 渲染空状态提示信息
         function renderEmptyState() {
             const messagesContainer = document.querySelector('#messages-container > div');
-            messagesContainer.innerHTML = `
-                <div class="text-center text-gray-500 py-8 space-y-4">
-                    <p>暂无消息，发送第一条消息吧！</p>
-                    <div class="text-sm bg-gray-100 p-3 rounded-lg inline-block text-left max-w-xs">
-                        <p class="mb-2"><i class="fa fa-info-circle text-primary mr-1"></i>支持以下格式：</p>
-                        <p><i class="fa fa-picture text-primary mr-1"></i>图片: [img=URL]描述[/img]</p>
-                        <p><i class="fa fa-link text-primary mr-1"></i>链接: [link=URL]文字[/link]</p>
+            if (currentMode === 'webrtc') {
+                // 检查连接是否就绪
+                const isReady = dataChannel && dataChannel.readyState === 'open';
+                if (isReady) {
+                    messagesContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8 space-y-4">
+                            <p>点对点聊天已就绪，发送第一条消息吧！</p>
+                            <div class="text-sm bg-gray-100 p-3 rounded-lg inline-block text-left max-w-xs">
+                                <p class="mb-2"><i class="fa fa-info-circle text-primary mr-1"></i>WebRTC模式支持：</p>
+                                <p><i class="fa fa-file text-primary mr-1"></i>直接发送本地文件</p>
+                                <p><i class="fa fa-bolt text-primary mr-1"></i>实时消息，无需刷新</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    messagesContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8 space-y-4">
+                            <p><i class="fa fa-spinner fa-spin mr-2"></i>等待点对点连接建立中...</p>
+                            <div class="text-sm bg-gray-100 p-3 rounded-lg inline-block text-left max-w-xs">
+                                <p>请先通过连接码与对方建立连接，连接建立后即可开始聊天</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                messagesContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-8 space-y-4">
+                        <p>暂无消息，发送第一条消息吧！</p>
+                        <div class="text-sm bg-gray-100 p-3 rounded-lg inline-block text-left max-w-xs">
+                            <p class="mb-2"><i class="fa fa-info-circle text-primary mr-1"></i>支持以下格式：</p>
+                            <p><i class="fa fa-picture text-primary mr-1"></i>图片: [img=URL]描述[/img]</p>
+                            <p><i class="fa fa-link text-primary mr-1"></i>链接: [link=URL]文字[/link]</p>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
         
         // 渲染消息
@@ -1038,14 +1172,74 @@
             // 滚动到底部
             scrollToBottom();
         }
+
+        // 添加WebRTC消息
+        function addWebRTCMessage(content, isOutgoing) {
+            const messagesContainer = document.querySelector('#messages-container > div');
+            // 如果是空状态，清空
+            if (messagesContainer.querySelector('.text-center')) {
+                messagesContainer.innerHTML = '';
+            }
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `flex ${isOutgoing ? 'justify-end' : 'justify-start'}`;
+            
+            const bubbleClass = isOutgoing 
+                ? 'bg-primary text-white chat-bubble-right' 
+                : 'bg-white text-dark chat-bubble-left shadow-sm';
+            
+            // 解析消息内容
+            const parsedContent = parseMessageContent(content, isOutgoing);
+            
+            messageElement.innerHTML = `
+                <div class="max-w-[80%]">
+                    <div class="${bubbleClass} p-3">
+                        <div class="font-medium ${isOutgoing ? '' : 'text-primary'}">${isOutgoing ? username : '对方'}</div>
+                        <div class="mt-1">${parsedContent}</div>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1 ${isOutgoing ? 'text-right' : ''}">
+                        ${formatTime(new Date().toISOString())}
+                    </div>
+                </div>
+            `;
+            
+            messageElement.style.opacity = "0";
+            messageElement.style.transform = "translateY(10px)";
+            messageElement.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            
+            messagesContainer.appendChild(messageElement);
+            
+            setTimeout(() => {
+                messageElement.style.opacity = "1";
+                messageElement.style.transform = "translateY(0)";
+            }, 50);
+            
+            scrollToBottom();
+        }
         
         // 发送消息
         function prepareSendMessage() {
             const input = document.getElementById('message-input');
             const content = input.value;
             
-            if (!content || content.trim() === '' || !currentRoomKey) return;
+            if (!content || content.trim() === '') return;
             
+            if (currentMode === 'webrtc') {
+                // WebRTC模式，直接通过DataChannel发送
+                if (!dataChannel || dataChannel.readyState !== 'open') {
+                    showNotification('连接未就绪，请等待连接建立', 'error');
+                    return;
+                }
+                // 发送文本消息
+                dataChannel.send(content.trim());
+                // 自己显示消息
+                addWebRTCMessage(content.trim(), true);
+                // 清空输入框
+                input.value = '';
+                return;
+            }
+            
+            // 常规模式的原有逻辑
             // 检查是否已设置用户名
             if (!username || username.trim() === '') {
                 openSettingsModal();
@@ -1148,6 +1342,59 @@
                 closeConfirmModal(); // 确保关闭确认模态框
             }
         }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // WebRTC发送文件
+        async function sendWebRTCFile(file) {
+            if (!dataChannel || dataChannel.readyState !== 'open') {
+                showNotification('数据通道未就绪，请等待连接建立', 'error');
+                return;
+            }
+
+            try {
+                // 先发送文件元信息
+                const meta = JSON.stringify({
+                    type: 'file',
+                    name: file.name,
+                    size: file.size,
+                    mime: file.type
+                });
+                dataChannel.send(meta);
+
+                // 读取文件
+                const arrayBuffer = await file.arrayBuffer();
+                
+                // 分块发送
+                for (let i = 0; i < arrayBuffer.byteLength; i += CHUNK_SIZE) {
+                    const chunk = arrayBuffer.slice(i, i + CHUNK_SIZE);
+                    dataChannel.send(chunk);
+                }
+
+                // 自己这边显示文件
+                const url = URL.createObjectURL(file);
+                const isImage = file.type.startsWith('image/');
+                let content;
+                if (isImage) {
+                    content = `[img=${url}]${file.name}[/img]`;
+                } else {
+                    content = `[link=${url}]下载文件: ${file.name} (${formatFileSize(file.size)})[/link]`;
+                }
+                addWebRTCMessage(content, true);
+
+                showNotification('文件发送成功', 'success');
+            } catch (error) {
+                showNotification('发送文件失败: ' + error.message, 'error');
+                console.error('发送文件失败:', error);
+            }
+        }
         
         // 复制聊天室key到剪贴板
         function copyRoomKey(key) {
@@ -1209,13 +1456,347 @@
             document.getElementById('request-counter').textContent = `剩余操作: ${displayText}`;
             document.getElementById('mobile-request-counter').textContent = `剩余操作: ${displayText}`;
         }
+
+        // 更新模式UI
+        function updateModeUI() {
+            const modeIndicator = document.getElementById('mode-indicator');
+            const modeText = document.getElementById('mode-text');
+            const requestCounter = document.getElementById('request-counter');
+            const mobileRequestCounter = document.getElementById('mobile-request-counter');
+            const webrtcStatus = document.getElementById('webrtc-status');
+            const imageBtnText = document.getElementById('image-btn-text');
+            const aside = document.querySelector('aside');
+            const createRoomBtn = document.getElementById('create-room-btn');
+            const refreshBtn = document.getElementById('refresh-btn');
+
+            if (currentMode === 'webrtc') {
+                modeText.textContent = 'WebRTC模式';
+                requestCounter.classList.add('hidden');
+                mobileRequestCounter.classList.add('hidden');
+                imageBtnText.textContent = '发送文件(<10MiB)';
+                aside.classList.add('hidden');
+                createRoomBtn.classList.add('hidden');
+                refreshBtn.classList.add('hidden');
+                // 清空消息
+                document.querySelector('#messages-container > div').innerHTML = '';
+                renderEmptyState();
+                // 打开WebRTC连接模态框
+                openWebRTCConnectModal();
+            } else {
+                modeText.textContent = '常规模式';
+                requestCounter.classList.remove('hidden');
+                mobileRequestCounter.classList.remove('hidden');
+                webrtcStatus.classList.add('hidden');
+                imageBtnText.textContent = '插入图片';
+                aside.classList.remove('hidden');
+                createRoomBtn.classList.remove('hidden');
+                refreshBtn.classList.remove('hidden');
+                // 关闭WebRTC连接
+                closeWebRTCConnection();
+                // 恢复常规模式的消息
+                document.getElementById('current-room-name').textContent = currentRoomName;
+                document.getElementById('current-room-key').textContent = currentRoomKey;
+                loadMessages(true);
+            }
+        }
+
+        // 打开WebRTC连接模态框
+        function openWebRTCConnectModal() {
+            document.getElementById('webrtc-connect-modal').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('webrtc-modal-content').classList.remove('scale-95', 'opacity-0');
+                document.getElementById('webrtc-modal-content').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // 关闭WebRTC连接模态框
+        function closeWebRTCConnectModal() {
+            document.getElementById('webrtc-modal-content').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('webrtc-modal-content').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('webrtc-connect-modal').classList.add('hidden');
+                document.getElementById('initiate-section').classList.add('hidden');
+                document.getElementById('join-section').classList.add('hidden');
+            }, 300);
+        }
+
+        // 关闭WebRTC连接
+        function closeWebRTCConnection() {
+            if (signalingTimer) {
+                clearInterval(signalingTimer);
+                signalingTimer = null;
+            }
+            if (dataChannel) {
+                dataChannel.close();
+                dataChannel = null;
+            }
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            signalingKey = null;
+            fileBuffer = null;
+            receivedSize = 0;
+            currentFileInfo = null;
+        }
+
+        // 发起WebRTC连接
+        async function initiateWebRTCConnection() {
+            // 生成6位随机连接码
+            signalingKey = Math.random().toString(36).slice(2, 8).toLowerCase();
+            document.getElementById('initiate-key').value = signalingKey;
+            document.getElementById('initiate-section').classList.remove('hidden');
+
+            // 创建PeerConnection
+            peerConnection = new RTCPeerConnection(ICE_CONFIG);
+            
+            // 创建DataChannel
+            dataChannel = peerConnection.createDataChannel('chat', {
+                ordered: true
+            });
+
+            // 监听DataChannel事件
+            setupDataChannelListeners();
+
+            // 监听ICE候选
+            peerConnection.onicecandidate = async (event) => {
+                if (event.candidate) {
+                    // 将候选保存到信令服务器
+                    await saveSignalingCandidate(event.candidate);
+                }
+            };
+
+            // 创建Offer
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            // 保存Offer到信令服务器
+            await saveSignaling({
+                offer: offer,
+                answer: null,
+                candidates: []
+            });
+
+            // 启动轮询，等待Answer
+            startSignalingPolling();
+
+            showNotification('连接已发起，等待对方加入...', 'info');
+        }
+
+        // 加入WebRTC连接
+        async function joinWebRTCConnection(key) {
+            signalingKey = key.toLowerCase();
+            
+            // 从信令服务器获取Offer
+            const signaling = await getSignaling();
+            if (!signaling || !signaling.offer) {
+                showNotification('无效的连接码，请检查后重试', 'error');
+                return;
+            }
+
+            // 创建PeerConnection
+            peerConnection = new RTCPeerConnection(ICE_CONFIG);
+
+            // 监听DataChannel
+            peerConnection.ondatachannel = (event) => {
+                dataChannel = event.channel;
+                setupDataChannelListeners();
+            };
+
+            // 监听ICE候选
+            peerConnection.onicecandidate = async (event) => {
+                if (event.candidate) {
+                    // 将候选保存到信令服务器
+                    await saveSignalingCandidate(event.candidate);
+                }
+            };
+
+            // 设置远程描述
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(signaling.offer));
+
+            // 创建Answer
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            // 保存Answer到信令服务器
+            signaling.answer = answer;
+            await saveSignaling(signaling);
+
+            // 处理已有的候选
+            if (signaling.candidates && signaling.candidates.length > 0) {
+                for (const candidate of signaling.candidates) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                }
+            }
+
+            // 启动轮询
+            startSignalingPolling();
+
+            showNotification('已成功加入连接！', 'success');
+            closeWebRTCConnectModal();
+        }
+
+        // 设置DataChannel监听
+        function setupDataChannelListeners() {
+            dataChannel.onopen = () => {
+                console.log('DataChannel opened');
+                document.getElementById('webrtc-status').classList.remove('hidden');
+                showNotification('点对点连接已建立，可以开始聊天了！', 'success');
+                // 连接建立后，停止信令轮询，不再访问textdb
+                if (signalingTimer) {
+                    clearInterval(signalingTimer);
+                    signalingTimer = null;
+                }
+                // 关闭连接模态框
+                closeWebRTCConnectModal();
+                // 更新房间名称和连接码
+                document.getElementById('current-room-name').textContent = `与对方的聊天`;
+                document.getElementById('current-room-key').textContent = signalingKey;
+                // 更新空状态，现在连接就绪了
+                renderEmptyState();
+            };
+
+            dataChannel.onmessage = (event) => {
+                if (typeof event.data === 'string') {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'file') {
+                            // 开始接收文件
+                            fileBuffer = [];
+                            receivedSize = 0;
+                            currentFileInfo = data;
+                            return;
+                        }
+                    } catch (e) {
+                        // 普通文本消息
+                        addWebRTCMessage(event.data, false);
+                        return;
+                    }
+                } else {
+                    // 文件块
+                    if (fileBuffer) {
+                        fileBuffer.push(event.data);
+                        receivedSize += event.data.byteLength;
+
+                        // 检查是否接收完成
+                        if (receivedSize === currentFileInfo.size) {
+                            // 拼接文件
+                            const blob = new Blob(fileBuffer, { type: currentFileInfo.mime });
+                            const url = URL.createObjectURL(blob);
+                            const isImage = currentFileInfo.mime.startsWith('image/');
+                            let content;
+                            if (isImage) {
+                                content = `[img=${url}]${currentFileInfo.name}[/img]`;
+                            } else {
+                                content = `[link=${url}]下载文件: ${currentFileInfo.name} (${formatFileSize(currentFileInfo.size)})[/link]`;
+                            }
+                            addWebRTCMessage(content, false);
+
+                            // 重置缓冲区
+                            fileBuffer = null;
+                            receivedSize = 0;
+                            currentFileInfo = null;
+                        }
+                    }
+                }
+            };
+
+            dataChannel.onclose = () => {
+                console.log('DataChannel closed');
+                document.getElementById('webrtc-status').classList.add('hidden');
+                showNotification('连接已关闭', 'info');
+            };
+
+            dataChannel.onerror = (error) => {
+                console.error('DataChannel error:', error);
+                showNotification('连接出错了', 'error');
+            };
+        }
+
+        // 保存信令
+        async function saveSignaling(data) {
+            try {
+                const updateUrl = 'https://api.textdb.online/update/';
+                const formData = new FormData();
+                formData.append('key', 'sig_' + signalingKey);
+                formData.append('value', JSON.stringify(data));
+                await fetch(updateUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (error) {
+                console.error('保存信令失败:', error);
+            }
+        }
+
+        // 保存ICE候选
+        async function saveSignalingCandidate(candidate) {
+            try {
+                // 获取当前信令
+                const signaling = await getSignaling();
+                if (signaling) {
+                    // 添加新候选
+                    if (!signaling.candidates) signaling.candidates = [];
+                    signaling.candidates.push(candidate);
+                    // 保存回去
+                    await saveSignaling(signaling);
+                }
+            } catch (error) {
+                console.error('保存候选失败:', error);
+            }
+        }
+
+        // 获取信令
+        async function getSignaling() {
+            try {
+                const url = `https://textdb.online/sig_${signalingKey}`;
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.text();
+                    if (data) {
+                        return JSON.parse(data);
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('获取信令失败:', error);
+                return null;
+            }
+        }
+
+        // 启动信令轮询
+        function startSignalingPolling() {
+            let lastCandidateCount = 0;
+
+            signalingTimer = setInterval(async () => {
+                const signaling = await getSignaling();
+                if (!signaling) return;
+
+                // 处理Answer
+                if (!peerConnection.remoteDescription && signaling.answer) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(signaling.answer));
+                }
+
+                // 处理新的ICE候选
+                if (signaling.candidates && signaling.candidates.length > lastCandidateCount) {
+                    for (let i = lastCandidateCount; i < signaling.candidates.length; i++) {
+                        const candidate = signaling.candidates[i];
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    }
+                    lastCandidateCount = signaling.candidates.length;
+                }
+            }, 1000);
+        }
         
         // 设置自动刷新
         function setupAutoRefresh() {
             // 清除现有定时器
             if (refreshTimer) {
                 clearInterval(refreshTimer);
+                refreshTimer = null;
             }
+
+            if (currentMode !== 'normal') return;
             
             // 设置新定时器 - 读取不受限制，无需检查
             refreshTimer = setInterval(() => {
@@ -1227,6 +1808,9 @@
         function saveSettings() {
             const newUsername = document.getElementById('username').value.trim();
             const newInterval = parseInt(document.getElementById('refresh-interval').value);
+            const newMode = document.querySelector('input[name="chat-mode"]:checked').value;
+
+            let modeChanged = newMode !== currentMode;
             
             if (newUsername) {
                 username = newUsername;
@@ -1242,6 +1826,14 @@
                 localStorage.setItem('refreshInterval', refreshInterval);
                 setupAutoRefresh();
                 showNotification(`自动刷新间隔已更新为: ${refreshInterval}秒`, 'success');
+            }
+
+            if (modeChanged) {
+                currentMode = newMode;
+                localStorage.setItem('chatMode', currentMode);
+                updateModeUI();
+                setupAutoRefresh();
+                showNotification(`已切换到${currentMode === 'normal' ? '常规' : 'WebRTC点对点'}模式`, 'success');
             }
             
             // 关闭设置模态框并添加动画
@@ -1410,12 +2002,27 @@
             
             // 插入图片相关事件
             document.getElementById('insert-image-btn').addEventListener('click', () => {
-                document.getElementById('insert-image-modal').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('image-modal-content').classList.remove('scale-95', 'opacity-0');
-                    document.getElementById('image-modal-content').classList.add('scale-100', 'opacity-100');
-                }, 10);
-                document.getElementById('image-url').focus();
+                if (currentMode === 'webrtc') {
+                    document.getElementById('file-input').click();
+                } else {
+                    document.getElementById('insert-image-modal').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('image-modal-content').classList.remove('scale-95', 'opacity-0');
+                        document.getElementById('image-modal-content').classList.add('scale-100', 'opacity-100');
+                    }, 10);
+                    document.getElementById('image-url').focus();
+                }
+            });
+
+            // 文件选择事件
+            document.getElementById('file-input').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (currentMode === 'webrtc') {
+                        sendWebRTCFile(file);
+                    }
+                    e.target.value = ''; // 重置，方便重复选择
+                }
             });
             
             document.querySelectorAll('.close-image-modal').forEach(btn => {
@@ -1467,6 +2074,40 @@
                 if (e.target === document.getElementById('confirm-modal')) {
                     closeConfirmModal();
                 }
+            });
+
+            // WebRTC相关事件
+            document.getElementById('close-webrtc-modal-btn').addEventListener('click', closeWebRTCConnectModal);
+            document.getElementById('initiate-connect-btn').addEventListener('click', initiateWebRTCConnection);
+            document.getElementById('join-connect-btn').addEventListener('click', () => {
+                document.getElementById('join-section').classList.remove('hidden');
+            });
+            document.getElementById('confirm-join-btn').addEventListener('click', () => {
+                const key = document.getElementById('join-key').value.trim();
+                if (key.length === 6) {
+                    joinWebRTCConnection(key);
+                } else {
+                    showNotification('请输入有效的6位连接码', 'error');
+                }
+            });
+            document.getElementById('copy-initiate-key-btn').addEventListener('click', () => {
+                copyRoomKey(signalingKey);
+            });
+
+            // 连接码输入自动转小写
+            document.getElementById('join-key').addEventListener('input', (e) => {
+                e.target.value = e.target.value.toLowerCase();
+            });
+
+            // 模式标识点击切换模式
+            document.getElementById('mode-indicator').addEventListener('click', () => {
+                // 切换模式
+                const newMode = currentMode === 'normal' ? 'webrtc' : 'normal';
+                currentMode = newMode;
+                localStorage.setItem('chatMode', currentMode);
+                updateModeUI();
+                setupAutoRefresh();
+                showNotification(`已切换到${currentMode === 'normal' ? '常规' : 'WebRTC点对点'}模式`, 'success');
             });
         }
         
