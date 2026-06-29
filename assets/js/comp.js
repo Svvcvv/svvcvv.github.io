@@ -35,7 +35,7 @@ async function initializeApp() {
 
     try {
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', './simhr_data.json');
+        xhr.open('GET', '/assets/js/simhr_data.json');
         xhr.responseType = 'json';
         
         let hasValidProgress = false;
