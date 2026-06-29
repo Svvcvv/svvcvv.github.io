@@ -44,7 +44,7 @@
                                 class="w-full pl-3 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                             <option value="html">HTML内容</option>
                             <option value="text">纯文本</option>
-                            <option value="url">URL链接</option>
+                            <option value="url">URL链接（解密后自动跳转）</option>
                         </select>
                     </div>
                     
@@ -73,7 +73,7 @@
                         </div>
                         <div>
                             <h3 class="font-medium text-green-800">配置生成成功！</h3>
-                            <p class="text-sm text-green-700">点击复制按钮，然后粘贴到 secure-page.html 中</p>
+                            <p class="text-sm text-green-700">代码已自动复制到剪贴板，粘贴到 secure-page.html 中即可使用</p>
                         </div>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                         </div>
                     </div>
                     <div class="p-4">
-                        <pre id="configCode" class="text-sm font-mono overflow-x-auto bg-transparent border-none"></pre>
+                        <pre id="configCode" class="text-sm font-mono overflow-x-auto bg-transparent border-none whitespace-pre-wrap break-all"></pre>
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@
                     </button>
                     <button id="newConfigBtn" 
                             class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center">
-                        <i class="fa fa-bullseye mr-2"></i>
+                        <i class="fa fa-refresh mr-2"></i>
                         生成新配置
                     </button>
                 </div>
@@ -149,14 +149,23 @@
         let generatedConfig = null;
         const PBKDF2_ITERATIONS = 200000;
 
-        // Base64 编码（修复大文件问题）
+        // ✅ 修复：避免展开运算符导致的调用栈溢出（支持任意大小内容）
         function arrayToBase64(array) {
-            return btoa(String.fromCharCode(...array));
+            let binary = '';
+            const bytes = new Uint8Array(array);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
         }
+
         function base64ToArray(base64) {
             const binary = atob(base64);
             const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
             return bytes;
         }
 
@@ -170,7 +179,11 @@
             const strengthElement = document.getElementById('passwordStrength');
             const strengthText = document.getElementById('strengthText');
             const strengthFill = document.getElementById('strengthFill');
-            if (!password) { strengthElement.classList.add('hidden'); return; }
+            
+            if (!password) {
+                strengthElement.classList.add('hidden');
+                return false;
+            }
             
             let strength = 0;
             if (password.length >= 8) strength++;
@@ -179,88 +192,172 @@
             if (/[0-9]/.test(password)) strength++;
             if (/[^A-Za-z0-9]/.test(password)) strength++;
             
-            const labels = ['非常弱','弱','中等','强','非常强'];
-            const colors = ['bg-red-500','bg-orange-500','bg-yellow-500','bg-green-400','bg-green-600'];
+            const labels = ['非常弱', '弱', '中等', '强', '非常强'];
+            const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-400', 'bg-green-600'];
             
             strengthElement.classList.remove('hidden');
             strengthText.textContent = `密码强度: ${labels[strength]}`;
             strengthFill.className = `h-full rounded-full transition-all ${colors[strength]}`;
-            strengthFill.style.width = `${(strength/5)*100}%`;
+            strengthFill.style.width = `${(strength / 5) * 100}%`;
             return strength >= 3;
         }
 
         async function copyToClipboard(text) {
-            return navigator.clipboard.writeText(text);
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (e) {
+                // 降级方案：创建临时textarea
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                return true;
+            }
         }
 
         async function generateConfig() {
             const password = document.getElementById('password').value;
             const contentType = document.getElementById('contentType').value;
-            const content = document.getElementById('contentToEncrypt').value;
+            const content = document.getElementById('contentToEncrypt').value.trim();
 
-            if (!password) { alert('请输入密码'); return; }
-            if (!content) { alert('请输入内容'); return; }
+            if (!password) {
+                alert('请输入访问密码');
+                document.getElementById('password').focus();
+                return;
+            }
+            if (!content) {
+                alert('请输入要加密的内容');
+                document.getElementById('contentToEncrypt').focus();
+                return;
+            }
 
             const btn = document.getElementById('generateBtn');
-            const original = btn.innerHTML;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>处理中...';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>加密处理中...';
             btn.disabled = true;
 
             try {
                 const encoder = new TextEncoder();
                 const salt = generateSalt();
-                const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(password), {name:"PBKDF2"}, false, ["deriveBits","deriveKey"]);
+                const keyMaterial = await crypto.subtle.importKey(
+                    "raw", 
+                    encoder.encode(password), 
+                    { name: "PBKDF2" }, 
+                    false, 
+                    ["deriveBits", "deriveKey"]
+                );
                 
-                // 生成密码哈希
-                const hashBits = await crypto.subtle.deriveBits({name:"PBKDF2",salt:base64ToArray(salt),iterations:PBKDF2_ITERATIONS,hash:"SHA-256"}, keyMaterial, 256);
+                // 生成密码哈希（用于验证）
+                const hashBits = await crypto.subtle.deriveBits(
+                    {
+                        name: "PBKDF2",
+                        salt: base64ToArray(salt),
+                        iterations: PBKDF2_ITERATIONS,
+                        hash: "SHA-256"
+                    }, 
+                    keyMaterial, 
+                    256
+                );
                 const storedHash = arrayToBase64(new Uint8Array(hashBits));
 
-                // 加密内容
+                // AES-GCM加密内容
                 const iv = crypto.getRandomValues(new Uint8Array(12));
-                const key = await crypto.subtle.deriveKey({name:"PBKDF2",salt:base64ToArray(salt),iterations:PBKDF2_ITERATIONS,hash:"SHA-256"}, keyMaterial, {name:"AES-GCM",length:256}, false, ["encrypt"]);
-                const encrypted = await crypto.subtle.encrypt({name:"AES-GCM",iv}, key, encoder.encode(content));
+                const encryptionKey = await crypto.subtle.deriveKey(
+                    {
+                        name: "PBKDF2",
+                        salt: base64ToArray(salt),
+                        iterations: PBKDF2_ITERATIONS,
+                        hash: "SHA-256"
+                    }, 
+                    keyMaterial, 
+                    { name: "AES-GCM", length: 256 }, 
+                    false, 
+                    ["encrypt"]
+                );
+                const encryptedData = await crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv }, 
+                    encryptionKey, 
+                    encoder.encode(content)
+                );
 
-                // 生成配置
+                // 生成最终配置
                 const configCode = `const config = {
     storedHash: "${storedHash}",
     storedSalt: "${salt}",
-    encryptedContent: "${arrayToBase64(new Uint8Array(encrypted))}",
+    encryptedContent: "${arrayToBase64(new Uint8Array(encryptedData))}",
     contentIv: "${arrayToBase64(iv)}",
-    contentType: "${contentType}"
+    contentType: "${contentType}",
+    pbkdf2Iterations: ${PBKDF2_ITERATIONS}
 };`;
 
                 generatedConfig = { code: configCode };
                 document.getElementById('configCode').textContent = configCode;
                 document.getElementById('resultSection').classList.remove('hidden');
-                await copyToClipboard(configCode);
-                document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+                
+                // 自动复制
+                const copySuccess = await copyToClipboard(configCode);
+                if (!copySuccess) {
+                    alert('自动复制失败，请手动复制代码');
+                }
+                
+                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
             } catch (e) {
-                console.error(e);
-                alert('加密失败：'+e.message);
+                console.error('加密失败:', e);
+                alert(`加密失败：${e.message}\n请检查内容大小或刷新页面重试`);
             } finally {
-                btn.innerHTML = original;
+                btn.innerHTML = originalHTML;
                 btn.disabled = false;
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('password').addEventListener('input', (e) => checkPasswordStrength(e.target.value));
+            // 密码强度实时检测
+            document.getElementById('password').addEventListener('input', (e) => {
+                checkPasswordStrength(e.target.value);
+            });
+
+            // 生成配置
             document.getElementById('generateBtn').addEventListener('click', generateConfig);
             
-            document.getElementById('copyConfigBtn').onclick = async () => {
-                await copyToClipboard(generatedConfig.code);
-                this.innerHTML = '<i class="fa fa-check"></i> 已复制';
-                setTimeout(() => this.innerHTML = '<i class="fa fa-copy"></i> 复制', 2000);
+            // ✅ 修复：使用普通函数而非箭头函数，确保this指向按钮元素
+            document.getElementById('copyConfigBtn').onclick = async function() {
+                if (!generatedConfig) return;
+                const success = await copyToClipboard(generatedConfig.code);
+                if (success) {
+                    this.innerHTML = '<i class="fa fa-check"></i> 已复制';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fa fa-copy"></i> 复制';
+                    }, 2000);
+                } else {
+                    alert('复制失败，请手动复制');
+                }
             };
             
-            document.getElementById('copyAgainBtn').onclick = async () => {
-                await copyToClipboard(generatedConfig.code);
-                this.innerText = '✅ 已复制';
-                setTimeout(() => this.innerText = '📋 重新复制代码', 2000);
+            document.getElementById('copyAgainBtn').onclick = async function() {
+                if (!generatedConfig) return;
+                const success = await copyToClipboard(generatedConfig.code);
+                if (success) {
+                    this.innerHTML = '✅ 已复制';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fa fa-copy mr-2"></i>重新复制代码';
+                    }, 2000);
+                } else {
+                    alert('复制失败，请手动复制');
+                }
             };
             
             document.getElementById('newConfigBtn').onclick = () => {
                 document.getElementById('resultSection').classList.add('hidden');
+                document.getElementById('password').value = '';
+                document.getElementById('contentToEncrypt').value = '';
+                document.getElementById('passwordStrength').classList.add('hidden');
+                document.getElementById('password').focus();
             };
         });
     </script>

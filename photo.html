@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D 沉浸式照片画廊</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    img, video { max-width: 100%; height: auto; display: block; }
+    body { overflow-wrap: break-word; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #1a1a1e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease;
+    }
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #loading-screen .loader-title {
+      color: #c8b89a;
+      font-size: 1.4rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+    #loading-screen .loader-bar-track {
+      width: 240px;
+      height: 2px;
+      background: rgba(200, 184, 154, 0.2);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    #loading-screen .loader-bar-fill {
+      height: 100%;
+      background: #c8b89a;
+      border-radius: 1px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    #loading-screen .loader-percent {
+      color: rgba(200, 184, 154, 0.7);
+      font-size: 0.8rem;
+      margin-top: 0.8rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* Click to start overlay */
+    #click-prompt {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.55);
+      cursor: pointer;
+      transition: opacity 0.5s ease;
+    }
+    #click-prompt.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #click-prompt .prompt-inner {
+      text-align: center;
+      color: #e8e0d8;
+    }
+    #click-prompt .prompt-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 1rem;
+      opacity: 0.8;
+    }
+    #click-prompt .prompt-text {
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      font-weight: 300;
+    }
+    #click-prompt .prompt-hint {
+      font-size: 0.75rem;
+      color: rgba(232,224,216,0.5);
+      margin-top: 0.5rem;
+      letter-spacing: 0.06em;
+    }
+
+    /* HUD */
+    #hud {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      display: flex;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #hud.visible {
+      opacity: 1;
+    }
+    #hud .hud-key {
+      width: 2rem;
+      height: 2rem;
+      border: 1px solid rgba(232,224,216,0.25);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(232,224,216,0.6);
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.3);
+    }
+    #hud .hud-sep {
+      width: 1px;
+      background: rgba(232,224,216,0.15);
+      margin: 0 0.25rem;
+    }
+
+    /* Speed indicator */
+    #speed-indicator {
+      position: fixed;
+      bottom: 5rem;
+      right: 2rem;
+      z-index: 30;
+      color: rgba(232,224,216,0.4);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #speed-indicator.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-title">GALLERY</div>
+    <div class="loader-bar-track">
+      <div class="loader-bar-fill" id="loader-fill"></div>
+    </div>
+    <div class="loader-percent" id="loader-percent">0%</div>
+  </div>
+
+  <!-- Click to start -->
+  <div id="click-prompt">
+    <div class="prompt-inner">
+      <svg class="prompt-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="24" cy="24" r="10"/>
+        <circle cx="24" cy="24" r="3"/>
+        <line x1="24" y1="4" x2="24" y2="14"/>
+        <line x1="24" y1="34" x2="24" y2="44"/>
+        <line x1="4" y1="24" x2="14" y2="24"/>
+        <line x1="34" y1="24" x2="44" y2="24"/>
+      </svg>
+      <div class="prompt-text">点击进入画廊</div>
+      <div class="prompt-hint">ESC 退出 · 鼠标环顾 · WASD 移动 · Q/E 升降</div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-key">W</div>
+    <div class="hud-key">A</div>
+    <div class="hud-key">S</div>
+    <div class="hud-key">D</div>
+    <div class="hud-sep"></div>
+    <div class="hud-key">Q</div>
+    <div class="hud-key">E</div>
+  </div>
+
+  <div id="speed-indicator"></div>
+
+  <div id="canvas-container"></div>
+
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/PointerLockControls.js"></script>
+
+  <script>
+    // ============================================================
+    //  参数配置 —— 所有可调参数集中在此
+    // ============================================================
+
+    /** 光照参数 */
+    const LIGHTING = {
+      ambient:      { color: 0x3a3540, intensity: 0.5 },
+      directional:  { color: 0xfff0dd, intensity: 1.0, position: [6, 7, 2], castShadow: true },
+      point:        { color: 0xffcc99, intensity: 0.7, position: [-4, 2.5, -1], distance: 14, decay: 2 },
+      shadowMapSize: 2048,
+      shadowBias:    -0.0004,
+      shadowCamera:  { left: -10, right: 10, top: 8, bottom: -8, near: 0.5, far: 30 }
+    };
+
+    /** 移动控制参数 */
+    const MOVEMENT = {
+      maxSpeed:        8.0,
+      acceleration:    20.0,
+      deceleration:    6.0,
+      mouseSensitivity: 0.002,
+      verticalSpeedRatio: 0.6
+    };
+
+    /** 运动模糊参数 */
+    const MOTION_BLUR = {
+      enabled:         true,
+      maxIntensity:    0.65,
+      speedThreshold:  0.15,
+      speedMax:        4.0,
+      rotationFactor:  1.2,
+      falloffRate:     8.0
+    };
+
+    /** 场景参数 */
+    const SCENE = {
+      wallWidth:       14,
+      wallHeight:      6,
+      roomDepth:       9,
+      wallThickness:   0.3,
+      frameWidth:      1.8,
+      frameSpacing:    0.4,
+      frameBorderThickness: 0.05,
+      frameBorderDepth:     0.035,
+      frameBackDepth:       0.05,
+      wallColor:       0xe0d8cc,
+      floorColor:      0x3a322a,
+      ceilingColor:    0xe8e4dc,
+      sideWallColor:   0xd8d0c4,
+      frameWoodColor:  0x3d2817,
+      frameWoodRoughness: 0.55,
+      frameWoodMetalness: 0.03,
+      photoRoughness:  0.15,
+      photoMetalness:  0.02,
+      columns:         4,
+      rows:            2,
+      wallMarginH:     1.6,
+      wallMarginV:     1.0
+    };
+
+    /** 照片数据 */
+    const PHOTOS = [
+      { url: 'https://picsum.photos/id/1015/600/450',  aspect: 4/3 },
+      { url: 'https://picsum.photos/id/1016/600/750',  aspect: 4/5 },
+      { url: 'https://picsum.photos/id/1018/600/400',  aspect: 3/2 },
+      { url: 'https://picsum.photos/id/1020/600/600',  aspect: 1/1 },
+      { url: 'https://picsum.photos/id/1025/600/450',  aspect: 4/3 },
+      { url: 'https://picsum.photos/id/1035/600/750',  aspect: 4/5 },
+      { url: 'https://picsum.photos/id/1039/600/400',  aspect: 3/2 },
+      { url: 'https://picsum.photos/id/1043/600/600',  aspect: 1/1 }
+    ];
+
+    // ============================================================
+    //  初始化
+    // ============================================================
+
+    const container = document.getElementById('canvas-container');
+    const loadingScreen = document.getElementById('loading-screen');
+    const loaderFill = document.getElementById('loader-fill');
+    const loaderPercent = document.getElementById('loader-percent');
+    const clickPrompt = document.getElementById('click-prompt');
+    const hudEl = document.getElementById('hud');
+    const speedIndicator = document.getElementById('speed-indicator');
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    container.appendChild(renderer.domElement);
+
+    // Scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a1e);
+    scene.fog = new THREE.Fog(0x1a1a1e, 6, 22);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 30);
+    camera.position.set(0, 0.3, 1.5);
+    camera.lookAt(0, 0, -4);
+
+    // Clock
+    const clock = new THREE.Clock();
+
+    // ============================================================
+    //  光照
+    // ============================================================
+
+    // 环境光
+    const ambientLight = new THREE.AmbientLight(
+      LIGHTING.ambient.color,
+      LIGHTING.ambient.intensity
+    );
+    scene.add(ambientLight);
+
+    // 方向光（主光 + 阴影）
+    const directionalLight = new THREE.DirectionalLight(
+      LIGHTING.directional.color,
+      LIGHTING.directional.intensity
+    );
+    directionalLight.position.set(...LIGHTING.directional.position);
+    if (LIGHTING.directional.castShadow) {
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = LIGHTING.shadowMapSize;
+      directionalLight.shadow.mapSize.height = LIGHTING.shadowMapSize;
+      directionalLight.shadow.camera.left = LIGHTING.shadowCamera.left;
+      directionalLight.shadow.camera.right = LIGHTING.shadowCamera.right;
+      directionalLight.shadow.camera.top = LIGHTING.shadowCamera.top;
+      directionalLight.shadow.camera.bottom = LIGHTING.shadowCamera.bottom;
+      directionalLight.shadow.camera.near = LIGHTING.shadowCamera.near;
+      directionalLight.shadow.camera.far = LIGHTING.shadowCamera.far;
+      directionalLight.shadow.bias = LIGHTING.shadowBias;
+      directionalLight.shadow.normalBias = 0.02;
+    }
+    scene.add(directionalLight);
+
+    // 点光源（氛围补光）
+    const pointLight = new THREE.PointLight(
+      LIGHTING.point.color,
+      LIGHTING.point.intensity,
+      LIGHTING.point.distance,
+      LIGHTING.point.decay
+    );
+    pointLight.position.set(...LIGHTING.point.position);
+    scene.add(pointLight);
+
+    // ============================================================
+    //  构建场景几何
+    // ============================================================
+
+    const { wallWidth, wallHeight, roomDepth, wallThickness,
+            wallColor, floorColor, ceilingColor, sideWallColor } = SCENE;
+    const halfW = wallWidth / 2;
+    const halfH = wallHeight / 2;
+    const halfD = roomDepth / 2;
+
+    // 材质
+    const wallMat = new THREE.MeshStandardMaterial({
+      color: wallColor, roughness: 0.82, metalness: 0.02
+    });
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: floorColor, roughness: 0.7, metalness: 0.05
+    });
+    const ceilingMat = new THREE.MeshStandardMaterial({
+      color: ceilingColor, roughness: 0.88, metalness: 0.01
+    });
+    const sideMat = new THREE.MeshStandardMaterial({
+      color: sideWallColor, roughness: 0.8, metalness: 0.02
+    });
+
+    // 后墙（照片墙）
+    const backWall = new THREE.Mesh(
+      new THREE.BoxGeometry(wallWidth, wallHeight, wallThickness),
+      wallMat
+    );
+    backWall.position.set(0, 0, -halfD);
+    backWall.receiveShadow = true;
+    backWall.castShadow = true;
+    scene.add(backWall);
+
+    // 地板
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(wallWidth, roomDepth),
+      floorMat
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, -halfH, 0);
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // 天花板
+    const ceiling = new THREE.Mesh(
+      new THREE.PlaneGeometry(wallWidth, roomDepth),
+      ceilingMat
+    );
+    ceiling.rotation.x = Math.PI / 2;
+    ceiling.position.set(0, halfH, 0);
+    scene.add(ceiling);
+
+    // 左墙
+    const leftWall = new THREE.Mesh(
+      new THREE.BoxGeometry(wallThickness, wallHeight, roomDepth),
+      sideMat
+    );
+    leftWall.position.set(-halfW, 0, 0);
+    leftWall.receiveShadow = true;
+    scene.add(leftWall);
+
+    // 右墙
+    const rightWall = new THREE.Mesh(
+      new THREE.BoxGeometry(wallThickness, wallHeight, roomDepth),
+      sideMat
+    );
+    rightWall.position.set(halfW, 0, 0);
+    rightWall.receiveShadow = true;
+    scene.add(rightWall);
+
+    // ============================================================
+    //  画框构建
+    // ============================================================
+
+    const frameWoodMat = new THREE.MeshStandardMaterial({
+      color: SCENE.frameWoodColor,
+      roughness: SCENE.frameWoodRoughness,
+      metalness: SCENE.frameWoodMetalness
+    });
+
+    const photoMatTemplate = new THREE.MeshStandardMaterial({
+      roughness: SCENE.photoRoughness,
+      metalness: SCENE.photoMetalness
+    });
+
+    const frameGroup = new THREE.Group();
+    scene.add(frameGroup);
+
+    // 计算画框排列
+    const { frameWidth, frameSpacing, frameBorderThickness: bt, frameBorderDepth: bd, frameBackDepth: backD, columns, rows, wallMarginH, wallMarginV } = SCENE;
+
+    const totalGridW = columns * frameWidth + (columns - 1) * frameSpacing;
+    const startX = -totalGridW / 2 + frameWidth / 2;
+
+    // 收集所有画框高度，计算垂直排列
+    const frameHeights = PHOTOS.map(p => frameWidth / p.aspect + bt * 2);
+    const rowHeights = [];
+    for (let r = 0; r < rows; r++) {
+      let maxH = 0;
+      for (let c = 0; c < columns; c++) {
+        const idx = r * columns + c;
+        if (idx < PHOTOS.length) {
+          maxH = Math.max(maxH, frameHeights[idx]);
+        }
+      }
+      rowHeights.push(maxH);
+    }
+    const totalGridH = rowHeights.reduce((a, b) => a + b, 0) + (rows - 1) * frameSpacing;
+    const startY = totalGridH / 2;
+
+    // 画框 z 位置（略突出于后墙）
+    const frameZ = -halfD + wallThickness / 2 + backD / 2 + 0.01;
+
+    // 纹理加载管理
+    const loadingManager = new THREE.LoadingManager();
+    const textureLoader = new THREE.TextureLoader(loadingManager);
+    let texturesLoaded = 0;
+    const totalTextures = PHOTOS.length;
+
+    function updateLoadingProgress() {
+      const pct = Math.round((texturesLoaded / totalTextures) * 100);
+      loaderFill.style.width = pct + '%';
+      loaderPercent.textContent = pct + '%';
+    }
+
+    function onAllTexturesLoaded() {
+      setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+        setTimeout(() => {
+          clickPrompt.classList.remove('hidden');
+        }, 400);
+      }, 300);
+    }
+
+    // 创建单个画框
+    function createFrame(photoData, x, y, z) {
+      const group = new THREE.Group();
+
+      const fw = frameWidth;
+      const fh = frameWidth / photoData.aspect + bt * 2;
+      const photoW = frameWidth - bt * 2;
+      const photoH = frameWidth / photoData.aspect;
+
+      // 背板
+      const backGeo = new THREE.BoxGeometry(fw, fh, backD);
+      const backMesh = new THREE.Mesh(backGeo, frameWoodMat);
+      backMesh.castShadow = true;
+      backMesh.receiveShadow = true;
+      group.add(backMesh);
+
+      // 四条边框
+      const borderMat = frameWoodMat;
+      // 上边框
+      const topBorder = new THREE.Mesh(
+        new THREE.BoxGeometry(fw, bt, bd),
+        borderMat
+      );
+      topBorder.position.set(0, fh / 2 - bt / 2, backD / 2 + bd / 2);
+      topBorder.castShadow = true;
+      group.add(topBorder);
+
+      // 下边框
+      const bottomBorder = new THREE.Mesh(
+        new THREE.BoxGeometry(fw, bt, bd),
+        borderMat
+      );
+      bottomBorder.position.set(0, -fh / 2 + bt / 2, backD / 2 + bd / 2);
+      bottomBorder.castShadow = true;
+      group.add(bottomBorder);
+
+      // 左边框
+      const leftBorder = new THREE.Mesh(
+        new THREE.BoxGeometry(bt, fh - bt * 2, bd),
+        borderMat
+      );
+      leftBorder.position.set(-fw / 2 + bt / 2, 0, backD / 2 + bd / 2);
+      leftBorder.castShadow = true;
+      group.add(leftBorder);
+
+      // 右边框
+      const rightBorder = new THREE.Mesh(
+        new THREE.BoxGeometry(bt, fh - bt * 2, bd),
+        borderMat
+      );
+      rightBorder.position.set(fw / 2 - bt / 2, 0, backD / 2 + bd / 2);
+      rightBorder.castShadow = true;
+      group.add(rightBorder);
+
+      // 照片
+      const photoGeo = new THREE.PlaneGeometry(photoW, photoH);
+      const photoMat = photoMatTemplate.clone();
+      const photoMesh = new THREE.Mesh(photoGeo, photoMat);
+      photoMesh.position.z = backD / 2 + bd + 0.002;
+      photoMesh.castShadow = false;
+      group.add(photoMesh);
+
+      // 加载纹理
+      textureLoader.load(photoData.url,
+        (texture) => {
+          texture.encoding = THREE.sRGBEncoding;
+          texture.minFilter = THREE.LinearMipmapLinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.generateMipmaps = true;
+          photoMat.map = texture;
+          photoMat.needsUpdate = true;
+          texturesLoaded++;
+          updateLoadingProgress();
+          if (texturesLoaded === totalTextures) {
+            onAllTexturesLoaded();
+          }
+        },
+        undefined,
+        () => {
+          // 加载失败也计数，避免卡在loading
+          texturesLoaded++;
+          updateLoadingProgress();
+          if (texturesLoaded === totalTextures) {
+            onAllTexturesLoaded();
+          }
+        }
+      );
+
+      group.position.set(x, y, z);
+      return group;
+    }
+
+    // 排列画框
+    let currentY = startY;
+    for (let r = 0; r < rows; r++) {
+      const rowMaxH = rowHeights[r];
+      const rowStartY = currentY - rowMaxH / 2;
+      for (let c = 0; c < columns; c++) {
+        const idx = r * columns + c;
+        if (idx >= PHOTOS.length) break;
+        const fh = frameHeights[idx];
+        const x = startX + c * (frameWidth + frameSpacing);
+        const y = rowStartY + fh / 2;
+        const frame = createFrame(PHOTOS[idx], x, y, frameZ);
+        frameGroup.add(frame);
+      }
+      currentY -= rowMaxH + frameSpacing;
+    }
+
+    // 初始进度
+    updateLoadingProgress();
+
+    // ============================================================
+    //  运动模糊 (Accumulation Buffer)
+    // ============================================================
+
+    let motionBlurEnabled = MOTION_BLUR.enabled;
+    let accumTargetA, accumTargetB, sceneTarget;
+    let accumRead, accumWrite;
+    let blendScene, blendCamera, blendMaterial;
+    let copyScene, copyCamera, copyMaterial;
+
+    function setupMotionBlur() {
+      const w = renderer.domElement.width;
+      const h = renderer.domElement.height;
+
+      sceneTarget = new THREE.WebGLRenderTarget(w, h, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        format: THREE.RGBAFormat,
+        encoding: THREE.sRGBEncoding
+      });
+
+      accumTargetA = new THREE.WebGLRenderTarget(w, h, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        format: THREE.RGBAFormat,
+        encoding: THREE.sRGBEncoding
+      });
+
+      accumTargetB = new THREE.WebGLRenderTarget(w, h, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        format: THREE.RGBAFormat,
+        encoding: THREE.sRGBEncoding
+      });
+
+      accumRead = accumTargetA;
+      accumWrite = accumTargetB;
+
+      // 混合 shader
+      blendMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          tScene: { value: null },
+          tAccum: { value: null },
+          uMix: { value: 1.0 }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D tScene;
+          uniform sampler2D tAccum;
+          uniform float uMix;
+          varying vec2 vUv;
+          void main() {
+            vec4 sceneColor = texture2D(tScene, vUv);
+            vec4 accumColor = texture2D(tAccum, vUv);
+            gl_FragColor = mix(accumColor, sceneColor, uMix);
+          }
+        `,
+        depthTest: false,
+        depthWrite: false
+      });
+
+      blendCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      blendScene = new THREE.Scene();
+      const blendQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blendMaterial);
+      blendScene.add(blendQuad);
+
+      // 复制 shader（输出到屏幕）
+      copyMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          tDiffuse: { value: null }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D tDiffuse;
+          varying vec2 vUv;
+          void main() {
+            gl_FragColor = texture2D(tDiffuse, vUv);
+          }
+        `,
+        depthTest: false,
+        depthWrite: false
+      });
+
+      copyCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      copyScene = new THREE.Scene();
+      const copyQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), copyMaterial);
+      copyScene.add(copyQuad);
+    }
+
+    function resizeMotionBlurTargets() {
+      const w = renderer.domElement.width;
+      const h = renderer.domElement.height;
+      sceneTarget.setSize(w, h);
+      accumTargetA.setSize(w, h);
+      accumTargetB.setSize(w, h);
+    }
+
+    setupMotionBlur();
+
+    // ============================================================
+    //  指针锁定 & 移动控制
+    // ============================================================
+
+    const controls = new THREE.PointerLockControls(camera, document.body);
+
+    let isLocked = false;
+
+    controls.addEventListener('lock', () => {
+      isLocked = true;
+      clickPrompt.classList.add('hidden');
+      hudEl.classList.add('visible');
+    });
+
+    controls.addEventListener('unlock', () => {
+      isLocked = false;
+      clickPrompt.classList.remove('hidden');
+      hudEl.classList.remove('visible');
+      speedIndicator.classList.remove('visible');
+      // 重置速度
+      velocity.set(0, 0, 0);
+    });
+
+    clickPrompt.addEventListener('click', () => {
+      controls.lock();
+    });
+
+    // 按键状态
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      keys[e.code] = true;
+      // 防止方向键滚动页面
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) {
+        e.preventDefault();
+      }
+    });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    // 移动速度
+    const velocity = new THREE.Vector3();
+    const forwardDir = new THREE.Vector3();
+    const rightDir = new THREE.Vector3();
+
+    // 角速度追踪（用于旋转模糊）
+    const prevQuat = new THREE.Quaternion();
+    const tempQuat = new THREE.Quaternion();
+    let angularSpeed = 0;
+    let smoothedBlurMix = 1.0;
+
+    // ============================================================
+    //  渲染循环
+    // ============================================================
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = Math.min(clock.getDelta(), 0.1);
+
+      // ---- 移动更新 ----
+      if (isLocked) {
+        camera.getWorldDirection(forwardDir);
+        forwardDir.y = 0;
+        forwardDir.normalize();
+        rightDir.crossVectors(forwardDir, camera.up).normalize();
+
+        // 目标速度方向
+        let tx = 0, tz = 0, ty = 0;
+        if (keys['KeyW'] || keys['ArrowUp'])    tz += 1;
+        if (keys['KeyS'] || keys['ArrowDown'])  tz -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft'])  tx -= 1;
+        if (keys['KeyD'] || keys['ArrowRight']) tx += 1;
+        if (keys['KeyQ']) ty += 1;
+        if (keys['KeyE']) ty -= 1;
+
+        // 归一化水平移动
+        const hLen = Math.sqrt(tx * tx + tz * tz);
+        if (hLen > 1) { tx /= hLen; tz /= hLen; }
+
+        const anyInput = tx !== 0 || tz !== 0 || ty !== 0;
+
+        // 目标速度向量
+        const targetVel = new THREE.Vector3();
+        targetVel.addScaledVector(rightDir, tx * MOVEMENT.maxSpeed);
+        targetVel.addScaledVector(forwardDir, tz * MOVEMENT.maxSpeed);
+        targetVel.y = ty * MOVEMENT.maxSpeed * MOVEMENT.verticalSpeedRatio;
+
+        // 平滑加速/减速
+        const accel = anyInput ? MOVEMENT.acceleration : MOVEMENT.deceleration;
+        velocity.lerp(targetVel, Math.min(accel * delta, 1));
+
+        // 速度上限
+        const speed = velocity.length();
+        if (speed > MOVEMENT.maxSpeed) {
+          velocity.normalize().multiplyScalar(MOVEMENT.maxSpeed);
+        }
+
+        // 应用移动
+        camera.position.addScaledVector(velocity, delta);
+
+        // 限制在房间内
+        const margin = 0.5;
+        camera.position.x = Math.max(-halfW + margin, Math.min(halfW - margin, camera.position.x));
+        camera.position.y = Math.max(-halfH + margin, Math.min(halfH - margin, camera.position.y));
+        camera.position.z = Math.max(-halfD + margin, Math.min(halfD - margin, camera.position.z));
+
+        // 计算角速度（相机旋转速度）
+        tempQuat.copy(camera.quaternion);
+        const angleDelta = prevQuat.angleTo(tempQuat);
+        angularSpeed = delta > 0.001 ? angleDelta / delta : 0;
+        prevQuat.copy(tempQuat);
+
+        // 速度指示器
+        const currentSpeed = velocity.length();
+        if (currentSpeed > 0.1 || angularSpeed > 0.05) {
+          speedIndicator.textContent = Math.round(currentSpeed * 10) / 10 + ' m/s';
+          speedIndicator.classList.add('visible');
+        } else {
+          speedIndicator.classList.remove('visible');
+        }
+      }
+
+      // ---- 运动模糊混合系数 ----
+      // 合并线速度与角速度，计算总运动强度
+      let targetBlurMix = 1.0;
+      if (motionBlurEnabled && isLocked) {
+        const linearSpeed = velocity.length();
+        const rotSpeed = angularSpeed * MOTION_BLUR.rotationFactor;
+        const totalSpeed = Math.max(linearSpeed, rotSpeed);
+        if (totalSpeed > MOTION_BLUR.speedThreshold) {
+          const t = Math.min(
+            (totalSpeed - MOTION_BLUR.speedThreshold) / (MOTION_BLUR.speedMax - MOTION_BLUR.speedThreshold),
+            1.0
+          );
+          targetBlurMix = 1.0 - t * MOTION_BLUR.maxIntensity;
+        }
+      }
+
+      // 平滑过渡 blurMix，消除突兀跳变
+      const falloffDelta = MOTION_BLUR.falloffRate * delta;
+      if (targetBlurMix < smoothedBlurMix) {
+        smoothedBlurMix = Math.max(targetBlurMix, smoothedBlurMix - falloffDelta);
+      } else {
+        smoothedBlurMix = Math.min(targetBlurMix, smoothedBlurMix + falloffDelta);
+      }
+      // 接近 1.0 时直接钳位，避免微小浮点误差导致不必要的模糊管线
+      const blurMix = smoothedBlurMix > 0.999 ? 1.0 : smoothedBlurMix;
+
+      // ---- 渲染（统一走模糊管线，消除路径切换导致的亮度割裂）----
+      if (motionBlurEnabled) {
+        // 渲染场景到 sceneTarget
+        renderer.setRenderTarget(sceneTarget);
+        renderer.render(scene, camera);
+
+        // 混合到 accumWrite
+        renderer.setRenderTarget(accumWrite);
+        blendMaterial.uniforms.tScene.value = sceneTarget.texture;
+        blendMaterial.uniforms.tAccum.value = accumRead.texture;
+        blendMaterial.uniforms.uMix.value = blurMix;
+        renderer.render(blendScene, blendCamera);
+
+        // 输出到屏幕
+        renderer.setRenderTarget(null);
+        copyMaterial.uniforms.tDiffuse.value = accumWrite.texture;
+        renderer.render(copyScene, copyCamera);
+
+        // 交换 accum buffer
+        const tmp = accumRead;
+        accumRead = accumWrite;
+        accumWrite = tmp;
+      } else {
+        // 运动模糊完全关闭时直接渲染
+        renderer.setRenderTarget(null);
+        renderer.render(scene, camera);
+      }
+    }
+
+    // ============================================================
+    //  窗口大小调整
+    // ============================================================
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      resizeMotionBlurTargets();
+    });
+
+    // ============================================================
+    //  启动
+    // ============================================================
+
+    // 初始化运动模糊 accum buffer 与角速度追踪
+    prevQuat.copy(camera.quaternion);
+    renderer.setRenderTarget(accumTargetA);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(accumTargetB);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+
+    // 如果纹理在短时间内全部加载完（缓存命中），直接过渡
+    if (texturesLoaded === totalTextures) {
+      onAllTexturesLoaded();
+    }
+
+    animate();
+  </script>
+</body>
+</html>
