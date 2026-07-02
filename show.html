@@ -31,13 +31,6 @@
             font-size: 16px;
             cursor: pointer;
         }
-        /* 用来渲染HTML内容的容器 */
-        #contentBox {
-            width: 100vw;
-            height: 100vh;
-            display: none;
-            overflow: auto;
-        }
     </style>
 </head>
 <body>
@@ -46,23 +39,20 @@
         <input type="file" id="fileInput" accept=".html,.htm">
     </div>
 
-    <div id="contentBox"></div>
-
     <script>
         const fileInput = document.getElementById('fileInput');
-        const tipBox = document.getElementById('tipBox');
-        const contentBox = document.getElementById('contentBox');
 
-        fileInput.addEventListener('change', function(e) {
+        fileInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                // 直接读取HTML源码，插入当前页面渲染，规避iframe跨域限制
-                contentBox.innerHTML = evt.target.result;
-                tipBox.style.display = 'none';
-                contentBox.style.display = 'block';
+            reader.onload = function (ev) {
+                const htmlContent = ev.target.result;
+                // 整页覆盖写入
+                document.open();
+                document.write(htmlContent);
+                document.close();
             };
             reader.readAsText(file);
         });
